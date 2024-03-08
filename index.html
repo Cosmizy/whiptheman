@@ -141,6 +141,19 @@
       border: 0px solid #000000;
     }
 
+    .tool2 {
+      position: absolute;
+      width: 10px;
+      height: 140px;
+      top: 45px; /* Adjust the top value based on your design */
+      left: 25%;
+      transform-origin: 0% 10%;
+      transform: rotate(-110deg);
+      background-color: black; 
+      border: 0px solid #000000;
+      display: none;
+    }
+
     .crown {
       position: absolute;
       width: 100px;
@@ -324,6 +337,20 @@
       background-color: #D3D3D3;
     }
 
+    .upgrade-double {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .upgrade-double:hover {
+      background-color: #D3D3D3;
+    }
+
     .upgrade-thick {
       cursor: pointer;
       padding: 10px;
@@ -375,6 +402,7 @@
   <div class="shop-frame" id="shop-frame">
       <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
       <div class="upgrade-booster" id="upgrade-booster" onclick="upgradeBooster()">Boost Whip<br>200 Coins</div>
+      <div class="upgrade-double" id="upgrade-double" onclick="upgradeDouble()">Double Whips<br>100 Coins</div>
       <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip<br>25 Coins</div>
       <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip<br>25 Coins</div>
       <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip<br>100 Coins</div>
@@ -410,6 +438,7 @@
     <div class="left-arm"></div>
    <div class="right-arm">
        <div class="tool"></div>
+       <div class="tool2"></div>
     </div>
     <div class="left-leg"></div>
     <div class="right-leg"></div>
@@ -423,6 +452,7 @@
         if (isManAlive) {
             //alert(hex);
             rotateStick();
+            rotateStick2();
             moveUp();
             //updateBloodParticleColor();
             
@@ -437,7 +467,15 @@
             const randomNumber = Math.random();
              const randomNumber2 = Math.random();
                 let gotCoin;
+
+                const tool2 = document.querySelector('.tool2');
+                const tool2Display = window.getComputedStyle(tool2).getPropertyValue('display');
             // Check if the random number falls within the 20% probability
+
+            if (tool2Display === 'block') {
+                moveUp();
+            }
+            
             if (randomNumber <= coinChance) {
               createCoin(0,150);
               gotCoin = true; // or set it based on your logic
@@ -469,7 +507,9 @@
     function upgradeBooster() {
         if (coinCount >= boosterCost) {
             const originalBorderStyle = toolElement.style.border;
+            const originalBorderStyle2 = toolElement2.style.border;
             toolElement.style.border = '2px solid #0000FF';
+            toolElement2.style.border = '2px solid #0000FF';
             booster = true;
             coinChance *= 3;
             deathChance = 0;
@@ -484,8 +524,30 @@
                 booster = false;
                 coinChance /= 3;
                 toolElement.style.border = originalBorderStyle;
+                toolElement2.style.border = originalBorderStyle2;
                 boosterButton.style.display = 'block';
             }, 120000);
+        }
+    }
+
+    let doubleCost = 100;
+
+    function upgradeDouble() {
+        if (coinCount >= doubleCost) {
+            toolElement2.style.display = 'block';
+            coinChance *= 1.5;
+            coinCount -= doubleCost;
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const doubleButton = document.getElementById('upgrade-double');
+            doubleButton.style.display = 'none';
+
+            setTimeout(() => {
+                coinChance /= 1.5;
+                toolElement2.style.display = 'none';
+                doubleButton.style.display = 'block';
+            }, 60000);
         }
     }
       
@@ -494,6 +556,7 @@
     function upgradeThick() {
         if (coinCount >= thickCost) {
             toolElement.style.width = '20px';
+            toolElement2.style.width = '20px';
             coinChance += 0.05;
             deathChance += 0.001;
             coinCount -= thickCost;
@@ -509,7 +572,8 @@
 
     function upgradeLong() {
         if (coinCount >= longCost) {
-            toolElement.style.height = '155px';
+            toolElement.style.height = '175px';
+            toolElement2.style.height = '175px';
             coinChance += 0.05;
             deathChance += 0.001;
             coinCount -= longCost;
@@ -526,6 +590,7 @@
     function upgradePower() {
         if (coinCount >= powerCost) {
             toolElement.style.border = '2px solid #FF0000';
+            toolElement2.style.border = '2px solid #FF0000';
             coinChance += 0.2;
             deathChance += 0.0025;
             coinCount -= powerCost;
@@ -657,6 +722,42 @@ function rotateStick() {
     // Start the animation
     updateRotation();
 }
+
+const toolElement2 = document.querySelector('.tool2');
+      
+function rotateStick2() {
+    let rotate = true;
+    let invert = false;
+    let rotation = -110;
+
+    // Update the rotation angle every frame
+    function updateRotation() {
+        if (rotate && !invert) {
+            rotation += 5;
+        } else if (rotate && invert) {
+            rotation -= 5;
+        }
+
+        if (rotation >= -40) {
+            invert = true;
+        }
+
+        if (rotation < -110) {
+            rotate = false;
+            invert = false;
+        }
+
+        toolElement2.style.transform = `rotate(${rotation}deg)`;
+
+        // Request the next animation frame
+        requestAnimationFrame(updateRotation);
+    }
+
+    // Start the animation
+    updateRotation();
+}
+
+      
     let clickCount = 0;
     let coinCount = 0;
     let highScore = 4014;
