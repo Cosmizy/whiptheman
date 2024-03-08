@@ -309,7 +309,20 @@
     .buy-man:hover {
       background-color: #D3D3D3;
     }
-      
+
+    .upgrade-booster {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .upgrade-booster:hover {
+      background-color: #D3D3D3;
+    }
 
     .upgrade-thick {
       cursor: pointer;
@@ -361,6 +374,7 @@
 
   <div class="shop-frame" id="shop-frame">
       <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
+      <div class="upgrade-booster" id="upgrade-booster" onclick="upgradeBooster()">Boost Whip<br>200 Coins</div>
       <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip<br>25 Coins</div>
       <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip<br>25 Coins</div>
       <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip<br>100 Coins</div>
@@ -449,14 +463,39 @@
             shopFrame.style.display = 'block';
         }
     }
+      
+    let boosterCost = 25;
 
+    function upgradeBooster() {
+        if (coinCount >= boosterCost) {
+            const originalBorderStyle = toolElement.style.border;
+            toolElement.style.border = '2px solid #0000FF';
+            booster = true;
+            coinChance *= 3;
+            deathChance = 0;
+            coinCount -= boosterCost;
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const boosterButton = document.getElementById('upgrade-booster');
+            boosterButton.style.display = 'none';
+
+            setTimeout(() => {
+                booster = false;
+                coinChance /= 3;
+                toolElement.style.border = originalBorderStyle;
+                boosterButton.style.display = 'block';
+            }, 120000);
+        }
+    }
+      
     let thickCost = 25;
 
     function upgradeThick() {
         if (coinCount >= thickCost) {
             toolElement.style.width = '20px';
             coinChance += 0.05;
-            deathChance += 0.025;
+            deathChance += 0.001;
             coinCount -= thickCost;
             const coinsText = document.getElementById('coin-text');
             coinsText.textContent = `coins: ${coinCount}`;
@@ -472,7 +511,7 @@
         if (coinCount >= longCost) {
             toolElement.style.height = '155px';
             coinChance += 0.05;
-            deathChance += 0.025;
+            deathChance += 0.001;
             coinCount -= longCost;
             const coinsText = document.getElementById('coin-text');
             coinsText.textContent = `coins: ${coinCount}`;
@@ -488,27 +527,13 @@
         if (coinCount >= powerCost) {
             toolElement.style.border = '2px solid #FF0000';
             coinChance += 0.2;
-            deathChance += 0.05;
+            deathChance += 0.0025;
             coinCount -= powerCost;
             const coinsText = document.getElementById('coin-text');
             coinsText.textContent = `coins: ${coinCount}`;
 
             const powerButton = document.getElementById('upgrade-power');
             powerButton.style.display = 'none';
-        }
-    }
-
-    function bloodOn() {
-        const groundText = document.querySelector('.ground-text');
-        
-        if (groundText.style.color === 'red') {
-            // If text is currently red, change it to white
-            groundText.style.color = 'white';
-            changeHex('#ffffff');
-        } else {
-            // If text is not red, change it to red
-            groundText.style.color = 'red';
-            changeHex('#ff0000');
         }
     }
 
@@ -556,6 +581,7 @@
             movableFigure.style.display = 'block';
             
             coinChance += 0.025;
+            deathChance -= 0.0005;
             coinCount -= manCost;
             const coinsText = document.getElementById('coin-text');
             coinsText.textContent = `coins: ${coinCount}`;
@@ -564,8 +590,6 @@
             manButton.style.display = 'none';
         }
     }
-
-    
 
     function makeFigureFall() {
       const movableFigure = document.getElementById('movableFigure');
@@ -601,7 +625,6 @@
   };
 
 const toolElement = document.querySelector('.tool');
-
       
 function rotateStick() {
     let rotate = true;
@@ -639,6 +662,7 @@ function rotateStick() {
     let highScore = 2222;
     let coinChance = 0.2;
     let deathChance = 0;
+    let booster = false;
 
     function moveUp(gotCoin) {
       clickCount += 1;
