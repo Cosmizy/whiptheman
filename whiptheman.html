@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>whiptheman.io</title> <!-- Add the title element here -->
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+      
+
+        #blood-container {
+            position: absolute;
+        }
+
+        #coin-container {
+            position: absolute;
+        }
+
+        .blood-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            animation: bleed 0.5s ease-out;
+            z-index: 1;
+        }
+
+        .coin-particle {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: #ffc500;
+            border-radius: 50%;
+            animation: bleed 0.5s ease-out;
+            z-index: 1;
+        }
+
+        @keyframes bleed {
+            to {
+                transform: scale(2);
+            }
+        }
+
+
+    .figure {
+      position: absolute;
+      width: 200px;
+      height: 300px;
+      transition: top 0.5s ease-in-out;
+    }
+
+    #movableFigure {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    #movableFigure2 {
+      left: 40%;
+      transform: translateX(-50%);
+    }
+
+    .head, .body, .left-arm, .right-arm, .left-leg, .right-leg {
+      position: absolute;
+      background-color: black;
+    }
+
+    .head {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .body {
+      width: 20px;
+      height: 120px;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-arm, .right-arm {
+      width: 20px;
+      height: 80px;
+      top: 40px;
+    }
+
+    .left-arm {
+      left: 41%;
+      top: 50px;
+      transform-origin: 100% 10%;
+      transform: rotate(30deg);
+    }
+
+    .right-arm {
+      left: 49%;
+      top: 50px;
+      transform-origin: 0% 10%;
+      transform: rotate(-30deg);
+    }
+
+    .left-leg, .right-leg {
+      width: 20px;
+      height: 120px;
+      top: 120px;
+    }
+
+    .left-leg {
+      left: 45%;
+      top: 140px;
+      transform-origin: 50% 0;
+      transform: rotate(-15deg);
+    }
+
+    .right-leg {
+      left: 45%;
+      top: 140px;
+      transform-origin: 50% 0;
+      transform: rotate(15deg);
+    }
+
+    .tool {
+      position: absolute;
+      width: 10px;
+      height: 140px;
+      top: 65px; /* Adjust the top value based on your design */
+      left: 25%;
+      transform-origin: 0% 10%;
+      transform: rotate(-110deg);
+      background-color: black; 
+      border: 0px solid #000000;
+    }
+
+    .crown {
+      position: absolute;
+      width: 100px;
+      height: 75px; /* Adjusted for the total height of the square and triangles */
+      top: -8px; /* Adjusted to move the crown above the head */
+      margin-left: 45px; /* Adjusted to center the crown horizontally within the head */
+      transform: translateX(-50%);
+    }
+
+    .black-square {
+      position: relative;
+      width: 50px;
+      height: 12px;
+      background-color: black;
+    }
+
+    .triangle {
+      position: absolute;
+      top: -20px; /* Adjusted to position above the black square */
+      left: 25%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 20px solid black; /* Adjusted for a height of 100 pixels */
+    }
+
+    .triangle2 {
+      position: absolute;
+      top: -20px; /* Adjusted for better positioning */
+      left: 6%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 0px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 20px solid black;
+    }
+
+    .triangle3 {
+      position: absolute;
+      top: -20px; /* Adjusted for better positioning */
+      left: 44%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 0px solid transparent;
+      border-bottom: 20px solid black;
+    }
+
+    .title-text {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: black;
+      font-size: 55px;
+    }
+
+    .highscore-text {
+      position: absolute;
+      top: 10px;
+      left: 1100px;
+      color: black;
+      font-size: 33px;
+    }
+      
+    .coin-text {
+      position: absolute;
+      top: 80px;
+      left: 10px;
+      color: black;
+      font-size: 36px;
+    }
+
+    .whip-text {
+      position: absolute;
+      top: 80px;
+      left: 175px;
+      color: black;
+      font-size: 36px;
+    }
+
+    .ground-text {
+      position: absolute;
+      top: 680px;
+      transform: translateX(-50%); /* Center the text horizontally */
+      transform: translateY(0%);
+      color: white; /* Set the text color to white */
+      font-size: 40px;
+      z-index: 3;
+    }
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50px; /* Adjust the height as needed */
+      background-color: black;
+      z-index: 2;
+    }
+
+    .shop-frame {
+      position: absolute;
+      top: 50%;
+      transform: translateX(-50%); /* Center the text horizontally */
+      transform: translateY(-50%); /* Center the text horizontally */
+      width: 700px;
+      height: 500px;
+      background-color: #FFFFFF;
+      border-radius: 16px;
+      z-index: 4;
+      display: none;
+      outline: 2px solid #000000;
+    }
+
+    .large-button {
+      position: absolute;
+      top: 50%; /* Adjust the top distance as needed */
+      transform: translateX(-50%);
+      transform: translateY(-50%);
+      padding: 10px 20px; /* Adjust padding to control button size */
+      font-size: 32px; /* Set font size */
+      background-color: #FFFFFF /* Set button background color */
+      color: black; /* Set button text color */
+      border: none; /* Remove button border */
+      cursor: pointer;
+      border-radius: 16px; /* Optional: Add rounded corners */
+    }
+
+    .large-button:hover {
+      background-color: #D3D3D3; /* Change background color on hover */
+    }
+
+    .shop-button {
+      position: absolute;
+      top: 25px; /* Adjust the top distance as needed */
+      left: 400px; /* Adjust the left distance or use other positioning properties */
+      padding: 10px 20px; /* Adjust padding to control button size */
+      font-size: 32px; /* Set font size */
+      background-color: #FFFFFF /* Set button background color */
+      color: black; /* Set button text color */
+      border: none; /* Remove button border */
+      cursor: pointer;
+      border-radius: 16px; /* Optional: Add rounded corners */
+    }
+
+    .shop-button:hover {
+      background-color: #D3D3D3; /* Change background color on hover */
+    }
+      
+
+    .buy-man {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+      display: none;
+    }
+    
+    .buy-man:hover {
+      background-color: #D3D3D3;
+    }
+      
+
+    .upgrade-thick {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .upgrade-long {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .upgrade-long:hover {
+      background-color: #D3D3D3;
+    }
+
+    .upgrade-power {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .upgrade-power:hover {
+      background-color: #D3D3D3;
+    }
+      
+  </style> 
+</head>
+<body>
+
+<div id="blood-container"></div>
+<div id="coin-container"></div>
+    
+<button class="large-button" id="large-button" onclick="buttonClick();" title="Click to Whip">Whip</button>
+<button class="shop-button" onclick="shopClick();">Shop</button>
+
+  <div class="shop-frame" id="shop-frame">
+      <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
+      <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip<br>25 Coins</div>
+      <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip<br>25 Coins</div>
+      <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip<br>100 Coins</div>
+  </div>
+
+  <div class="title-text">whiptheman.io</div>
+<div class="highscore-text" id="highscore-text">highscore: 0</div>
+  <div class="coin-text" id="coin-text">coins: 0</div>
+  <div class="whip-text" id="whip-text">whips: 0</div>
+<div class="ground-text" onclick="bloodOn()">WHIP THAT MAN!</div>
+
+  <div class="ground"></div>
+
+  <div class="figure" id="movableFigure">
+    <div class="head"></div>
+    <div class="body"></div>
+    <div class="left-arm"></div>
+    <div class="right-arm"></div>
+    <div class="left-leg"></div>
+    <div class="right-leg"></div>
+  </div>
+
+  <div class="figure" id="movableFigure2">
+    <div class="head">
+     <div class="crown">
+      <div class="black-square"></div>
+      <div class="triangle"></div>
+      <div class="triangle2"></div>
+      <div class="triangle3"></div>
+     </div>
+    </div>
+    <div class="body"></div>
+    <div class="left-arm"></div>
+   <div class="right-arm">
+       <div class="tool"></div>
+    </div>
+    <div class="left-leg"></div>
+    <div class="right-leg"></div>
+  </div>
+
+  <script>
+
+    let isManAlive = true;
+      
+    function buttonClick() {
+        if (isManAlive) {
+            //alert(hex);
+            rotateStick();
+            moveUp();
+            //updateBloodParticleColor();
+            
+            const movableFigure = document.getElementById('movableFigure');
+            const targetElement = movableFigure.querySelector('.body');
+            const rect = targetElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+    
+            createBlood(0, 150);
+    
+            const randomNumber = Math.random();
+             const randomNumber2 = Math.random();
+                let gotCoin;
+            // Check if the random number falls within the 20% probability
+            if (randomNumber <= coinChance) {
+              createCoin(0,150);
+              gotCoin = true; // or set it based on your logic
+              moveUp(gotCoin);
+            } else {
+                gotCoin = false; // or set it based on your logic
+            }
+    
+            if (randomNumber2 <= deathChance) {
+              killMan();
+            }
+        } else {
+            
+        }
+    }
+
+    function shopClick() {
+        const shopFrame = document.getElementById('shop-frame');
+
+        if (shopFrame.style.display === 'block') {
+            shopFrame.style.display = 'none';
+        } else {
+            shopFrame.style.display = 'block';
+        }
+    }
+
+    let thickCost = 25;
+
+    function upgradeThick() {
+        if (coinCount >= thickCost) {
+            toolElement.style.width = '20px';
+            coinChance += 0.05;
+            deathChance += 0.025;
+            coinCount -= thickCost;
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const thickButton = document.getElementById('upgrade-thick');
+            thickButton.style.display = 'none';
+        }
+    }
+
+    let longCost = 25;
+
+    function upgradeLong() {
+        if (coinCount >= longCost) {
+            toolElement.style.height = '155px';
+            coinChance += 0.05;
+            deathChance += 0.025;
+            coinCount -= longCost;
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const longButton = document.getElementById('upgrade-long');
+            longButton.style.display = 'none';
+        }
+    }
+
+    let powerCost = 100;
+
+    function upgradePower() {
+        if (coinCount >= powerCost) {
+            toolElement.style.border = '2px solid #FF0000';
+            coinChance += 0.2;
+            deathChance += 0.05;
+            coinCount -= powerCost;
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const powerButton = document.getElementById('upgrade-power');
+            powerButton.style.display = 'none';
+        }
+    }
+
+    function bloodOn() {
+        const groundText = document.querySelector('.ground-text');
+        
+        if (groundText.style.color === 'red') {
+            // If text is currently red, change it to white
+            groundText.style.color = 'white';
+            changeHex('#ffffff');
+        } else {
+            // If text is not red, change it to red
+            groundText.style.color = 'red';
+            changeHex('#ff0000');
+        }
+    }
+
+    function bloodOn() {
+        const groundText = document.querySelector('.ground-text');
+        
+        if (groundText.style.color === 'red') {
+            // If text is currently red, change it to white
+            groundText.style.color = 'white';
+            changeHex('#ffffff');
+        } else {
+            // If text is not red, change it to red
+            groundText.style.color = 'red';
+            changeHex('#ff0000');
+        }
+    }
+
+    function killMan() {
+        const whipButton = document.getElementById('large-button');
+        const movableFigure = document.getElementById('movableFigure');
+        const manButton = document.getElementById('buy-man');
+        manButton.style.display = 'block';
+        isManAlive = false;
+
+        movableFigure.style.display = 'none';
+        
+        whipButton.disabled = true;
+        whipButton.style.opacity = 0.5;
+        whipButton.style.cursor = 'not-allowed';
+        whipButton.title = 'Man is dead. Buy a new man in Shop.';
+    }
+
+    let manCost = 5;
+
+    function buyMan() {
+        if (coinCount >= manCost) {
+            const whipButton = document.getElementById('large-button');
+            whipButton.disabled = false;
+            whipButton.style.opacity = 1;
+            whipButton.style.cursor = 'pointer';
+            whipButton.title = 'Click to Whip';
+
+            isManAlive = true;
+    
+            movableFigure.style.display = 'block';
+            
+            coinChance += 0.025;
+            coinCount -= manCost;
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const manButton = document.getElementById('buy-man');
+            manButton.style.display = 'none';
+        }
+    }
+
+    
+
+    function makeFigureFall() {
+      const movableFigure = document.getElementById('movableFigure');
+      const windowHeight = window.innerHeight;
+
+      // Set the initial top position
+      movableFigure.style.top = '0';
+
+      // Simulate the falling motion
+      setTimeout(() => {
+        movableFigure.style.top = `${windowHeight - movableFigure.clientHeight}px`;
+      }, 100);
+    }
+
+    function makeFigure2Fall() {
+      const movableFigure2 = document.getElementById('movableFigure2');
+      const windowHeight = window.innerHeight;
+
+      // Set the initial top position
+      movableFigure2.style.top = '0';
+
+      // Simulate the falling motion
+      setTimeout(() => {
+        movableFigure2.style.top = `${windowHeight - movableFigure2.clientHeight}px`;
+      }, 100);
+    }
+
+    // Call the function when the page is loaded
+  window.onload = function() {
+    makeFigureFall();
+    makeFigure2Fall(); // Call the function for movableFigure2
+    loadScores();
+  };
+
+const toolElement = document.querySelector('.tool');
+
+      
+function rotateStick() {
+    let rotate = true;
+    let invert = false;
+    let rotation = -110;
+
+    // Update the rotation angle every frame
+    function updateRotation() {
+        if (rotate && !invert) {
+            rotation += 5;
+        } else if (rotate && invert) {
+            rotation -= 5;
+        }
+
+        if (rotation >= -40) {
+            invert = true;
+        }
+
+        if (rotation < -110) {
+            rotate = false;
+            invert = false;
+        }
+
+        toolElement.style.transform = `rotate(${rotation}deg)`;
+
+        // Request the next animation frame
+        requestAnimationFrame(updateRotation);
+    }
+
+    // Start the animation
+    updateRotation();
+}
+    let clickCount = 0;
+    let coinCount = 0;
+    let highScore = 2222;
+    let coinChance = 0.2;
+    let deathChance = 0;
+
+    function moveUp(gotCoin) {
+      clickCount += 1;
+      const clicksText = document.getElementById('whip-text');
+      clicksText.textContent = `whips: ${clickCount}`;
+        if (gotCoin) {
+            coinCount += 1;
+
+          const coinsText = document.getElementById('coin-text');
+          coinsText.textContent = `coins: ${coinCount}`;
+        }
+
+        if (clickCount > highScore) {
+            highScore = clickCount;
+            updateHighScore();
+        }
+        
+        saveScores();
+    }
+
+      
+
+        let hex = '#ffffff';
+
+        function createBlood(x, y) {
+            const bloodContainer = document.getElementById('blood-container');
+
+            for (let i = 0; i < 25; i++) {
+                const bloodParticle = document.createElement('div');
+                bloodParticle.className = 'blood-particle';
+                bloodParticle.style.left = x + 'px';
+                bloodParticle.style.top = y + 'px';
+                bloodContainer.appendChild(bloodParticle);
+                bloodParticle.style.backgroundColor = hex;
+
+                const angle = Math.random() * 2 * Math.PI;
+                const speed = Math.random() * 5 + 2;
+
+                const deltaX = Math.cos(angle) * speed;
+                const deltaY = Math.sin(angle) * speed;
+
+                animateBloodParticle(bloodParticle, deltaX, deltaY);
+            }
+        }
+
+        function updateHighScore() {
+            const highScoreText = document.getElementById('highscore-text');
+            highScoreText.textContent = `highscore: ${highScore}`;
+        }
+
+        function saveScores() {
+            const scores = {
+                clickCount: clickCount,
+                coinCount: coinCount,
+                highScore: highScore
+            };
+        
+            // Convert scores object to JSON and save to local storage
+            localStorage.setItem('whipthemanScores', JSON.stringify(scores));
+        }
+
+        function loadScores() {
+            // Retrieve scores from local storage
+            const storedScores = localStorage.getItem('whipthemanScores');
+        
+            if (storedScores) {
+                const scores = JSON.parse(storedScores);
+        
+                clickCount = scores.clickCount || 0;
+                coinCount = scores.coinCount || 0;
+                
+        
+                const clicksText = document.getElementById('whip-text');
+                clicksText.textContent = `whips: ${clickCount}`;
+        
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
+        
+                updateHighScore(); // Call to update high score display
+            }
+        }
+      
+        function createCoin(x, y) {
+            const coinContainer = document.getElementById('coin-container');
+
+            for (let i = 0; i < 1; i++) {
+                const coinParticle = document.createElement('div');
+                coinParticle.className = 'coin-particle';
+                coinParticle.style.left = x + 'px';
+                coinParticle.style.top = y + 'px';
+                coinContainer.appendChild(coinParticle);
+                coinParticle.style.backgroundColor = '#FFC500';
+
+                const angle = Math.random() * 2 * Math.PI;
+                const speed = Math.random() * 5 + 2;
+
+                const deltaX = Math.cos(angle) * speed;
+                const deltaY = Math.sin(angle) * speed;
+
+                animateCoinParticle(coinParticle, deltaX, deltaY);
+            }
+        }
+
+function updateBloodParticleColor() {
+    bloodParticle.style.backgroundColor = hex;
+}
+
+function changeHex(newHex) {
+    hex = newHex;
+    updateBloodParticleColor();
+}
+
+function animateBloodParticle(bloodParticle) {
+    let x = parseFloat(bloodParticle.style.left);
+    let y = parseFloat(bloodParticle.style.top);
+    let speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
+    let speedY = (Math.random() - 0.5) * 10; // Random vertical speed
+    const gravity = 0.2;
+
+    function move() {
+        speedY += gravity;
+        x += speedX;
+        y += speedY;
+        bloodParticle.style.left = x + 'px';
+        bloodParticle.style.top = y + 'px';
+
+        // Stop the particle when it reaches the bottom (optional)
+        if (y > window.innerHeight) {
+            bloodParticle.remove();
+        }
+    }
+
+    function remove() {
+        bloodParticle.remove();
+    }
+
+    const animation = bloodParticle.animate([
+        { transform: 'translate(0, 0)' },
+        { transform: `translate(${speedX}px, ${speedY}px)` }
+    ], {
+        duration: 2000,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+
+    animation.onfinish = remove;
+
+    setInterval(move, 16);
+}
+//coin
+function animateCoinParticle(coinParticle) {
+    let x = parseFloat(coinParticle.style.left);
+    let y = parseFloat(coinParticle.style.top);
+    let speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
+    let speedY = (Math.random() - 0.5) * 10; // Random vertical speed
+    const coinGravity = 0.15;
+
+    function move() {
+        speedY += coinGravity;
+        x += speedX;
+        y += speedY;
+        coinParticle.style.left = x + 'px';
+        coinParticle.style.top = y + 'px';
+
+        // Stop the particle when it reaches the bottom (optional)
+        if (y > window.innerHeight) {
+            coinParticle.remove();
+        }
+    }
+
+    function remove() {
+        coinParticle.remove();
+    }
+
+    const animation = coinParticle.animate([
+        { transform: 'translate(0, 0)' },
+        { transform: `translate(${speedX}px, ${speedY}px)` }
+    ], {
+        duration: 2000,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+
+    animation.onfinish = remove;
+
+    setInterval(move, 16);
+}
+      
+      
+  </script>
+</body>
+</html>
