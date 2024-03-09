@@ -11,6 +11,7 @@
       align-items: center;
       height: 100vh;
       margin: 0;
+      overflow: hidden;
     }
 
       
@@ -446,6 +447,28 @@
 
   <script>
 
+ const firebaseConfig = {
+    apiKey: "AIzaSyC1g8oscztqxou85TW3eeKGYHJfMTfnqzw",
+    authDomain: "whiptheman.firebaseapp.com",
+    projectId: "whiptheman",
+    storageBucket: "whiptheman.appspot.com",
+    messagingSenderId: "429725313939",
+    appId: "1:429725313939:web:4883345cac6b7b14821666",
+    measurementId: "G-Y8QPDDXX8E"
+  };
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Get a reference to the Firestore database
+const db = firebase.firestore();
+
+const scoresCollection = db.collection('scores');
+
+      
+
+      
+
     let isManAlive = true;
       
     function buttonClick() {
@@ -760,7 +783,7 @@ function rotateStick2() {
       
     let clickCount = 0;
     let coinCount = 0;
-    let highScore = 4014;
+    let highScore = 0;
     let coinChance = 0.2;
     let deathChance = 0;
     let booster = false;
@@ -812,6 +835,8 @@ function rotateStick2() {
         function updateHighScore() {
             const highScoreText = document.getElementById('highscore-text');
             highScoreText.textContent = `highscore: ${highScore}`;
+
+            scoresCollection.doc('highscore').set({ value: highScore });
         }
 
         function saveScores() {
@@ -828,7 +853,14 @@ function rotateStick2() {
         function loadScores() {
             // Retrieve scores from local storage
             const storedScores = localStorage.getItem('whipthemanScores');
-        
+
+        scoresCollection.doc('highscore').get().then((doc) => {
+            if (doc.exists) {
+              highScore = doc.data().value || 0;
+              updateHighScore(); // Call to update high score display
+            }
+          });
+            
             if (storedScores) {
                 const scores = JSON.parse(storedScores);
         
@@ -951,8 +983,13 @@ function animateCoinParticle(coinParticle) {
 
     setInterval(move, 16);
 }
-      
+
+    
       
   </script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
+    
 </body>
 </html>
