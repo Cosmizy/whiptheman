@@ -391,6 +391,9 @@
     }
       
   </style> 
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
 </head>
 <body>
 
@@ -843,7 +846,6 @@ function rotateStick2() {
             const scores = {
                 clickCount: clickCount,
                 coinCount: coinCount,
-                highScore: highScore
             };
         
             // Convert scores object to JSON and save to local storage
@@ -987,9 +989,6 @@ function animateCoinParticle(coinParticle) {
     
       
   </script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
     
 </body>
 </html>
