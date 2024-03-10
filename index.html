@@ -221,6 +221,7 @@
       left: 1100px;
       color: black;
       font-size: 33px;
+      display: block;
     }
       
     .coin-text {
@@ -845,13 +846,6 @@ function rotateStick2() {
         function loadScores() {
             // Retrieve scores from local storage
             const storedScores = localStorage.getItem('whipthemanScores');
-
-        scoresCollection.doc('highscore').get().then((doc) => {
-            if (doc.exists) {
-              highScore = doc.data().value || 0;
-              updateHighScore(); // Call to update high score display
-            }
-          });
             
             if (storedScores) {
                 const scores = JSON.parse(storedScores);
