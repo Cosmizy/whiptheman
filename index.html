@@ -831,7 +831,7 @@ function rotateStick2() {
             const highScoreText = document.getElementById('highscore-text');
             highScoreText.textContent = `highscore: ${highScore}`;
 
-            scoresCollection.doc('highscore').set({ value: highScore });
+            saveScores();
         }
 
         function saveScores() {
