@@ -326,6 +326,27 @@
       background-color: #D3D3D3;
     }
 
+    .buy-poster {
+      cursor: pointer;
+      padding: 10px;
+      margin: 5px;
+      background-color: #FFFFFF;
+      border: 2px solid #000000;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    
+    .buy-poster:hover {
+      background-color: #D3D3D3;
+    }
+
+    .poster {
+        transform: translateX(75%);
+        width: 300px; /* Adjust the width as needed */
+        height: auto; /* This will maintain the aspect ratio */
+        display: none;
+    }
+
     .upgrade-booster {
       cursor: pointer;
       padding: 10px;
@@ -407,9 +428,10 @@
       <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
       <div class="upgrade-booster" id="upgrade-booster" onclick="upgradeBooster()">Boost Whip - 120sec<br>200 Coins</div>
       <div class="upgrade-double" id="upgrade-double" onclick="upgradeDouble()">Double Whips - 60sec<br>100 Coins</div>
-      <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip<br>25 Coins</div>
-      <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip<br>25 Coins</div>
-      <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip<br>100 Coins</div>
+      <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip - inf<br>25 Coins</div>
+      <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip - inf<br>25 Coins</div>
+      <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip - inf<br>100 Coins</div>
+      <div class="buy-poster" id="buy-poster" onclick="buyPoster()">Space Academy™ Poster - 60sec<br>10 Coins</div>
   </div>
 
   <div class="title-text">whiptheman.io</div>
@@ -448,6 +470,8 @@
     <div class="right-leg"></div>
   </div>
 
+    <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/poster.png" alt="Space Academy™" class="poster">
+    
   <script>
 
  const firebaseConfig = {
@@ -517,6 +541,29 @@
             shopFrame.style.display = 'none';
         } else {
             shopFrame.style.display = 'block';
+        }
+    }
+
+    let posterCost = 10;
+
+    function buyPoster() {
+        if (coinCount >= posterCost) {
+            coinChance *= 1.25;
+            deathChance = 0;
+            coinCount -= posterCost;
+            const poster = document.querySelector('.poster');
+            poster.style.display = 'block';
+            const coinsText = document.getElementById('coin-text');
+            coinsText.textContent = `coins: ${coinCount}`;
+
+            const posterButton = document.getElementById('buy-poster');
+            posterButton.style.display = 'none';
+
+            setTimeout(() => {
+                coinChance /= 1.25;
+                posterButton.style.display = 'block';
+                poster.style.display = 'none';
+            }, 60000);
         }
     }
       
