@@ -421,7 +421,7 @@
 <div id="blood-container"></div>
 <div id="coin-container"></div>
     
-<button class="large-button" id="large-button" onclick="buttonClick();" title="Click to Whip">Whip</button>
+<button class="large-button" id="large-button" title="Click to Whip">Whip</button>
 <button class="shop-button" onclick="shopClick();">Shop</button>
 
   <div class="shop-frame" id="shop-frame">
@@ -484,9 +484,34 @@
     measurementId: "G-Y8QPDDXX8E"
   };
 
+    let banned = 0;
+    let timeoutId;
       
+    document.getElementById("large-button").addEventListener("click", buttonClick);
+      
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        // Check if timeoutId is not set to avoid resetting the timeout
+        if (!timeoutId) {
+            // Set a new timeout for 5 seconds
+            timeoutId = setTimeout(function() {
+                alert('You have been banned');
+                banned = 1;
+                saveScores();
+                // Clear the timeoutId to reset the timeout
+                timeoutId = null;
+            }, 1000);
+        }
+    }
+});
 
-      
+document.addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+        // Clear the timeout when Enter key is released
+        clearTimeout(timeoutId);
+        timeoutId = null; // Reset timeoutId
+    }
+});
 
     let isManAlive = true;
       
@@ -748,11 +773,17 @@
     }
 
     // Call the function when the page is loaded
-  window.onload = function() {
-    makeFigureFall();
-    makeFigure2Fall(); // Call the function for movableFigure2
-    loadScores();
-  };
+    window.onload = function() {
+        loadScores();
+        if (banned === 1) {
+            // Remove all elements from the body
+            document.body.innerHTML = "";
+            alert('You have been permanently banned from whiptheman.io for abusing glitches');
+        } else {  
+            makeFigureFall();
+            makeFigure2Fall(); // Call the function for movableFigure2
+        }
+    };
 
 const toolElement = document.querySelector('.tool');
       
@@ -885,6 +916,7 @@ function rotateStick2() {
             const scores = {
                 clickCount: clickCount,
                 coinCount: coinCount,
+                banned: banned,
             };
         
             // Convert scores object to JSON and save to local storage
@@ -900,7 +932,7 @@ function rotateStick2() {
         
                 clickCount = scores.clickCount || 0;
                 coinCount = scores.coinCount || 0;
-                
+                banned = scores.banned || 0;
         
                 const clicksText = document.getElementById('whip-text');
                 clicksText.textContent = `whips: ${clickCount}`;
