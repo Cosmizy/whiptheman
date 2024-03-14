@@ -495,11 +495,11 @@ document.addEventListener("keydown", function(event) {
         if (!timeoutId) {
             // Set a new timeout for 5 seconds
             timeoutId = setTimeout(function() {
-                alert('You have been banned');
                 banned = 1;
                 saveScores();
                 // Clear the timeoutId to reset the timeout
                 timeoutId = null;
+                location.reload();
             }, 1000);
         }
     }
@@ -776,9 +776,13 @@ document.addEventListener("keyup", function(event) {
     window.onload = function() {
         loadScores();
         if (banned === 1) {
+            alert('Your score has been reset for abusing glitches');
+            makeFigureFall();
+            makeFigure2Fall(); // Call the function for movableFigure2
+            
             // Remove all elements from the body
-            document.body.innerHTML = "";
-            alert('You have been permanently banned from whiptheman.io for abusing glitches');
+            //document.body.innerHTML = "";
+            //alert('You have been permanently banned from whiptheman.io for abusing glitches');
         } else {  
             makeFigureFall();
             makeFigure2Fall(); // Call the function for movableFigure2
@@ -914,8 +918,8 @@ function rotateStick2() {
 
         function saveScores() {
             const scores = {
-                clickCount: clickCount,
-                coinCount: coinCount,
+                clickCount: banned ? 0 : clickCount, // Reset click count to 0 if banned
+                coinCount: banned ? 0 : coinCount,   // Reset coin count to 0 if banned
                 banned: banned,
             };
         
