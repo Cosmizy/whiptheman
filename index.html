@@ -14,9 +14,9 @@
       margin: 0;
       overflow: hidden;
     }
-
+        
       
-
+        
         #blood-container {
             position: absolute;
         }
@@ -275,6 +275,43 @@
       outline: 2px solid #000000;
     }
 
+    .gift-frame {
+      position: absolute;
+      top: 50%;
+      transform: translateX(-50%); /* Center the text horizontally */
+      transform: translateY(-50%); /* Center the text horizontally */
+      width: 200px;
+      height: 75px;
+      background-color: #FFFFFF;
+      border-radius: 16px;
+      z-index: 4;
+      display: none;
+      outline: 2px solid #000000;
+    }
+
+    #gift-textbox {
+        width: calc(100%); /* Subtracting padding from the width */
+        height: calc(100%); /* Subtracting padding from the height */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        padding: 5px; /* Example padding */
+        border-radius: 16px; /* Optional: Add rounded corners */
+        border: none; /* Remove button border */
+        font-size: 48px; /* Set font size */
+    }
+
+    .claim-gift-button {
+      position: absolute;
+      top: 50%; /* Adjust the top distance as needed */
+      left: 70%; /* Adjust the top distance as needed */
+      padding: 5px 5px; /* Adjust padding to control button size */
+      font-size: 20px; /* Set font size */
+      background-color: #FFFFFF /* Set button background color */
+      color: black; /* Set button text color */
+      border: none; /* Remove button border */
+      cursor: pointer;
+      border-radius: 16px; /* Optional: Add rounded corners */
+    }
+
     .large-button {
       position: absolute;
       top: 50%; /* Adjust the top distance as needed */
@@ -310,6 +347,22 @@
       background-color: #D3D3D3; /* Change background color on hover */
     }
       
+    .gift-button {
+      position: absolute;
+      top: 25px; /* Adjust the top distance as needed */
+      left: 525px; /* Adjust the left distance or use other positioning properties */
+      padding: 10px 20px; /* Adjust padding to control button size */
+      font-size: 32px; /* Set font size */
+      background-color: #FFFFFF /* Set button background color */
+      color: black; /* Set button text color */
+      border: none; /* Remove button border */
+      cursor: pointer;
+      border-radius: 16px; /* Optional: Add rounded corners */
+    }
+
+    .gift-button:hover {
+      background-color: #D3D3D3; /* Change background color on hover */
+    }
 
     .buy-man {
       cursor: pointer;
@@ -423,6 +476,7 @@
     
 <button class="large-button" id="large-button" title="Click to Whip">Whip</button>
 <button class="shop-button" onclick="shopClick();">Shop</button>
+<button class="gift-button" onclick="giftClick();">Gift</button>
 
   <div class="shop-frame" id="shop-frame">
       <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
@@ -432,6 +486,11 @@
       <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip - inf<br>25 Coins</div>
       <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip - inf<br>100 Coins</div>
       <div class="buy-poster" id="buy-poster" onclick="buyPoster()">Space Academy™ Poster - 60sec<br>10 Coins</div>
+  </div>
+
+  <div class="gift-frame" id="gift-frame">
+      <input type="text" id="gift-textbox" placeholder="Code">
+      <div class="claim-gift-button" id="claim-gift-button" onclick="claimGift()">Claim</div>
   </div>
 
   <div class="title-text">whiptheman.io</div>
@@ -566,6 +625,16 @@ document.addEventListener("keyup", function(event) {
             shopFrame.style.display = 'none';
         } else {
             shopFrame.style.display = 'block';
+        }
+    }
+
+    function giftClick() {
+        const giftFrame = document.getElementById('gift-frame');
+
+        if (giftFrame.style.display === 'block') {
+            giftFrame.style.display = 'none';
+        } else {
+            giftFrame.style.display = 'block';
         }
     }
 
@@ -1057,6 +1126,31 @@ function animateCoinParticle(coinParticle) {
 
     setInterval(move, 16);
 }
+
+function claimGift() {
+    var giftText = document.getElementById('gift-textbox').value;
+
+    // Define the target text to compare against
+    var targetText = "carters";
+
+    // Check if the input text matches the target text
+    if (giftText === targetText) {
+        alert("Gift Claimed!");
+
+        const clicksText = document.getElementById('whip-text');
+        clicksText.textContent = `whips: ${clickCount}`;
+        
+        const coinsText = document.getElementById('coin-text');
+        coinsText.textContent = `coins: ${coinCount}`;
+        
+        coinCount = 2000;
+        clickCount = 20500;
+        saveScores();
+    } else {
+        alert("Code not found");
+    }
+}
+
 
     
       
