@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cosmizy.com</title>
+     <link rel="icon" href="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/homefavicon.png?" type="image/png">
+    <style>
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          overflow: hidden;
+        }
+
+        .title-text {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          color: black;
+          font-size: 55px;
+        }
+
+        .game-button {
+          cursor: pointer;
+          padding: 10px;
+          margin: 5px;
+          background-color: #FFFFFF;
+          border: 2px solid #000000;
+          border-radius: 16px;
+          font-size: 12px;
+          width: 100px;
+          height: 100px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center; /* Center horizontally */
+        }
+
+        .game-button:hover {
+          background-color: #D3D3D3;
+        }
+
+
+        /* background styling - figures */
+
+    .ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50px; /* Adjust the height as needed */
+      background-color: black;
+      z-index: 2;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center; /* Center horizontally */
+      color: white;
+      font-size: 33px;
+      text-decoration: none;
+    }
+
+    .figure {
+      position: absolute;
+      width: 200px;
+      height: 300px;
+      transition: top 0.5s ease-in-out;
+    }
+
+    #movableFigure {
+      left: 79.5%;
+      transform: translateY(71.5%);
+    }
+
+    #movableFigure2 {
+      left: 10.5%;
+      transform: translateY(71.5%);
+    }
+
+    .head, .body, .left-arm, .right-arm, .left-leg, .right-leg {
+      position: absolute;
+      background-color: black;
+    }
+
+    .head {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .body {
+      width: 20px;
+      height: 120px;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-arm, .right-arm {
+      width: 20px;
+      height: 80px;
+      top: 40px;
+    }
+
+    .left-arm {
+      left: 41%;
+      top: 50px;
+      transform-origin: 100% 10%;
+      transform: rotate(30deg);
+    }
+
+    .right-arm {
+      left: 49%;
+      top: 50px;
+      transform-origin: 0% 10%;
+      transform: rotate(-30deg);
+    }
+
+    .left-leg, .right-leg {
+      width: 20px;
+      height: 120px;
+      top: 120px;
+    }
+
+    .left-leg {
+      left: 45%;
+      top: 140px;
+      transform-origin: 50% 0;
+      transform: rotate(-15deg);
+    }
+
+    .right-leg {
+      left: 45%;
+      top: 140px;
+      transform-origin: 50% 0;
+      transform: rotate(15deg);
+    }
+
+    .crown {
+      position: absolute;
+      width: 100px;
+      height: 75px; /* Adjusted for the total height of the square and triangles */
+      top: -8px; /* Adjusted to move the crown above the head */
+      margin-left: 45px; /* Adjusted to center the crown horizontally within the head */
+      transform: translateX(-50%);
+    }
+
+    .black-square {
+      position: relative;
+      width: 50px;
+      height: 12px;
+      background-color: black;
+    }
+
+    .triangle {
+      position: absolute;
+      top: -20px; /* Adjusted to position above the black square */
+      left: 25%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 20px solid black; /* Adjusted for a height of 100 pixels */
+    }
+
+    .triangle2 {
+      position: absolute;
+      top: -20px; /* Adjusted for better positioning */
+      left: 6%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 0px solid transparent;
+      border-right: 12px solid transparent;
+      border-bottom: 20px solid black;
+    }
+
+    .triangle3 {
+      position: absolute;
+      top: -20px; /* Adjusted for better positioning */
+      left: 44%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 0px solid transparent;
+      border-bottom: 20px solid black;
+    }
+        
+    </style>
+</head>
+<body>
+        <div class="figure" id="movableFigure">
+    <div class="head"></div>
+    <div class="body"></div>
+    <div class="left-arm"></div>
+    <div class="right-arm"></div>
+    <div class="left-leg"></div>
+    <div class="right-leg"></div>
+  </div>
+
+  <div class="figure" id="movableFigure2">
+    <div class="head">
+     <div class="crown">
+      <div class="black-square"></div>
+      <div class="triangle"></div>
+      <div class="triangle2"></div>
+      <div class="triangle3"></div>
+     </div>
+    </div>
+    <div class="body"></div>
+    <div class="left-arm"></div>
+   <div class="right-arm">
+       <div class="tool"></div>
+       <div class="tool2"></div>
+    </div>
+    <div class="left-leg"></div>
+    <div class="right-leg"></div>
+  </div>
+    
+      <div class="ground">cosmizy.com - the home for things made by cosmizy-<a href="https://github.com/Cosmizy" target="_blank">github</a></div>
+
+    
+      <div class="title-text">cosmizy.com</div>
+      <button class="game-button" data-title="whiptheman">whiptheman.io</button>
+      <button class="game-button" data-title="workthefields">comingsoon.io</button>
+
+
+    <script>
+        // Get the buttons by class name
+        const buttons = document.querySelectorAll('.game-button');
+
+        // Loop through each button and add a click event listener
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Retrieve the data-title attribute value
+                const title = this.getAttribute('data-title');
+                
+                // Construct the URL
+                const url = window.location.href + '/' + title;
+                
+                // Navigate to the constructed URL
+                window.location.href = url;
+            });
+        });
+    </script>
+    
+</body>
+</html>
