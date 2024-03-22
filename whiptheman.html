@@ -550,17 +550,7 @@
       
 document.addEventListener("keydown", function(event) {
     if (event.key === "Enter") {
-        // Check if timeoutId is not set to avoid resetting the timeout
-        if (!timeoutId) {
-            // Set a new timeout for 5 seconds
-            timeoutId = setTimeout(function() {
-                banned = 1;
-                saveScores();
-                // Clear the timeoutId to reset the timeout
-                timeoutId = null;
-                location.reload();
-            }, 1000);
-        }
+      event.preventDefault();
     }
 });
 
