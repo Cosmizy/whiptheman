@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test</title>
+  <style>
+    /* Style for the chat messages */
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #messages li {
+      padding: 5px 10px;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>lolchat</h1>
+  <!-- Input for typing a message -->
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <button onclick="sendMessage()">Send</button>
+  <!-- Container to display chat messages -->
+  <ul id="messages"></ul>
+
+  <!-- Firebase JavaScript SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js"></script>
+
+  <script>
+    // Initialize Firebase with your own configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAK658pEbQLdrOddeU0YN-rff32xL7BuFE",
+        authDomain: "test-chatroom-8133a.firebaseapp.com",
+        projectId: "test-chatroom-8133a",
+        storageBucket: "test-chatroom-8133a.appspot.com",
+        messagingSenderId: "1097118205649",
+        appId: "1:1097118205649:web:1587d89d6953f3f32627f0",
+        measurementId: "G-QPRSGK720G"
+      };
+    // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      const analytics = firebase.analytics();
+    
+
+    // Reference to the Firebase database
+    var database = firebase.database().ref("messages");
+
+    // Function to send a message
+    function sendMessage() {
+      var message = document.getElementById('messageInput').value;
+      if (message.trim() !== '') { // Check if the message is not empty
+        database.push().set({
+          message: message
+        });
+        // Clear the input field after sending the message
+        document.getElementById('messageInput').value = "";
+      }
+    }
+
+    // Function to display messages
+    database.on('child_added', function(snapshot) {
+      var message = snapshot.val().message;
+      var messageElement = document.createElement('li');
+      messageElement.innerText = message;
+      document.getElementById('messages').appendChild(messageElement);
+    });
+  </script>
+</body>
+</html>
