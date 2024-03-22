@@ -50,6 +50,7 @@
 
     // Function to send a message
     function sendMessage() {
+      alert("sendMessage function called");
       var message = document.getElementById('messageInput').value;
       if (message.trim() !== '') { // Check if the message is not empty
         database.push().set({
