@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test</title>
+  <title>New Tab</title>
   <style>
 
 body, ul {
@@ -12,8 +12,9 @@ body, ul {
     /* Style for the chat messages */
     #chatContainer {
       position: relative;
-      height: 100vh;
+      height: calc(100vh - 80px); /* Adjust the height considering the input container */
       overflow-y: auto;
+      padding-bottom: 0; /* Adjust padding to prevent messages from hiding behind the input container */
     }
 
     #messages {
@@ -30,12 +31,17 @@ body, ul {
 /* Position the input container fixed at the bottom */
 #inputContainer {
   position: fixed;
-  bottom: 0;
+  bottom: 0; /* Adjust the distance from the bottom as needed */
   left: 0;
   width: 100%;
   background-color: transparent;
   padding: 10px;
   box-sizing: border-box;
+  z-index: 1; /* Set a higher z-index to ensure it's above the chat container */
+}
+
+#nameInput {
+  width: 125px; /* Adjust the width as needed */
 }
 
   </style>
@@ -48,6 +54,7 @@ body, ul {
     <div id="inputContainer">
       <input type="text" id="messageInput" placeholder="Type a message...">
       <button onclick="sendMessage()">Send</button>
+      <input type="text" id="nameInput" placeholder="Your Name">
     </div>
   </div>
 
@@ -77,9 +84,11 @@ body, ul {
 
     // Function to send a message
     function sendMessage() {
-      var message = document.getElementById('messageInput').value;
-      if (message.trim() !== '') { // Check if the message is not empty
+      var name = document.getElementById('nameInput').value.trim();
+      var message = document.getElementById('messageInput').value.trim();
+      if (name !== '' && message !== '') {
         database.push().set({
+          name: name,
           message: message
         });
         // Clear the input field after sending the message
@@ -87,13 +96,31 @@ body, ul {
       }
     }
 
+    function displayMessage(snapshot) {
+      var data = snapshot.val();
+      var name = data.name;
+      var message = data.message;
+      var messageElement = document.createElement('li');
+      messageElement.innerText = name + ": " + message;
+      document.getElementById('messages').appendChild(messageElement);
+    }
+    
+    // Function to scroll to the bottom of the chat container
+    function scrollToBottom() {
+      var chatContainer = document.getElementById('chatContainer');
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
     // Function to display messages
     database.on('child_added', function(snapshot) {
-      var message = snapshot.val().message;
-      var messageElement = document.createElement('li');
-      messageElement.innerText = message;
-      document.getElementById('messages').appendChild(messageElement);
+      displayMessage(snapshot);
+      scrollToBottom(); // Scroll to the bottom after adding a new message
     });
+    
+    // Scroll to the bottom when the page is loaded
+    window.onload = function() {
+      scrollToBottom(); // Scroll to the bottom when the page is loaded
+    };
   </script>
 </body>
 </html>
