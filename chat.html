@@ -6,42 +6,63 @@
   <title>Test</title>
   <style>
     /* Style for the chat messages */
+    #chatContainer {
+      position: relative;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
     #messages {
       list-style-type: none;
       margin: 0;
       padding: 0;
     }
+
     #messages li {
       padding: 5px 10px;
       border-bottom: 1px solid #ccc;
     }
+
+    /* Position the input container at the bottom */
+    #inputContainer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f9f9f9;
+      padding: 10px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
-  <h1>lolchat</h1>
-  <!-- Input for typing a message -->
-  <input type="text" id="messageInput" placeholder="Type a message...">
-  <button onclick="sendMessage()">Send</button>
-  <!-- Container to display chat messages -->
-  <ul id="messages"></ul>
+  <div id="chatContainer">
+    <!-- Container to display chat messages -->
+    <ul id="messages"></ul>
+    <!-- Input for typing a message -->
+    <div id="inputContainer">
+      <input type="text" id="messageInput" placeholder="Type a message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
 
   <!-- Firebase JavaScript SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
 
   <script>
     // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyAK658pEbQLdrOddeU0YN-rff32xL7BuFE",
-    authDomain: "test-chatroom-8133a.firebaseapp.com",
-    databaseURL: "https://test-chatroom-8133a-default-rtdb.firebaseio.com",
-    projectId: "test-chatroom-8133a",
-    storageBucket: "test-chatroom-8133a.appspot.com",
-    messagingSenderId: "1097118205649",
-    appId: "1:1097118205649:web:1587d89d6953f3f32627f0",
-    measurementId: "G-QPRSGK720G"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAK658pEbQLdrOddeU0YN-rff32xL7BuFE",
+      authDomain: "test-chatroom-8133a.firebaseapp.com",
+      databaseURL: "https://test-chatroom-8133a-default-rtdb.firebaseio.com",
+      projectId: "test-chatroom-8133a",
+      storageBucket: "test-chatroom-8133a.appspot.com",
+      messagingSenderId: "1097118205649",
+      appId: "1:1097118205649:web:1587d89d6953f3f32627f0",
+      measurementId: "G-QPRSGK720G"
+    };
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
