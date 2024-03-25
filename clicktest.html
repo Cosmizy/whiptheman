@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suspicious Clicking Detection</title>
+</head>
+<body>
+
+<h1>lol</h1>
+
+<script>
+    let clickTimes = []; // Array to store timestamps of clicks
+    let suspiciousInterval = 100; // Threshold for suspicious click interval in milliseconds
+    let suspiciousDuration = 5000; // Duration to monitor in milliseconds (5 seconds)
+
+    // Function to handle click events
+    function handleClick() {
+        const currentTime = new Date().getTime();
+        
+        // Add current click time to the array
+        clickTimes.push(currentTime);
+        
+        // Remove old click times that are beyond the suspicious duration
+        const cutoffTime = currentTime - suspiciousDuration;
+        while (clickTimes.length > 0 && clickTimes[0] < cutoffTime) {
+            clickTimes.shift();
+        }
+        
+        // Check if there are enough clicks within the suspicious duration
+        if (clickTimes.length >= suspiciousDuration / suspiciousInterval) {
+            // Check if clicks occur consistently with the specified interval
+            let consistentInterval = true;
+            for (let i = 1; i < clickTimes.length; i++) {
+                if (clickTimes[i] - clickTimes[i - 1] > suspiciousInterval) {
+                    consistentInterval = false;
+                    break;
+                }
+            }
+            // If clicks occur consistently with the specified interval, log a message
+            if (consistentInterval) {
+                alert("cheat");
+                // You may choose to take further actions here, such as banning the player or issuing a warning
+            }
+        }
+    }
+
+    // Attach click event listener to the document
+    document.addEventListener("click", handleClick);
+</script>
+
+</body>
+</html>
