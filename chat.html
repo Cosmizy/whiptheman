@@ -44,6 +44,30 @@ body, ul {
   width: 125px; /* Adjust the width as needed */
 }
 
+    #codeModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ffffff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+      display: none;
+    }
+
+    #codeModal input[type="text"] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    #codeModal button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -56,6 +80,11 @@ body, ul {
       <button onclick="sendMessage()">Send</button>
       <input type="text" id="nameInput" placeholder="Your Name">
     </div>
+  </div>
+
+  <div id="codeModal">
+    <input type="password" id="verificationCode" placeholder="Code?">
+    <button onclick="verifyCode()">Enter</button>
   </div>
 
   <!-- Firebase JavaScript SDK -->
@@ -81,20 +110,48 @@ body, ul {
 
     // Reference to the Firebase database
     var database = firebase.database().ref("messages");
+    var cosmizyConfirmed = localStorage.getItem('cosmizyConfirmed') === 'true';
 
+      
+function verifyCode() {
+  var enteredCode = document.getElementById('verificationCode').value.trim();
+  // Replace 'your_secret_code' with your actual verification code
+  var secretCode = '1441';
+  if (enteredCode === secretCode) {
+    cosmizyConfirmed = true;
+    // Save cosmizyConfirmed locally
+    localStorage.setItem('cosmizyConfirmed', cosmizyConfirmed);
+    // Hide the code verification modal
+    document.getElementById('codeModal').style.display = 'none';
+  } else {
+    // Display an error message or handle the incorrect code scenario
+    alert('nuh uh');
+  }
+}
+      
     // Function to send a message
-    function sendMessage() {
-      var name = document.getElementById('nameInput').value.trim();
-      var message = document.getElementById('messageInput').value.trim();
-      if (name !== '' && message !== '') {
-        database.push().set({
-          name: name,
-          message: message
-        });
-        // Clear the input field after sending the message
-        document.getElementById('messageInput').value = "";
+      function sendMessage() {
+        var name = document.getElementById('nameInput').value.trim();
+        var message = document.getElementById('messageInput').value.trim();
+        
+        // Check if the name is "cosmizy"
+       if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
+          // Show the code verification modal
+          document.getElementById('codeModal').style.display = 'block';
+          return; // Exit the function without sending the message
+        }
+      
+        if (name !== '' && message !== '') {
+          // Existing code to send message to Firebase
+          var database = firebase.database().ref("messages");
+          database.push().set({
+            name: name,
+            message: message,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+          });
+          document.getElementById('messageInput').value = "";
+        }
       }
-    }
 
     function displayMessage(snapshot) {
       var data = snapshot.val();
