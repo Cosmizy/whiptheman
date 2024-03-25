@@ -92,6 +92,8 @@ body, ul {
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
 
+  <script src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/blacklist.js"></script>
+
   <script>
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -144,34 +146,45 @@ function verifyCode() {
   }
 }
       
-    // Function to send a message
-      function sendMessage() {
-        var name = document.getElementById('nameInput').value.trim();
-        var message = document.getElementById('messageInput').value.trim();
+// Define an array of blacklisted words
 
-        if (message.toLowerCase() === '!clearchat' && name.toLowerCase() === 'cosmizy') {
-            clearChats(); // Call the clearChats() function if conditions are met
-            return; // Exit the function
-        }
-          
-        // Check if the name is "cosmizy"
-       if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
-          // Show the code verification modal
-          document.getElementById('codeModal').style.display = 'block';
-          return; // Exit the function without sending the message
-        }
-      
-        if (name !== '' && message !== '') {
-          // Existing code to send message to Firebase
-          var database = firebase.database().ref("messages");
-          database.push().set({
-            name: name,
-            message: message,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-          });
-          document.getElementById('messageInput').value = "";
-        }
-      }
+// Function to send a message
+function sendMessage() {
+  var name = document.getElementById('nameInput').value.trim();
+  var message = document.getElementById('messageInput').value.trim();
+
+  // Check if the name is "cosmizy"
+  if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
+    // Show the code verification modal
+    document.getElementById('codeModal').style.display = 'block';
+    return; // Exit the function without sending the message
+  }
+
+  // Replace blacklisted words with hashtags
+  message = replaceBlacklistedWords(message);
+
+  if (name !== '' && message !== '') {
+    // Existing code to send message to Firebase
+    var database = firebase.database().ref("messages");
+    database.push().set({
+      name: name,
+      message: message,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+    document.getElementById('messageInput').value = "";
+  }
+}
+
+// Function to replace blacklisted words with hashtags
+function replaceBlacklistedWords(message) {
+  for (var i = 0; i < blacklist.length; i++) {
+    var regex = new RegExp('\\b' + blacklist[i] + '\\b', 'gi');
+    var replacement = '#'.repeat(blacklist[i].length);
+    message = message.replace(regex, replacement);
+  }
+  return message;
+}
+
 
     function displayMessage(snapshot) {
       var data = snapshot.val();
