@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Tab</title>
+  <title>Chat</title>
   <style>
 
 body, ul {
@@ -159,6 +159,11 @@ function sendMessage() {
     document.getElementById('codeModal').style.display = 'block';
     return; // Exit the function without sending the message
   }
+
+    if (message.toLowerCase() === '!clearchat' && name.toLowerCase() === 'cosmizy') {
+        clearChats(); // Call the clearChats() function if conditions are met
+        return; // Exit the function
+    }
 
   // Replace blacklisted words with hashtags
   message = replaceBlacklistedWords(message);
