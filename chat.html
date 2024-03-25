@@ -112,6 +112,21 @@ body, ul {
     var database = firebase.database().ref("messages");
     var cosmizyConfirmed = localStorage.getItem('cosmizyConfirmed') === 'true';
 
+// Function to clear all chats
+function clearChats() {
+  // Remove all messages from the chat container
+  var messagesElement = document.getElementById('messages');
+  messagesElement.innerHTML = '';
+  
+  // Remove all messages from the Firebase database
+  database.remove()
+    .then(function() {
+      console.log("All chats cleared successfully.");
+    })
+    .catch(function(error) {
+      console.error("Error clearing chats: ", error);
+    });
+}
       
 function verifyCode() {
   var enteredCode = document.getElementById('verificationCode').value.trim();
@@ -133,7 +148,12 @@ function verifyCode() {
       function sendMessage() {
         var name = document.getElementById('nameInput').value.trim();
         var message = document.getElementById('messageInput').value.trim();
-        
+
+        if (message.toLowerCase() === '!clearchat' && name.toLowerCase() === 'cosmizy') {
+            clearChats(); // Call the clearChats() function if conditions are met
+            return; // Exit the function
+        }
+          
         // Check if the name is "cosmizy"
        if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
           // Show the code verification modal
