@@ -1,3 +1,1 @@
 const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina'];
-
-export default blacklist;
