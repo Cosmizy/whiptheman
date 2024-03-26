@@ -250,6 +250,11 @@ function sendMessage() {
     return; // Exit the function without sending the message
   }
 
+    if (message.toLowerCase() === '!myid') {
+        alert(userID);
+        return; // Exit the function
+    }
+    
     if (message.toLowerCase() === '!clearchat' && cosmizyConfirmed) {
         clearChats(); // Call the clearChats() function if conditions are met
         return; // Exit the function
@@ -260,6 +265,12 @@ function sendMessage() {
         alert('your name must be longer than 3 characters');
         return;
     }
+
+  var userDatabase = firebase.database().ref("users");
+    
+  userDatabase.push().set({
+      userid: userID
+    });
     
   // Replace blacklisted words with hashtags
   message = replaceBlacklistedWords(message);
