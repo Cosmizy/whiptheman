@@ -183,7 +183,7 @@ function sendMessage() {
 // Function to replace blacklisted words with hashtags
 function replaceBlacklistedWords(message) {
   for (var i = 0; i < blacklist.length; i++) {
-    var regex = new RegExp('\\b' + blacklist[i] + '\\b', 'gi');
+    var regex = new RegExp('\\b' + blacklist[i] + '\\w*\\b', 'gi'); // Match partial words
     var replacement = '#'.repeat(blacklist[i].length);
     message = message.replace(regex, replacement);
   }
