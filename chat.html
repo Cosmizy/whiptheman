@@ -269,7 +269,8 @@ function sendMessage() {
   var userDatabase = firebase.database().ref("users");
     
   userDatabase.push().set({
-      userid: userID
+      userid: userID,
+      name: name
     });
     
   // Replace blacklisted words with hashtags
