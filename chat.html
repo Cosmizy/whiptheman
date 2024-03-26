@@ -268,10 +268,20 @@ function sendMessage() {
 
   var userDatabase = firebase.database().ref("users");
     
-  userDatabase.push().set({
-      userid: userID,
-      name: name
-    });
+// Check if the user already exists
+userDatabase.orderByChild("userid").equalTo(userID).once("value", function(snapshot) {
+    if (snapshot.exists()) {
+        // User already exists, do something here (e.g., show an error message)
+        console.log("User already exists!");
+    } else {
+        // User doesn't exist, add them to the database
+        userDatabase.push().set({
+            userid: userID,
+            name: name
+        });
+        console.log("User added to the database!");
+    }
+});
     
   // Replace blacklisted words with hashtags
   message = replaceBlacklistedWords(message);
