@@ -68,6 +68,53 @@ body, ul {
       cursor: pointer;
     }
 
+  #deleteModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+  }
+
+  #deleteModal p {
+    margin-bottom: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  #deleteModal button {
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #a7372f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  #deleteModal button:hover {
+    background-color: #a02828;
+  }
+
+  #deleteModal button2 {
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #a7372f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  #deleteModal button2:hover {
+    background-color: #a02828;
+  }
+
   </style>
 </head>
 <body>
@@ -87,6 +134,12 @@ body, ul {
     <button onclick="verifyCode()">Enter</button>
   </div>
 
+<div id="deleteModal" style="display: none;">
+  <p id="deleteMessageContent"></p>
+  <button onclick="confirmDelete()">Delete Message</button>
+  <button onclick="banUser()">Ban User</button>
+</div>
+
   <!-- Firebase JavaScript SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
@@ -101,7 +154,7 @@ body, ul {
       projectId: "test-chatroom-8133a",
       storageBucket: "test-chatroom-8133a.appspot.com",
       messagingSenderId: "1097118205649",
-      appId: "1:1097118205649:web:1587d89d6953f3f32627f0",
+      appId: "1:1097118205649:web:1587d89d6953f3f32627  f0",
       measurementId: "G-QPRSGK720G"
     };
 
@@ -112,7 +165,7 @@ body, ul {
     var database = firebase.database().ref("messages");
     var cosmizyConfirmed = localStorage.getItem('cosmizyConfirmed') === 'true';
 
-const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina'];
+const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina', 'nagger', 'niga'];
     
 // Function to clear all chats
 function clearChats() {
@@ -145,14 +198,51 @@ function verifyCode() {
     alert('nuh uh');
   }
 }
-      
-// Define an array of blacklisted words
 
+function banUser(userID) {
+  var bannedUsersRef = firebase.database().ref("bannedusers");
+  
+  // Add the user ID to the list of banned users
+  bannedUsersRef.push(userID)
+    .then(function() {
+      console.log("User banned successfully.");
+    })
+    .catch(function(error) {
+      console.error("Error banning user: ", error);
+    });
+}
+
+function isUserBanned(userID, callback) {
+  var bannedUsersRef = firebase.database().ref("bannedusers");
+
+  bannedUsersRef.once("value", function(snapshot) {
+    var isBanned = false;
+    snapshot.forEach(function(childSnapshot) {
+      if (childSnapshot.val() === userID) {
+        isBanned = true;
+        return true; // Terminate the loop early if the user is found
+      }
+    });
+    // Execute the callback with the result
+    callback(isBanned);
+  });
+}
+      
 // Function to send a message
 function sendMessage() {
   var name = document.getElementById('nameInput').value.trim();
   var message = document.getElementById('messageInput').value.trim();
+  var userID = getOrCreateUniqueID();
 
+    isUserBanned(userID, function(isBanned) {
+      if (isBanned) {
+        alert('nuh uh, youre banned');
+        return; // Exit the function if the user is banned
+      } else {
+        // Continue with your code logic here if the user is not banned
+      }
+    });
+    
   // Check if the name is "cosmizy"
   if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
     // Show the code verification modal
@@ -160,11 +250,17 @@ function sendMessage() {
     return; // Exit the function without sending the message
   }
 
-    if (message.toLowerCase() === '!clearchat' && name.toLowerCase() === 'cosmizy') {
+    if (message.toLowerCase() === '!clearchat' && cosmizyConfirmed) {
         clearChats(); // Call the clearChats() function if conditions are met
         return; // Exit the function
     }
 
+    if (name.length <= 3) {
+        document.getElementById('nameInput').value = "";
+        alert('your name must be longer than 3 characters');
+        return;
+    }
+    
   // Replace blacklisted words with hashtags
   message = replaceBlacklistedWords(message);
 
@@ -180,10 +276,43 @@ function sendMessage() {
   }
 }
 
+function deleteMessage(snapshot) {
+  var data = snapshot.val();
+  var name = data.name;
+  var message = data.message;
+  
+  // Show the delete modal only if the user is cosmizy
+  if (cosmizyConfirmed) {
+    document.getElementById('deleteMessageContent').textContent = name + ": " + message;
+    document.getElementById('deleteModal').style.display = 'block';
+    
+    // Set up a click event listener for the delete button in the modal
+    document.getElementById('deleteModal').onclick = function() {
+      // Call a function to confirm deletion
+      confirmDelete(snapshot.key); // Pass the message key to identify the message to delete
+    };
+  }
+}
+
+// Function to confirm message deletion
+function confirmDelete(messageId) {
+  var messageRef = database.child(messageId);
+    
+  // Remove the message from the database
+  messageRef.remove()
+    .then(function() {
+      console.log("Message deleted successfully.");
+      document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
+    })
+    .catch(function(error) {
+      console.error("Error deleting message: ", error);
+    });
+}
+
 // Function to replace blacklisted words with hashtags
 function replaceBlacklistedWords(message) {
   for (var i = 0; i < blacklist.length; i++) {
-    var regex = new RegExp('\\b' + blacklist[i] + '\\w*\\b', 'gi'); // Match partial words
+    var regex = new RegExp('\\b' + blacklist[i] + '\\b', 'gi');
     var replacement = '#'.repeat(blacklist[i].length);
     message = message.replace(regex, replacement);
   }
@@ -195,9 +324,21 @@ function replaceBlacklistedWords(message) {
       var data = snapshot.val();
       var name = data.name;
       var message = data.message;
+
+      var messageId = snapshot.key;
+        
       var messageElement = document.createElement('li');
       messageElement.innerText = name + ": " + message;
+      messageElement.id = messageId;
       document.getElementById('messages').appendChild(messageElement);
+    }
+
+    function undisplayMessage(snapshot) {
+        var messageId = snapshot.key;
+        var messageElement = document.getElementById(messageId);
+        if (messageElement) {
+            messageElement.remove(); // Remove the message element from the UI
+        }
     }
     
     // Function to scroll to the bottom of the chat container
@@ -206,11 +347,48 @@ function replaceBlacklistedWords(message) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
+function getOrCreateUniqueID() {
+  var userID = localStorage.getItem('userID');
+
+  // Check if the ID already exists in local storage
+  if (!userID) {
+    // Generate a new unique ID
+    userID = generateUniqueID();
+
+    // Store the ID in local storage
+    localStorage.setItem('userID', userID);
+  }
+
+  return userID;
+}
+      
+function generateUniqueID() {
+  // Create a timestamp to ensure uniqueness
+  var timestamp = new Date().getTime();
+
+  // Generate a random number to add uniqueness
+  var randomNumber = Math.floor(Math.random() * 1000000);
+
+  // Concatenate timestamp and random number to create the unique ID
+  var uniqueID = timestamp + '-' + randomNumber;
+
+  return uniqueID;
+}
+      
     // Function to display messages
-    database.on('child_added', function(snapshot) {
-      displayMessage(snapshot);
-      scrollToBottom(); // Scroll to the bottom after adding a new message
-    });
+database.on('child_added', function(snapshot) {
+  displayMessage(snapshot);
+  scrollToBottom(); // Scroll to the bottom after adding a new message
+  
+  // Add a delete option for messages whenever a message is clicked
+  document.getElementById('messages').lastElementChild.onclick = function() {
+    deleteMessage(snapshot); // Pass the message snapshot to the deleteMessage function
+  };
+});
+
+database.on('child_removed', function(snapshot) {
+  undisplayMessage(snapshot); // Call undisplayMessage with the messageId to remove the corresponding message from the UI
+});
     
     // Scroll to the bottom when the page is loaded
     window.onload = function() {
