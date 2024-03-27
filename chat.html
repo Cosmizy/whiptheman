@@ -229,6 +229,7 @@ function sendMessage() {
       if (isBanned) {
         alert('nuh uh, youre banned');
         document.getElementById('messageInput').value = "";
+        cosmizyConfirmed = false;
         return; // Exit the function if the user is banned
       } else {
 
