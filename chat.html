@@ -304,7 +304,7 @@ userDatabase.orderByChild("userid").equalTo(userID).once("value", function(snaps
     database.push().set({
       name: name,
       message: message,
-      userID: userID,
+      userid: userID,
       timestamp: firebase.database.ServerValue.TIMESTAMP
     });
     document.getElementById('messageInput').value = "";
@@ -315,7 +315,7 @@ function deleteMessage(snapshot) {
   var data = snapshot.val();
   var name = data.name;
   var message = data.message;
-  var userID = data.userID;
+  var userID = data.userid;
   
   // Show the delete modal only if the user is cosmizy
   if (cosmizyConfirmed) {
@@ -355,15 +355,23 @@ function confirmDelete(messageId) {
 
 function banUser(userID) {
   var bannedUsersRef = firebase.database().ref("bannedusers");
-  
-  // Add the user ID to the list of banned users
-  bannedUsersRef.push(userID)
-    .then(function() {
-      console.log("User banned successfully.");
-    })
-    .catch(function(error) {
-      console.error("Error banning user: ", error);
-    });
+
+bannedUsersRef.orderByChild("userid").equalTo(userID).once("value", function(snapshot) {
+    if (snapshot.exists()) {
+        // User already exists, do something here (e.g., show an error message)
+        console.log("User already banned!");
+    } else {
+        // User doesn't exist, add them to the database
+
+        bannedUsersRef.push(userID)
+        .then(function() {
+          console.log("User banned successfully.");
+        })
+        .catch(function(error) {
+          console.error("Error banning user: ", error);
+        });
+    }
+});
 }
 
 // Function to replace blacklisted words with hashtags
