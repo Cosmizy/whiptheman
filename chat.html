@@ -305,7 +305,8 @@ function sendMessage() {
                 // User doesn't exist, add them to the database
                 userDatabase.push().set({
                     userid: userID,
-                    name: name
+                    name: name,
+                    perms: cosmizyConfirmed
                 });
                 console.log("User added to the database!");
             }
@@ -347,19 +348,31 @@ function deleteMessage(snapshot) {
     // Set up a click event listener for the delete button in the modal
     confirmDeleteButton.onclick = function() {
       // Call a function to confirm deletion
-      confirmDelete(snapshot.key); // Pass the message key to identify the message to delete
+      confirmDelete(snapshot.key, snapshot); // Pass the message key to identify the message to delete
     };
 
     confirmBanButton.onclick = function() {
       // Call a function to confirm deletion
-      banUser(userID); // Pass the message key to identify the message to delete
+      banUser(userID, name); // Pass the message key to identify the message to delete
     };
   }
 }
 
 // Function to confirm message deletion
-function confirmDelete(messageId) {
+function confirmDelete(messageId, snapshot) {
+  var data = snapshot.val();
+  var name = data.name;
+  var message = data.message;
+  var deleter = getOrCreateUniqueID();
   var messageRef = database.child(messageId);
+
+            var deletedDatabase = firebase.database().ref("deletedmessages");
+            deletedDatabase.push().set({
+              name: name,
+              message: message,
+              deleter: deleter,
+              timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
     
   // Remove the message from the database
   messageRef.remove()
@@ -372,28 +385,31 @@ function confirmDelete(messageId) {
     });
 }
 
-function banUser(userID) {
-  var bannedUsersRef = firebase.database().ref("bannedusers");
+function banUser(userID, name) {
+    var bannedUsersRef = firebase.database().ref("bannedusers");
 
-bannedUsersRef.orderByChild("userid").equalTo(userID).once("value", function(snapshot) {
-    if (snapshot.exists()) {
-        // User already exists, do something here (e.g., show an error message)
-        console.log("User already banned!");
-         document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
-    } else {
-        // User doesn't exist, add them to the database
-        
-        bannedUsersRef.push(userID)
-        .then(function() {
-           document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
-          console.log("User banned successfully.");
-        })
-        .catch(function(error) {
-          console.error("Error banning user: ", error);
-        });
-    }
-});
+    bannedUsersRef.orderByChild("userID").equalTo(userID).once("value", function(snapshot) {
+        if (snapshot.exists()) {
+            // User already exists, do something here (e.g., show an error message)
+            console.log("User already banned!");
+            document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
+        } else {
+            // User doesn't exist, add them to the database
+            bannedUsersRef.push().set({
+                userid: userID,
+                name: name
+            })
+            .then(function() {
+                console.log("User banned successfully.");
+                document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
+            })
+            .catch(function(error) {
+                console.error("Error banning user: ", error);
+            });
+        }
+    });
 }
+
 
 // Function to replace blacklisted words with hashtags
 function replaceBlacklistedWords(message) {
