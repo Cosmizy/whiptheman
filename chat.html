@@ -136,8 +136,8 @@ body, ul {
 
 <div id="deleteModal" style="display: none;">
   <p id="deleteMessageContent"></p>
-  <button onclick="confirmDelete()">Delete Message</button>
-  <button onclick="banUser()">Ban User</button>
+  <button id="deleteMessageButton">Delete Message</button>
+  <button id="banUserButton">Ban User</button>
 </div>
 
   <!-- Firebase JavaScript SDK -->
@@ -165,8 +165,12 @@ body, ul {
     var database = firebase.database().ref("messages");
     var cosmizyConfirmed = localStorage.getItem('cosmizyConfirmed') === 'true';
 
-const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina', 'nagger', 'niga'];
-    
+const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina', 'nagger', 'niga', 'boner', 'erect', 'erection'];
+
+const rules = 'Chat Rules<br>Rule 1: Keep it school appropriate<br>Rule 2: Be respectful<br>Rule 3: Do not impersonate people<br>Rule 4: Put your real name or school email<br>Rule 5: Only use chat when work is done';
+
+const rulesFormat = rules.replace(/<br>/g, '\n');
+      
 // Function to clear all chats
 function clearChats() {
   // Remove all messages from the chat container
@@ -197,19 +201,6 @@ function verifyCode() {
     // Display an error message or handle the incorrect code scenario
     alert('nuh uh');
   }
-}
-
-function banUser(userID) {
-  var bannedUsersRef = firebase.database().ref("bannedusers");
-  
-  // Add the user ID to the list of banned users
-  bannedUsersRef.push(userID)
-    .then(function() {
-      console.log("User banned successfully.");
-    })
-    .catch(function(error) {
-      console.error("Error banning user: ", error);
-    });
 }
 
 function isUserBanned(userID, callback) {
@@ -250,13 +241,35 @@ function sendMessage() {
     return; // Exit the function without sending the message
   }
 
+  if (name.toLowerCase() === 'server') {
+    // Show the code verification modal
+    alert('nuh uh');
+    document.getElementById('nameInput').value = "";
+    return; // Exit the function without sending the message
+  }
+
     if (message.toLowerCase() === '!myid') {
         alert(userID);
+        document.getElementById('messageInput').value = "";
         return; // Exit the function
     }
-    
+
+    if (message.toLowerCase() === '!rules') {
+
+        var database = firebase.database().ref("messages");
+        database.push().set({
+          name: "Server",
+          message: rulesFormat,
+          timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+        
+        document.getElementById('messageInput').value = "";
+        return; // Exit the function
+    }
+      
     if (message.toLowerCase() === '!clearchat' && cosmizyConfirmed) {
         clearChats(); // Call the clearChats() function if conditions are met
+        document.getElementById('messageInput').value = "";
         return; // Exit the function
     }
 
@@ -292,6 +305,7 @@ userDatabase.orderByChild("userid").equalTo(userID).once("value", function(snaps
     database.push().set({
       name: name,
       message: message,
+      userID: userID,
       timestamp: firebase.database.ServerValue.TIMESTAMP
     });
     document.getElementById('messageInput').value = "";
@@ -302,16 +316,25 @@ function deleteMessage(snapshot) {
   var data = snapshot.val();
   var name = data.name;
   var message = data.message;
+  var userID = data.userID;
   
   // Show the delete modal only if the user is cosmizy
   if (cosmizyConfirmed) {
     document.getElementById('deleteMessageContent').textContent = name + ": " + message;
     document.getElementById('deleteModal').style.display = 'block';
+
+    var confirmDeleteButton = document.getElementById('deleteMessageButton');
+    var confirmBanButton = document.getElementById('banUserButton');
     
     // Set up a click event listener for the delete button in the modal
-    document.getElementById('deleteModal').onclick = function() {
+    confirmDeleteButton.onclick = function() {
       // Call a function to confirm deletion
       confirmDelete(snapshot.key); // Pass the message key to identify the message to delete
+    };
+
+    confirmBanButton.onclick = function() {
+      // Call a function to confirm deletion
+      banUser(userID); // Pass the message key to identify the message to delete
     };
   }
 }
@@ -328,6 +351,19 @@ function confirmDelete(messageId) {
     })
     .catch(function(error) {
       console.error("Error deleting message: ", error);
+    });
+}
+
+function banUser(userID) {
+  var bannedUsersRef = firebase.database().ref("bannedusers");
+  
+  // Add the user ID to the list of banned users
+  bannedUsersRef.push(userID)
+    .then(function() {
+      console.log("User banned successfully.");
+    })
+    .catch(function(error) {
+      console.error("Error banning user: ", error);
     });
 }
 
