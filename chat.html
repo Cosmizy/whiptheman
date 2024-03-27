@@ -8,19 +8,32 @@
 
 body, ul {
   overflow-y: hidden;
+
+   background: radial-gradient(circle at center, transparent 0%, black 100%), #555555;
 }
+
+        #image {
+            position: absolute; /* Positioning the image absolutely */
+            top: 50px; /* Adjust these values to change the position */
+            left: 1000px; /* Adjust these values to change the position */
+            z-index: 2;
+            display: none;
+        }
+      
     /* Style for the chat messages */
     #chatContainer {
       position: relative;
       height: calc(100vh - 80px); /* Adjust the height considering the input container */
       overflow-y: auto;
       padding-bottom: 0; /* Adjust padding to prevent messages from hiding behind the input container */
+      z-index: 1;
     }
 
     #messages {
       list-style-type: none;
       margin: 0;
       padding: 0;
+      color: white;
     }
 
     #messages li {
@@ -139,6 +152,8 @@ body, ul {
   <button id="deleteMessageButton">Delete Message</button>
   <button id="banUserButton">Ban User</button>
 </div>
+
+<img id="image" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/logo.png">
 
   <!-- Firebase JavaScript SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
