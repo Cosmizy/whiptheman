@@ -230,6 +230,7 @@ function sendMessage() {
         alert('nuh uh, youre banned');
         document.getElementById('messageInput').value = "";
         cosmizyConfirmed = false;
+        localStorage.setItem('cosmizyConfirmed', cosmizyConfirmed);
         return; // Exit the function if the user is banned
       } else {
 
