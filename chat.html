@@ -379,11 +379,13 @@ bannedUsersRef.orderByChild("userid").equalTo(userID).once("value", function(sna
     if (snapshot.exists()) {
         // User already exists, do something here (e.g., show an error message)
         console.log("User already banned!");
+         document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
     } else {
         // User doesn't exist, add them to the database
-
+        
         bannedUsersRef.push(userID)
         .then(function() {
+           document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after deletion
           console.log("User banned successfully.");
         })
         .catch(function(error) {
