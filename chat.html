@@ -244,7 +244,7 @@ function isUserBanned(userID, callback) {
   bannedUsersRef.once("value", function(snapshot) {
     var isBanned = false;
     snapshot.forEach(function(childSnapshot) {
-      if (childSnapshot.val() === userID) {
+      if (childSnapshot.val().userid === userID) {
         isBanned = true;
         return true; // Terminate the loop early if the user is found
       }
@@ -267,7 +267,6 @@ function sendMessage() {
         cosmizyConfirmed = false;
         return; // Exit the function if the user is banned
       } else {
-          alert(isBanned);
           // Check if the name is "cosmizy"
           if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
             // Show the code verification modal
