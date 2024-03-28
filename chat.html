@@ -267,7 +267,7 @@ function sendMessage() {
         cosmizyConfirmed = false;
         return; // Exit the function if the user is banned
       } else {
-
+          alert(isBanned);
           // Check if the name is "cosmizy"
           if (name.toLowerCase() === 'cosmizy' && !cosmizyConfirmed) {
             // Show the code verification modal
