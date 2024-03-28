@@ -334,6 +334,7 @@ function sendMessage() {
             
           // Replace blacklisted words with hashtags
           message = replaceBlacklistedWords(message);
+          name = replaceBlacklistedWords(name);
         
           if (name !== '' && message !== '') {
             // Existing code to send message to Firebase
