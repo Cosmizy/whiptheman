@@ -507,8 +507,8 @@ function replaceBlacklistedWords(message) {
             const msg = parts.slice(1).join(' '); // Remaining parts as additional text
         
             if (id === getOrCreateUniqueID()) {
-                alert(name + ' says: ' + msg);
                 deleteMessage(snapshot);
+                alert(name + ' says: ' + msg);
             }
           }
         }
