@@ -495,7 +495,7 @@ function replaceBlacklistedWords(message) {
           deleteMessage(snapshot);
         }
 
-        if (message.toLowerCase().startsWith('!refresh ') && message.includes(' ')) {
+        if (message.toLowerCase().startsWith('!alert ') && message.includes(' ')) {
           // Extract the part after the first space
           const afterFirstSpace = message.substring(message.indexOf(' ') + 1);
         
