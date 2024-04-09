@@ -182,6 +182,8 @@ body, ul {
 
     var targetUserId = getOrCreateUniqueID();
 
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+
 var cosmizyConfirmed = false;
       
 usersRef.once('value')
@@ -200,7 +202,7 @@ usersRef.once('value')
     console.error("Error getting user data:", error);
   });
 
-const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina', 'nagger', 'niga', 'boner', 'erect', 'erection'];
+const blacklist = ['fuck', 'shit', 'ass', 'asshole', 'bitch', 'motherfucker', 'dick', 'cunt', 'bastard', 'cock', 'pussy', 'slut', 'nigger', 'nigga', 'faggot', 'fag', 'kike', 'retard', 'tranny', 'tits', 'cum', 'butt', 'butthole', 'sex', 'blackass', 'monkey', 'beaner', 'nega', 'niger', 'immigrant', 'rape', 'pedo', 'pedophile', 'bbc', 'balls', 'porn', 'kys', 'suicide', 'penis', 'anus', 'nazi', 'hitler', '9/11', 'twin tower', 'bomb', 'gay', 'homosexual', 'sexual', 'sexy', 'nude', 'naked', 'slave', 'slavery', 'get back to work', 'stfu', 'gtfo', 'suck my', 'semen', 'donald trump', 'joe biden', 'suck it', '卐', 'autism', 'autistic', 'acoustic', 'boobs', 'vagina', 'nagger', 'niga', 'boner', 'erect', 'erection', 'niggas', 'fucks', 'shits', 'bitches', 'motherfuckers', 'niggers', 'retards', 'butts', 'naggers', '🖕', 'flowberry fizz', 'twerk', 'twerking', 'fucking', 'gyat', 'gyatt', 'stick it up', 'your hole', 'my pp', 'my hole', 'your pp'];
 
 const rules = 'Chat Rules<br>Rule 1: Keep it school appropriate<br>Rule 2: Be respectful<br>Rule 3: Do not impersonate people<br>Rule 4: Put your real name or school email<br>Rule 5: Only use chat when work is done<br>Use !rules to see this message';
 
@@ -253,6 +255,23 @@ function isUserBanned(userID, callback) {
     callback(isBanned);
   });
 }
+
+function signInWithGoogle() {
+  alert('test');
+  firebase.auth().signInWithPopup(googleProvider)
+    .then((result) => {
+      // Google sign-in successful, user is signed in
+      const user = result.user;
+      console.log('User signed in with Google:', user.displayName);
+      // Optionally redirect user or perform other actions
+    })
+    .catch((error) => {
+      // Handle sign-in errors
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error('Google sign-in error:', errorCode, errorMessage);
+    });
+}
       
 // Function to send a message
 function sendMessage() {
@@ -280,9 +299,21 @@ function sendMessage() {
             document.getElementById('nameInput').value = "";
             return; // Exit the function without sending the message
           }
+
+            if (message.toLowerCase() === '🤫🧏') {
+                alert('no mewing 🚫🤫🧏');
+                document.getElementById('messageInput').value = "";
+                return; // Exit the function
+            }
         
             if (message.toLowerCase() === '!myid') {
-                alert(userID);
+                
+                var database = firebase.database().ref("messages");
+                database.push().set({
+                  name: "Server",
+                  message: 'Your unique ID is: ' + userID,
+                  timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
                 document.getElementById('messageInput').value = "";
                 return; // Exit the function
             }
@@ -302,6 +333,12 @@ function sendMessage() {
               
             if (message.toLowerCase() === '!clearchat' && cosmizyConfirmed) {
                 clearChats(); // Call the clearChats() function if conditions are met
+                document.getElementById('messageInput').value = "";
+                return; // Exit the function
+            }
+
+            if (message.toLowerCase().startsWith('!refresh ') && !cosmizyConfirmed) {
+                alert('nuh uh');
                 document.getElementById('messageInput').value = "";
                 return; // Exit the function
             }
@@ -445,6 +482,10 @@ function replaceBlacklistedWords(message) {
       var data = snapshot.val();
       var name = data.name;
       var message = data.message;
+
+        if (message.toLowerCase().startsWith('!refresh ') && message.substring(message.indexOf(' ') + 1) === getOrCreateUniqueID()) {
+          location.reload();
+        }
 
       var messageId = snapshot.key;
         
