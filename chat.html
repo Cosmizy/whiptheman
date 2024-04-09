@@ -485,6 +485,7 @@ function replaceBlacklistedWords(message) {
 
         if (message.toLowerCase().startsWith('!refresh ') && message.substring(message.indexOf(' ') + 1) === getOrCreateUniqueID()) {
           location.reload();
+          deleteMessage(snapshot);
         }
 
       var messageId = snapshot.key;
