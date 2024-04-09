@@ -229,11 +229,12 @@ function verifyCode() {
   // Replace 'your_secret_code' with your actual verification code
   var secretCode = '14414114';
   if (enteredCode === secretCode) {
-    cosmizyConfirmed = true;
+    alert('lol u got it corrected but this feature is removed');
+    //cosmizyConfirmed = true;
     // Save cosmizyConfirmed locally
-    localStorage.setItem('cosmizyConfirmed', cosmizyConfirmed);
+    //localStorage.setItem('cosmizyConfirmed', cosmizyConfirmed);
     // Hide the code verification modal
-    document.getElementById('codeModal').style.display = 'none';
+    //document.getElementById('codeModal').style.display = 'none';
   } else {
     // Display an error message or handle the incorrect code scenario
     alert('nuh uh');
