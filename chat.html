@@ -343,6 +343,12 @@ function sendMessage() {
                 document.getElementById('messageInput').value = "";
                 return; // Exit the function
             }
+
+            if (message.toLowerCase().startsWith('!alert ') && !cosmizyConfirmed) {
+                alert('nuh uh');
+                document.getElementById('messageInput').value = "";
+                return; // Exit the function
+            }
         
             if (name.length <= 3) {
                 document.getElementById('nameInput').value = "";
@@ -487,6 +493,24 @@ function replaceBlacklistedWords(message) {
         if (message.toLowerCase().startsWith('!refresh ') && message.substring(message.indexOf(' ') + 1) === getOrCreateUniqueID()) {
           location.reload();
           deleteMessage(snapshot);
+        }
+
+        if (message.toLowerCase().startsWith('!refresh ') && message.includes(' ')) {
+          // Extract the part after the first space
+          const afterFirstSpace = message.substring(message.indexOf(' ') + 1);
+        
+          // Split the remaining part into identifier and additional text
+          const parts = afterFirstSpace.split(' ');
+        
+          if (parts.length >= 2) {
+            const id = parts[0]; // First part should be the identifier
+            const msg = parts.slice(1).join(' '); // Remaining parts as additional text
+        
+            if (id === getOrCreateUniqueID()) {
+                alert(name + ' says: ' + msg);
+                deleteMessage(snapshot);
+            }
+          }
         }
 
       var messageId = snapshot.key;
