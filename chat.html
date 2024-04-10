@@ -151,6 +151,7 @@ body, ul {
   <p id="deleteMessageContent"></p>
   <button id="deleteMessageButton">Delete Message</button>
   <button id="banUserButton">Ban User</button>
+  <button id="getUserIDButton">Get UserID</button>
 </div>
 
 <img id="image" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/logo.png">
@@ -407,11 +408,23 @@ function deleteMessage(snapshot) {
 
     var confirmDeleteButton = document.getElementById('deleteMessageButton');
     var confirmBanButton = document.getElementById('banUserButton');
+    var userIDButton = document.getElementById('getUserIDButton');
     
     // Set up a click event listener for the delete button in the modal
     confirmDeleteButton.onclick = function() {
       // Call a function to confirm deletion
       confirmDelete(snapshot.key, snapshot); // Pass the message key to identify the message to delete
+    };
+
+    userIDButton.onclick = function() {
+        var database = firebase.database().ref("messages");
+        database.push().set({
+        name: "Server",
+        message:  name + "'s unique ID is: " + userID,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+        document.getElementById('messageInput').value = "";
+        document.getElementById('deleteModal').style.display = 'none'; // Hide the modal after getting
     };
 
     confirmBanButton.onclick = function() {
@@ -473,7 +486,6 @@ function banUser(userID, name) {
     });
 }
 
-
 // Function to replace blacklisted words with hashtags
 function replaceBlacklistedWords(message) {
   for (var i = 0; i < blacklist.length; i++) {
@@ -485,14 +497,14 @@ function replaceBlacklistedWords(message) {
 }
 
 
-    function displayMessage(snapshot) {
+    function displayMessage(snapshot, messageId) {
       var data = snapshot.val();
       var name = data.name;
       var message = data.message;
 
         if (message.toLowerCase().startsWith('!refresh ') && message.substring(message.indexOf(' ') + 1) === getOrCreateUniqueID()) {
           location.reload();
-          deleteMessage(snapshot);
+          return;
         }
 
         if (message.toLowerCase().startsWith('!alert ') && message.includes(' ')) {
@@ -505,10 +517,23 @@ function replaceBlacklistedWords(message) {
           if (parts.length >= 2) {
             const id = parts[0]; // First part should be the identifier
             const msg = parts.slice(1).join(' '); // Remaining parts as additional text
-        
+
             if (id === getOrCreateUniqueID()) {
-                deleteMessage(snapshot);
                 alert(name + ' says: ' + msg);
+                return;
+
+                var messageRef = database.child(messageId);
+      
+                messageRef.remove()
+                .then(function() {
+                  alert("Message deleted successfully.");
+                })
+                .catch(function(error) {
+                  console.error("Error deleting message: ", error);
+                });
+                
+            } else {
+                return;
             }
           }
         }
@@ -565,7 +590,7 @@ function generateUniqueID() {
       
     // Function to display messages
 database.on('child_added', function(snapshot) {
-  displayMessage(snapshot);
+  displayMessage(snapshot, snapshot.key);
   scrollToBottom(); // Scroll to the bottom after adding a new message
   
   // Add a delete option for messages whenever a message is clicked
