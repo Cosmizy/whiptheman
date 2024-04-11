@@ -62,6 +62,13 @@ body, ul {
   width: 125px; /* Adjust the width as needed */
 }
 
+#idDisplay {
+  width: 125px; /* Adjust the width as needed */
+  position: fixed;
+  top: 70%;
+  left: 50%;
+}
+
     #accessModal {
       display: none;
       position: fixed;
@@ -191,6 +198,8 @@ body, ul {
     <input type="password" id="accessCode" placeholder="Entry code? Ask Cosmizy...">
     <button onclick="verifyAccess()">Enter</button>
   </div>
+
+<div id="idDisplay">Please press Verify.</div>
 
 
   <!-- Firebase JavaScript SDK -->
