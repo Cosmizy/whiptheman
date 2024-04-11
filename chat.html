@@ -10,6 +10,11 @@ body, ul {
   overflow-y: hidden;
 
    background: radial-gradient(circle at center, transparent 0%, black 100%), #555555;
+
+}
+
+#chatroomContainer {
+  display: none; /* Make sure the loader is visible initially */
 }
 
         #image {
@@ -56,6 +61,29 @@ body, ul {
 #nameInput {
   width: 125px; /* Adjust the width as needed */
 }
+
+    #accessModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ffffff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+    }
+
+    #accessModal input[type="text"] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    #accessModal button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
 
     #codeModal {
       display: none;
@@ -131,7 +159,8 @@ body, ul {
   </style>
 </head>
 <body>
-  <div id="chatContainer">
+  <div id="chatroomContainer">
+    <div id="chatContainer">
     <!-- Container to display chat messages -->
     <ul id="messages"></ul>
     <!-- Input for typing a message -->
@@ -155,6 +184,14 @@ body, ul {
 </div>
 
 <img id="image" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/logo.png">
+      
+  </div>
+
+  <div id="accessModal">
+    <input type="password" id="accessCode" placeholder="Entry code? Ask Cosmizy...">
+    <button onclick="verifyAccess()">Enter</button>
+  </div>
+
 
   <!-- Firebase JavaScript SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
@@ -186,6 +223,7 @@ body, ul {
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 var cosmizyConfirmed = false;
+var accessConfirmed = false;
       
 usersRef.once('value')
   .then(function(snapshot) {
@@ -236,6 +274,32 @@ function verifyCode() {
     //localStorage.setItem('cosmizyConfirmed', cosmizyConfirmed);
     // Hide the code verification modal
     //document.getElementById('codeModal').style.display = 'none';
+  } else {
+    // Display an error message or handle the incorrect code scenario
+    alert('nuh uh');
+  }
+}
+
+function verifyAccess() {
+  var userID = getOrCreateUniqueID();
+  var enteredCode = document.getElementById('accessCode').value.trim();
+  // Replace 'your_secret_code' with your actual verification code
+  var accessCode = createUniqueAccessCode();
+
+              var unvDatabase = firebase.database().ref("unverified");
+                unvDatabase.push().set({
+                    userid: userID,
+                    name: 'Unverified',
+                    code: accessCode
+                });
+    
+  if (enteredCode === accessCode) {
+    accessConfirmed = true;
+    localStorage.setItem('accessConfirmed', accessConfirmed);
+    document.getElementById('chatroomContainer').style.display = 'block';
+    scrollToBottom();
+    document.getElementById('accessModal').style.display = 'none';
+    alert(accessConfirmed);
   } else {
     // Display an error message or handle the incorrect code scenario
     alert('nuh uh');
@@ -520,18 +584,19 @@ function replaceBlacklistedWords(message) {
 
             if (id === getOrCreateUniqueID()) {
                 alert(name + ' says: ' + msg);
-                return;
 
                 var messageRef = database.child(messageId);
+                alert(messageId);
       
                 messageRef.remove()
                 .then(function() {
                   alert("Message deleted successfully.");
                 })
                 .catch(function(error) {
-                  console.error("Error deleting message: ", error);
+                  alert("Error deleting message: ", error);
                 });
-                
+
+                return;
             } else {
                 return;
             }
@@ -587,6 +652,12 @@ function generateUniqueID() {
 
   return uniqueID;  
 }
+
+function createUniqueAccessCode() {
+  var sixDigit = Math.floor(100000 + Math.random() * 900000);
+  
+  return userID;
+}
       
     // Function to display messages
 database.on('child_added', function(snapshot) {
@@ -605,7 +676,15 @@ database.on('child_removed', function(snapshot) {
     
     // Scroll to the bottom when the page is loaded
     window.onload = function() {
-      scrollToBottom(); // Scroll to the bottom when the page is loaded
+        var userID = getOrCreateUniqueID();
+        const accessConfirmedStorage = localStorage.getItem('accessConfirmed');
+        if (accessConfirmedStorage === 'true') {
+            document.getElementById('chatroomContainer').style.display = 'block';
+            scrollToBottom();
+            document.getElementById('accessModal').style.display = 'none';
+        } else {
+            document.getElementById('accessModal').style.display = 'block';
+        }
     };
   </script>
 </body>
