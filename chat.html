@@ -299,7 +299,13 @@ function verifyAccess() {
   var userID = getOrCreateUniqueID();
   var enteredCode = document.getElementById('accessCode').value.trim();
   // Replace 'your_secret_code' with your actual verification code
-  var accessCode = createUniqueAccessCode();
+  var codeRef = firebase.database().ref('accesscode/code');
+  var accessCode
+
+codeRef.once('value', (snapshot) => {
+    const codeValue = snapshot.val();
+    accessCode = codeValue;
+  });
     
   if (enteredCode === accessCode) {
     accessConfirmed = true;
