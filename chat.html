@@ -306,21 +306,19 @@ function verifyAccess() {
 codeRef.once('value', (snapshot) => {
     const codeValue = snapshot.val();
     accessCode = codeValue;
-  });
 
-  alert(accessCode);
-    
-  if (enteredCode === accessCode) {
-    accessConfirmed = true;
-    localStorage.setItem('accessConfirmed', accessConfirmed);
-    document.getElementById('chatroomContainer').style.display = 'block';
-    scrollToBottom();
-    document.getElementById('accessModal').style.display = 'none';
-    alert(accessConfirmed);
-  } else {
-    // Display an error message or handle the incorrect code scenario
-    alert(accessCode);
-  }
+    if (enteredCode === accessCode) {
+        accessConfirmed = true;
+        localStorage.setItem('accessConfirmed', accessConfirmed);
+        document.getElementById('chatroomContainer').style.display = 'block';
+        scrollToBottom();
+        document.getElementById('accessModal').style.display = 'none';
+        alert(accessConfirmed);
+      } else {
+        // Display an error message or handle the incorrect code scenario
+        alert(accessCode);
+      }
+  });
 }
 
 function isUserBanned(userID, callback) {
