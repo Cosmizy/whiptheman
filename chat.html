@@ -313,12 +313,10 @@ codeRef.once('value', (snapshot) => {
         document.getElementById('chatroomContainer').style.display = 'block';
         scrollToBottom();
         document.getElementById('accessModal').style.display = 'none';
-        alert(accessConfirmed);
       } else {
         // Display an error message or handle the incorrect code scenario
         alert('nuh uh');
-        alert('the code you entered was: ' + enteredCode);
-        alert('the real code was: ' + accessCode);
+        location.reload();
       }
   });
 }
