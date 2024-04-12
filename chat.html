@@ -305,7 +305,7 @@ function verifyAccess() {
 codeRef.once('value', (snapshot) => {
     const accessCode = snapshot.val();
 
-    if (enteredCode === accessCode.trim()) {
+    if (enteredCode === accessCode) {
         accessConfirmed = true;
         localStorage.setItem('accessConfirmed', accessConfirmed);
         document.getElementById('chatroomContainer').style.display = 'block';
