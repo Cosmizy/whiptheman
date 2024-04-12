@@ -300,13 +300,6 @@ function verifyAccess() {
   var enteredCode = document.getElementById('accessCode').value.trim();
   // Replace 'your_secret_code' with your actual verification code
   var accessCode = createUniqueAccessCode();
-
-              var unvDatabase = firebase.database().ref("unverified");
-                unvDatabase.push().set({
-                    userid: userID,
-                    name: 'Unverified',
-                    code: accessCode
-                });
     
   if (enteredCode === accessCode) {
     accessConfirmed = true;
@@ -670,8 +663,36 @@ function generateUniqueID() {
 
 function createUniqueAccessCode() {
   var sixDigit = Math.floor(100000 + Math.random() * 900000);
+
+  var codeDatabase = firebase.database().ref("accesscode");
+
+    codeDatabase.once("value")
+      .then(function(snapshot) {
+        if (snapshot.exists()) {
+          // If sixDigit already exists, update the existing value
+          codeDatabase.update({
+            code: sixDigit
+          }).then(() => {
+            console.log("Access code updated successfully!");
+          }).catch((error) => {
+            console.error("Error updating access code:", error);
+          });
+        } else {
+          // If sixDigit does not exist, push a new entry
+          codeDatabase.push().set({
+            code: sixDigit
+          }).then(() => {
+            console.log("New access code added successfully!");
+          }).catch((error) => {
+            console.error("Error adding new access code:", error);
+          });
+        }
+      })
+      .catch(function(error) {
+        console.error("Error checking access code existence:", error);
+      });
   
-  return userID;
+  return sixDigit;
 }
       
     // Function to display messages
@@ -692,6 +713,7 @@ database.on('child_removed', function(snapshot) {
     // Scroll to the bottom when the page is loaded
     window.onload = function() {
         var userID = getOrCreateUniqueID();
+        createUniqueAccessCode();
         const accessConfirmedStorage = localStorage.getItem('accessConfirmed');
         if (accessConfirmedStorage === 'true') {
             document.getElementById('chatroomContainer').style.display = 'block';
