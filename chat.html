@@ -304,6 +304,7 @@ function verifyAccess() {
 
 codeRef.once('value', (snapshot) => {
     const codeValue = snapshot.val();
+    alert(codeValue);
     accessCode = codeValue;
   });
     
