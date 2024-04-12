@@ -303,7 +303,7 @@ function verifyAccess() {
   var codeRef = firebase.database().ref('accesscode/code');
 
 codeRef.once('value', (snapshot) => {
-    const accessCode = snapshot.val();
+    const accessCode = snapshot.val().trim();
 
     if (enteredCode === accessCode) {
         accessConfirmed = true;
