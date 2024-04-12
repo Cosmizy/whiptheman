@@ -316,7 +316,9 @@ codeRef.once('value', (snapshot) => {
         alert(accessConfirmed);
       } else {
         // Display an error message or handle the incorrect code scenario
-        alert(accessCode);
+        alert('nuh uh');
+        alert('the code you entered was: ' + enteredCode);
+        alert('the real code was: ' + accessCode);
       }
   });
 }
