@@ -301,13 +301,11 @@ function verifyAccess() {
   var enteredCode = document.getElementById('accessCode').value.trim();
   // Replace 'your_secret_code' with your actual verification code
   var codeRef = firebase.database().ref('accesscode/code');
-  var accessCode
 
 codeRef.once('value', (snapshot) => {
-    const codeValue = snapshot.val();
-    accessCode = codeValue;
+    const accessCode = snapshot.val();
 
-    if (enteredCode === accessCode) {
+    if (accessCode && enteredCode === accessCode.trim()) {
         accessConfirmed = true;
         localStorage.setItem('accessConfirmed', accessConfirmed);
         document.getElementById('chatroomContainer').style.display = 'block';
