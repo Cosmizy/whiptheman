@@ -63,6 +63,7 @@ body, ul {
 }
 
 #idDisplay {
+  display: none;
   width: 250px; /* Adjust the width as needed */
   position: fixed;
   top: 70%;
@@ -305,8 +306,9 @@ function verifyAccess() {
 codeRef.once('value', (snapshot) => {
     const codeValue = snapshot.val();
     accessCode = codeValue;
-    alert(accessCode);
   });
+
+  alert(accessCode);
     
   if (enteredCode === accessCode) {
     accessConfirmed = true;
