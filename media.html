@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Media Player</title>
+</head>
+<body>
+    <h1>Media Player</h1>
+    <input type="text" id="mediaInput" placeholder="Enter media link">
+    <button onclick="displayMedia()">Display Media</button>
+    <div id="mediaContainer"></div>
+
+    <script>
+        function displayMedia() {
+            var mediaUrl = document.getElementById("mediaInput").value;
+            var mediaContainer = document.getElementById("mediaContainer");
+
+            // Clear previous content
+            mediaContainer.innerHTML = "";
+
+            // Check if the URL is a valid video URL
+            if (isValidVideoUrl(mediaUrl)) {
+                // Create a video element
+                var videoElement = document.createElement("video");
+                videoElement.setAttribute("controls", "true");
+                videoElement.setAttribute("src", mediaUrl);
+
+                // Append the video element to the mediaContainer
+                mediaContainer.appendChild(videoElement);
+            } else {
+                // If not a valid video URL, try to embed using an iframe
+                var iframeElement = document.createElement("iframe");
+                iframeElement.setAttribute("src", mediaUrl);
+                iframeElement.style.width = "100%";
+                iframeElement.style.height = "400px"; // Adjust height as needed
+
+                // Append the iframe element to the mediaContainer
+                mediaContainer.appendChild(iframeElement);
+            }
+        }
+
+        function isValidVideoUrl(url) {
+            // Check if the URL contains common video extensions
+            return (
+                url.toLowerCase().includes(".mp4") ||
+                url.toLowerCase().includes(".webm") ||
+                url.toLowerCase().includes(".ogg")
+            );
+        }
+    </script>
+</body>
+</html>
