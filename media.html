@@ -26,8 +26,15 @@
 
                 // Append the video element to the mediaContainer
                 mediaContainer.appendChild(videoElement);
+            } else if (isValidImageUrl(mediaUrl)) {
+                // Create an image element for GIFs
+                var imgElement = document.createElement("img");
+                imgElement.setAttribute("src", mediaUrl);
+
+                // Append the image element to the mediaContainer
+                mediaContainer.appendChild(imgElement);
             } else {
-                // If not a valid video URL, try to embed using an iframe
+                // If not a valid video URL or image URL, try to embed using an iframe
                 var iframeElement = document.createElement("iframe");
                 iframeElement.setAttribute("src", mediaUrl);
                 iframeElement.style.width = "100%";
@@ -44,6 +51,16 @@
                 url.toLowerCase().includes(".mp4") ||
                 url.toLowerCase().includes(".webm") ||
                 url.toLowerCase().includes(".ogg")
+            );
+        }
+
+        function isValidImageUrl(url) {
+            // Check if the URL ends with a common image extension (like .gif, .png, .jpg, .jpeg, etc.)
+            return (
+                url.toLowerCase().endsWith(".gif") ||
+                url.toLowerCase().endsWith(".png") ||
+                url.toLowerCase().endsWith(".jpg") ||
+                url.toLowerCase().endsWith(".jpeg")
             );
         }
     </script>
