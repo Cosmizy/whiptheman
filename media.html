@@ -1,67 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Media Player</title>
+    <title>Reddit Post Embed</title>
 </head>
 <body>
-    <h1>Media Player</h1>
-    <input type="text" id="mediaInput" placeholder="Enter media link">
-    <button onclick="displayMedia()">Display Media</button>
-    <div id="mediaContainer"></div>
+    <h1>Embed Reddit Post</h1>
+    <input type="text" id="postUrlInput" placeholder="Enter Reddit post URL">
+    <button onclick="embedRedditPost()">Embed Post</button>
+    <div id="redditEmbedContainer"></div>
 
     <script>
-        function displayMedia() {
-            var mediaUrl = document.getElementById("mediaInput").value;
-            var mediaContainer = document.getElementById("mediaContainer");
+        function embedRedditPost() {
+            var postUrl = document.getElementById("postUrlInput").value;
+            var embedContainer = document.getElementById("redditEmbedContainer");
 
             // Clear previous content
-            mediaContainer.innerHTML = "";
+            embedContainer.innerHTML = "";
 
-            // Check if the URL is a valid video URL
-            if (isValidVideoUrl(mediaUrl)) {
-                // Create a video element
-                var videoElement = document.createElement("video");
-                videoElement.setAttribute("controls", "true");
-                videoElement.setAttribute("src", mediaUrl);
+            // Validate if the entered URL is a Reddit post URL
+            if (isValidRedditPostUrl(postUrl)) {
+                // Extract the post ID from the URL
+                var postId = extractPostId(postUrl);
 
-                // Append the video element to the mediaContainer
-                mediaContainer.appendChild(videoElement);
-            } else if (isValidImageUrl(mediaUrl)) {
-                // Create an image element for GIFs
-                var imgElement = document.createElement("img");
-                imgElement.setAttribute("src", mediaUrl);
-
-                // Append the image element to the mediaContainer
-                mediaContainer.appendChild(imgElement);
-            } else {
-                // If not a valid video URL or image URL, try to embed using an iframe
+                // Create an iframe element for Reddit post embed
                 var iframeElement = document.createElement("iframe");
-                iframeElement.setAttribute("src", mediaUrl);
-                iframeElement.style.width = "100%";
-                iframeElement.style.height = "400px"; // Adjust height as needed
+                iframeElement.setAttribute("src", "https://www.redditmedia.com/mediaembed/" + postId);
+                iframeElement.setAttribute("width", "100%");
+                iframeElement.setAttribute("height", "400px");
+                iframeElement.setAttribute("frameborder", "0");
 
-                // Append the iframe element to the mediaContainer
-                mediaContainer.appendChild(iframeElement);
+                // Append the iframe element to the embedContainer
+                embedContainer.appendChild(iframeElement);
+            } else {
+                // Display error message for invalid Reddit post URL
+                embedContainer.innerHTML = "Invalid Reddit post URL. Please enter a valid Reddit post link.";
             }
         }
 
-        function isValidVideoUrl(url) {
-            // Check if the URL contains common video extensions
-            return (
-                url.toLowerCase().includes(".mp4") ||
-                url.toLowerCase().includes(".webm") ||
-                url.toLowerCase().includes(".ogg")
-            );
+        function isValidRedditPostUrl(url) {
+            // Check if the URL matches the format of a Reddit post URL
+            return url.toLowerCase().includes("reddit.com") && url.toLowerCase().includes("/comments/");
         }
 
-        function isValidImageUrl(url) {
-            // Check if the URL ends with a common image extension (like .gif, .png, .jpg, .jpeg, etc.)
-            return (
-                url.toLowerCase().endsWith(".gif") ||
-                url.toLowerCase().endsWith(".png") ||
-                url.toLowerCase().endsWith(".jpg") ||
-                url.toLowerCase().endsWith(".jpeg")
-            );
+        function extractPostId(url) {
+            // Extract the post ID from the Reddit post URL
+            var urlParts = url.split("/");
+            var postIdIndex = urlParts.indexOf("comments") + 1;
+            return urlParts[postIdIndex];
         }
     </script>
 </body>
