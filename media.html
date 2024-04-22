@@ -1,52 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Reddit Post Embed</title>
+    <title>Media Player</title>
 </head>
 <body>
-    <h1>Embed Reddit Post</h1>
-    <input type="text" id="postUrlInput" placeholder="Enter Reddit post URL">
-    <button onclick="embedRedditPost()">Embed Post</button>
-    <div id="redditEmbedContainer"></div>
+    <h1>Media Player</h1>
+    <input type="text" id="mediaInput" placeholder="Enter media link">
+    <button onclick="displayMedia()">Display Media</button>
+    <div id="mediaContainer"></div>
 
     <script>
-        function embedRedditPost() {
-            var postUrl = document.getElementById("postUrlInput").value;
-            var embedContainer = document.getElementById("redditEmbedContainer");
+        function displayMedia() {
+            var mediaUrl = document.getElementById("mediaInput").value;
+            var mediaContainer = document.getElementById("mediaContainer");
 
             // Clear previous content
-            embedContainer.innerHTML = "";
+            mediaContainer.innerHTML = "";
 
-            // Validate if the entered URL is a Reddit post URL
-            if (isValidRedditPostUrl(postUrl)) {
-                // Extract the post ID from the URL
-                var postId = extractPostId(postUrl);
+            // Check if the URL is a valid video URL
+            if (isValidVideoUrl(mediaUrl)) {
+                // Create a video element
+                var videoElement = document.createElement("video");
+                videoElement.setAttribute("controls", "true");
+                videoElement.setAttribute("src", mediaUrl);
 
-                // Create an iframe element for Reddit post embed
-                var iframeElement = document.createElement("iframe");
-                iframeElement.setAttribute("src", "https://www.redditmedia.com/mediaembed/" + postId);
-                iframeElement.setAttribute("width", "100%");
-                iframeElement.setAttribute("height", "400px");
-                iframeElement.setAttribute("frameborder", "0");
-
-                // Append the iframe element to the embedContainer
-                embedContainer.appendChild(iframeElement);
+                // Append the video element to the mediaContainer
+                mediaContainer.appendChild(videoElement);
             } else {
-                // Display error message for invalid Reddit post URL
-                embedContainer.innerHTML = "Invalid Reddit post URL. Please enter a valid Reddit post link.";
+                // If not a valid video URL, try to embed using an iframe
+                var iframeElement = document.createElement("iframe");
+                iframeElement.setAttribute("src", mediaUrl);
+                iframeElement.style.width = "100%";
+                iframeElement.style.height = "400px"; // Adjust height as needed
+
+                // Append the iframe element to the mediaContainer
+                mediaContainer.appendChild(iframeElement);
             }
         }
 
-        function isValidRedditPostUrl(url) {
-            // Check if the URL matches the format of a Reddit post URL
-            return url.toLowerCase().includes("reddit.com") && url.toLowerCase().includes("/comments/");
-        }
-
-        function extractPostId(url) {
-            // Extract the post ID from the Reddit post URL
-            var urlParts = url.split("/");
-            var postIdIndex = urlParts.indexOf("comments") + 1;
-            return urlParts[postIdIndex];
+        function isValidVideoUrl(url) {
+            // Check if the URL contains common video extensions
+            return (
+                url.toLowerCase().includes(".mp4") ||
+                url.toLowerCase().includes(".webm") ||
+                url.toLowerCase().includes(".ogg")
+            );
         }
     </script>
 </body>
