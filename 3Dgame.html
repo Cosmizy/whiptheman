@@ -26,12 +26,6 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Create a cube and add it to the scene
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-
       // Create the game map
       const mapSize = 10;
       const mapGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -59,7 +53,7 @@
       let mouseY = 0;
       const pitchObject = new THREE.Object3D();
       const yawObject = new THREE.Object3D();
-      
+
       // Initialize pitch and yaw objects
       pitchObject.add(camera);
       yawObject.add(pitchObject);
@@ -84,9 +78,9 @@
       function movePlayer() {
         const speed = 0.1;
 
-        // Direction vectors relative to player's facing direction
-        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(player.quaternion).normalize();
-        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(player.quaternion).normalize();
+        // Calculate the direction vectors relative to the camera's facing direction
+        const forward = new THREE.Vector3(0, 0, -1).applyMatrix4(camera.matrixWorld);
+        const right = new THREE.Vector3(1, 0, 0).applyMatrix4(camera.matrixWorld);
         const backward = forward.clone().negate();
         const left = right.clone().negate();
 
