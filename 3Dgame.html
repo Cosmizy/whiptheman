@@ -23,6 +23,12 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
+        // Create a cube and add it to the scene
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        
       // Create the game map
       const mapSize = 10;
       const mapGeometry = new THREE.BoxGeometry(1, 1, 1);
