@@ -50,18 +50,21 @@
       const player = new THREE.Mesh(playerGeometry, playerMaterial);
       scene.add(player);
 
-      // Position the camera
-      const playerHeight = 1.5;
-      camera.position.set(0, playerHeight, 5); // Initial camera position
+      // Position the camera at the player's height and relative to the player
+      const playerHeight = 1; // Adjust to match the player's height
+      camera.position.set(0, playerHeight, 0);
+      player.add(camera); // Attach camera to the player
 
       // Variables for mouse controls
       let mouseX = 0;
       let mouseY = 0;
+
+      // Initialize pitch and yaw objects for camera rotation
       const pitchObject = new THREE.Object3D();
       const yawObject = new THREE.Object3D();
-      yawObject.add(camera);
-      pitchObject.add(yawObject);
-      scene.add(pitchObject);
+      pitchObject.add(camera);
+      yawObject.add(pitchObject);
+      player.add(yawObject);
 
       // Mouse control
       document.addEventListener('mousemove', (event) => {
@@ -93,10 +96,6 @@
       }
 
       function updateCamera() {
-        // Update the camera's position to follow the player
-        pitchObject.position.copy(player.position);
-        pitchObject.position.y += playerHeight; // Adjust height to match the player
-
         // Update camera orientation based on mouse input
         yawObject.rotation.y = -mouseX * Math.PI;
         pitchObject.rotation.x = -mouseY * Math.PI / 2;
@@ -110,7 +109,7 @@
         cube.rotation.y += 0.01;
 
         movePlayer(); // Update player position based on controls
-        updateCamera(); // Update camera orientation and position
+        updateCamera(); // Update camera orientation
 
         renderer.render(scene, camera);
       }
