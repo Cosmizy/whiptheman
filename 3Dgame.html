@@ -31,7 +31,7 @@
       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
       const cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
-        
+
       // Create the game map
       const mapSize = 10;
       const mapGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -50,20 +50,18 @@
       const player = new THREE.Mesh(playerGeometry, playerMaterial);
       scene.add(player);
 
-      // Position the camera at the player's height and relative to the player
-      const playerHeight = 1.5; // Adjust to match the player's height
-      camera.position.set(0, playerHeight, 0);
+      // Position the camera
+      const playerHeight = 1.5;
+      camera.position.set(0, playerHeight, 5); // Initial camera position
 
       // Variables for mouse controls
       let mouseX = 0;
       let mouseY = 0;
       const pitchObject = new THREE.Object3D();
       const yawObject = new THREE.Object3D();
-
-      // Initialize pitch and yaw objects
-      pitchObject.add(camera);
-      yawObject.add(pitchObject);
-      scene.add(yawObject);
+      yawObject.add(camera);
+      pitchObject.add(yawObject);
+      scene.add(pitchObject);
 
       // Mouse control
       document.addEventListener('mousemove', (event) => {
@@ -83,14 +81,11 @@
 
       function movePlayer() {
         const speed = 0.1;
-
-        // Calculate the direction vectors relative to the camera's facing direction
-        const forward = new THREE.Vector3(0, 0, -1).applyMatrix4(camera.matrixWorld);
-        const right = new THREE.Vector3(1, 0, 0).applyMatrix4(camera.matrixWorld);
+        const forward = new THREE.Vector3(0, 0, -1).applyMatrix4(yawObject.matrixWorld);
+        const right = new THREE.Vector3(1, 0, 0).applyMatrix4(yawObject.matrixWorld);
         const backward = forward.clone().negate();
         const left = right.clone().negate();
 
-        // Move the player based on keyboard input
         if (keyboard['w']) player.position.add(forward.multiplyScalar(speed));
         if (keyboard['s']) player.position.add(backward.multiplyScalar(speed));
         if (keyboard['a']) player.position.add(left.multiplyScalar(speed));
@@ -99,8 +94,8 @@
 
       function updateCamera() {
         // Update the camera's position to follow the player
-        yawObject.position.copy(player.position);
-        yawObject.position.y += playerHeight; // Adjust height to match the player
+        pitchObject.position.copy(player.position);
+        pitchObject.position.y += playerHeight; // Adjust height to match the player
 
         // Update camera orientation based on mouse input
         yawObject.rotation.y = -mouseX * Math.PI;
