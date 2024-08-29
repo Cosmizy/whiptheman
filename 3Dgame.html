@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Game</title>
+    <style>
+      body { margin: 0; overflow: hidden; }
+    </style>
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
 
@@ -23,12 +26,6 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-        // Create a cube and add it to the scene
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        
       // Create the game map
       const mapSize = 10;
       const mapGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -42,51 +39,53 @@
       }
 
       // Create the player object
-      const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const playerGeometry = new THREE.BoxGeometry(1, 2, 1);
       const playerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
       const player = new THREE.Mesh(playerGeometry, playerMaterial);
-      player.position.set(0, 0.5, 0);
       scene.add(player);
 
-      // Position the camera
-      camera.position.z = 5;
+      // Position the camera at the player's height
+      camera.position.set(0, 1.5, 0); // Adjust as needed
 
-      // Implement player controls
-      const keyboard = {};
-      window.addEventListener('keydown', (event) => {
-        keyboard[event.key] = true;
-      });
+      // Variables for mouse controls
+      let mouseX = 0;
+      let mouseY = 0;
+      let pitchObject = new THREE.Object3D();
+      let yawObject = new THREE.Object3D();
 
-      window.addEventListener('keyup', (event) => {
-        keyboard[event.key] = false;
+      // Initialize pitch and yaw objects
+      pitchObject.add(camera);
+      yawObject.add(pitchObject);
+      scene.add(yawObject);
+
+      // Mouse control
+      document.addEventListener('mousemove', (event) => {
+        mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        mouseY = (event.clientY / window.innerHeight) * 2 - 1;
       });
 
       function movePlayer() {
         const speed = 0.1;
+        const direction = new THREE.Vector3();
 
-        if (keyboard['w']) player.position.z -= speed;
-        if (keyboard['s']) player.position.z += speed;
-        if (keyboard['a']) player.position.x -= speed;
-        if (keyboard['d']) player.position.x += speed;
+        if (keyboard['w']) direction.z -= speed;
+        if (keyboard['s']) direction.z += speed;
+        if (keyboard['a']) direction.x -= speed;
+        if (keyboard['d']) direction.x += speed;
+
+        player.position.add(direction);
       }
 
-      // Update camera to follow player
       function updateCamera() {
-        camera.position.x = player.position.x;
-        camera.position.z = player.position.z + 5; // Adjust distance as needed
-        camera.lookAt(player.position);
+        yawObject.rotation.y = -mouseX * Math.PI; // Adjust for mouse movement
+        pitchObject.rotation.x = -mouseY * Math.PI / 2; // Adjust for mouse movement
       }
 
-      // Animation loop function
       function animate() {
         requestAnimationFrame(animate);
 
-        // Rotate the map or any other animation
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-
         movePlayer(); // Update player position based on controls
-        updateCamera(); // Update camera position
+        updateCamera(); // Update camera orientation based on mouse input
 
         renderer.render(scene, camera);
       }
@@ -99,6 +98,16 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
+      });
+
+      // Handle keyboard input
+      const keyboard = {};
+      window.addEventListener('keydown', (event) => {
+        keyboard[event.key] = true;
+      });
+
+      window.addEventListener('keyup', (event) => {
+        keyboard[event.key] = false;
       });
     </script>
 </head>
