@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Game</title>
-    <!-- Load the module version of Three.js directly -->
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
 
@@ -24,20 +23,65 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Create a cube and add it to the scene
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
+      // Create the game map
+      const mapSize = 10;
+      const mapGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const mapMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+      for (let x = 0; x < mapSize; x++) {
+        for (let z = 0; z < mapSize; z++) {
+          const mapCube = new THREE.Mesh(mapGeometry, mapMaterial);
+          mapCube.position.set(x - mapSize / 2, 0, z - mapSize / 2);
+          scene.add(mapCube);
+        }
+      }
+
+      // Create the player object
+      const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const playerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const player = new THREE.Mesh(playerGeometry, playerMaterial);
+      player.position.set(0, 0.5, 0);
+      scene.add(player);
 
       // Position the camera
       camera.position.z = 5;
 
+      // Implement player controls
+      const keyboard = {};
+      window.addEventListener('keydown', (event) => {
+        keyboard[event.key] = true;
+      });
+
+      window.addEventListener('keyup', (event) => {
+        keyboard[event.key] = false;
+      });
+
+      function movePlayer() {
+        const speed = 0.1;
+
+        if (keyboard['w']) player.position.z -= speed;
+        if (keyboard['s']) player.position.z += speed;
+        if (keyboard['a']) player.position.x -= speed;
+        if (keyboard['d']) player.position.x += speed;
+      }
+
+      // Update camera to follow player
+      function updateCamera() {
+        camera.position.x = player.position.x;
+        camera.position.z = player.position.z + 5; // Adjust distance as needed
+        camera.lookAt(player.position);
+      }
+
       // Animation loop function
       function animate() {
         requestAnimationFrame(animate);
+
+        // Rotate the map or any other animation
         cube.rotation.x += 0.01;
         cube.rotation.y += 0.01;
+
+        movePlayer(); // Update player position based on controls
+        updateCamera(); // Update camera position
+
         renderer.render(scene, camera);
       }
 
