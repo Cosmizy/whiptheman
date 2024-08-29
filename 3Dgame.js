@@ -1,33 +1,38 @@
-// main.ts
-// Import necessary modules from Three.js
+// Import Three.js modules
 import * as THREE from 'three';
-// Create Scene, Camera, and Renderer
+// Create a scene
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+// Set up a camera
+const camera = new THREE.PerspectiveCamera(75, // Field of view
+window.innerWidth / window.innerHeight, // Aspect ratio
+0.1, // Near clipping plane
+1000 // Far clipping plane
+);
+// Set up a renderer and attach it to the document
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-// Add a Cube
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-// Set Camera Position
+// Add a cube to the scene
+const geometry = new THREE.BoxGeometry(); // Define the shape
+const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Define the material (color)
+const cube = new THREE.Mesh(geometry, material); // Create the mesh by combining shape and material
+scene.add(cube); // Add the cube to the scene
+// Position the camera
 camera.position.z = 5;
-// Animation Loop
+// Animation loop function
 function animate() {
-    requestAnimationFrame(animate);
-    // Rotate the Cube
+    requestAnimationFrame(animate); // Request the next frame
+    // Add rotation for some basic animation
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
-    // Render the Scene
+    // Render the scene through the camera
     renderer.render(scene, camera);
 }
-// Start Animation
+// Start the animation loop
 animate();
-// Handle Resize
+// Handle window resizing
 window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
+    renderer.setSize(window.innerWidth, window.innerHeight); // Update renderer size
+    camera.aspect = window.innerWidth / window.innerHeight; // Update camera aspect ratio
     camera.updateProjectionMatrix();
 });
