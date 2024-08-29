@@ -3,53 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Game</title>
-    <!-- Load the module version of Three.js directly -->
+    <title>3D Game with Controls</title>
     <script type="module">
       import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js';
+      import { PointerLockControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/controls/PointerLockControls.js';
 
-      // Create the scene
-      const scene = new THREE.Scene();
+      let camera, scene, renderer, controls, cube;
+      let keys = {};
 
-      // Set up the camera
-      const camera = new THREE.PerspectiveCamera(
-        75, // Field of view
-        window.innerWidth / window.innerHeight, // Aspect ratio
-        0.1, // Near clipping plane
-        1000 // Far clipping plane
-      );
+      function init() {
+          // Create the scene
+          scene = new THREE.Scene();
 
-      // Create the renderer and attach it to the document
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
+          // Set up the camera
+          camera = new THREE.PerspectiveCamera(
+              75, // Field of view
+              window.innerWidth / window.innerHeight, // Aspect ratio
+              0.1, // Near clipping plane
+              1000 // Far clipping plane
+          );
 
-      // Create a cube and add it to the scene
-      const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
+          // Create the renderer and attach it to the document
+          renderer = new THREE.WebGLRenderer({ antialias: true });
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          document.body.appendChild(renderer.domElement);
 
-      // Position the camera
-      camera.position.z = 5;
+          // Create a cube and add it to the scene
+          const geometry = new THREE.BoxGeometry();
+          const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+          cube = new THREE.Mesh(geometry, material);
+          scene.add(cube);
 
-      // Animation loop function
-      function animate() {
-        requestAnimationFrame(animate);
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
-        renderer.render(scene, camera);
+          // Position the camera
+          camera.position.z = 5;
+
+          // Set up controls
+          controls = new PointerLockControls(camera, renderer.domElement);
+          document.addEventListener('click', () => controls.lock(), false);
+
+          // Handle keyboard input
+          window.addEventListener('keydown', (event) => {
+              keys[event.code] = true;
+          });
+          window.addEventListener('keyup', (event) => {
+              keys[event.code] = false;
+          });
+
+          // Start the animation
+          animate();
+
+          // Adjust the rendering when the window is resized
+          window.addEventListener('resize', () => {
+              renderer.setSize(window.innerWidth, window.innerHeight);
+              camera.aspect = window.innerWidth / window.innerHeight;
+              camera.updateProjectionMatrix();
+          });
       }
 
-      // Start the animation
-      animate();
+      function animate() {
+          requestAnimationFrame(animate);
 
-      // Adjust the rendering when the window is resized
-      window.addEventListener('resize', () => {
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-      });
+          // Basic controls (moving cube)
+          if (keys['KeyW']) cube.position.z -= 0.1;
+          if (keys['KeyS']) cube.position.z += 0.1;
+          if (keys['KeyA']) cube.position.x -= 0.1;
+          if (keys['KeyD']) cube.position.x += 0.1;
+
+          renderer.render(scene, camera);
+      }
+
+      // Run the initialization function
+      init();
     </script>
 </head>
 <body>
