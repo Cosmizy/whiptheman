@@ -59,7 +59,7 @@
       let mouseY = 0;
       const pitchObject = new THREE.Object3D();
       const yawObject = new THREE.Object3D();
-
+      
       // Initialize pitch and yaw objects
       pitchObject.add(camera);
       yawObject.add(pitchObject);
@@ -83,14 +83,18 @@
 
       function movePlayer() {
         const speed = 0.1;
-        const direction = new THREE.Vector3();
 
-        if (keyboard['w']) direction.z -= speed;
-        if (keyboard['s']) direction.z += speed;
-        if (keyboard['a']) direction.x -= speed;
-        if (keyboard['d']) direction.x += speed;
+        // Direction vectors relative to player's facing direction
+        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(player.quaternion).normalize();
+        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(player.quaternion).normalize();
+        const backward = forward.clone().negate();
+        const left = right.clone().negate();
 
-        player.position.add(direction);
+        // Move the player based on keyboard input
+        if (keyboard['w']) player.position.add(forward.multiplyScalar(speed));
+        if (keyboard['s']) player.position.add(backward.multiplyScalar(speed));
+        if (keyboard['a']) player.position.add(left.multiplyScalar(speed));
+        if (keyboard['d']) player.position.add(right.multiplyScalar(speed));
       }
 
       function updateCamera() {
