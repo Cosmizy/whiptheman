@@ -4,21 +4,105 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashing Screen</title>
+    <title>flash.html</title>
     <style>
         body {
             margin: 0;
+            overflow: hidden;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            animation: zoomChange 0.05s infinite, flipHorizontal 3s infinite; /* Apply zoom and flip animations */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200vw; /* Make it large enough */
+            height: 200vw; /* Make it large enough */
+            transform: translate(-50%, -50%); /* Center the overlay */
+            transform-origin: center; /* Ensure rotation is around the center */
+            pointer-events: none;
+            opacity: 0.75; /* Initial opacity */
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(0, 0, 0, 0.5) 100px, rgba(0, 0, 0, 0.5) 200px);
+            animation: rotate 5s linear infinite, opacityChange 0.03s infinite; /* Add rotation and opacity animations */
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes opacityChange {
+            0%, 100% {
+                opacity: 0.75;
+            }
+            33% {
+                opacity: 0%;
+            }
+            67% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomChange {
+            0%, 100% {
+                transform: scale(1); /* Zoomed out to original size */
+            }
+            50% {
+                transform: scale(0.25); /* Zoom out to 25% */
+            }
+        }
+
+        @keyframes flipHorizontal {
+            0%, 100% {
+                transform: scaleX(1); /* No flip */
+            }
+            50% {
+                transform: scaleX(-1); /* Flip horizontally */
+            }
         }
     </style>
 </head>
 <body>
+    <div class="overlay"></div>
     <script>
-        let isWhite = true;
+        const colors = ['red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'white', 'black'];
+        const overlay = document.querySelector('.overlay');
+        let colorIndex = 0;
 
-        setInterval(() => {
-            document.body.style.backgroundColor = isWhite ? 'black' : 'white';
-            isWhite = !isWhite;
-        }, 100); // 100 milliseconds = 0.1 second
+        function getOppositeColor(color) {
+            const colorMap = {
+                'red': 'cyan',
+                'green': 'magenta',
+                'blue': 'yellow',
+                'yellow': 'blue',
+                'cyan': 'red',
+                'magenta': 'green',
+                'white': 'black',
+                'black': 'white'
+            };
+            return colorMap[color] || 'black';
+        }
+
+        function updateColorAndPattern() {
+            const currentColor = colors[colorIndex];
+            const oppositeColor = getOppositeColor(currentColor);
+
+            document.body.style.backgroundColor = currentColor;
+            overlay.style.backgroundImage = `repeating-linear-gradient(45deg, transparent, transparent 100px, ${oppositeColor} 100px, ${oppositeColor} 200px)`;
+
+            colorIndex = (colorIndex + 1) % colors.length;
+        }
+
+        setInterval(updateColorAndPattern, 10); // 10 milliseconds = 0.01 second
     </script>
 </body>
 </html>
