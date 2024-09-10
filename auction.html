@@ -145,21 +145,23 @@
             document.getElementById(sectionId).classList.remove('hidden');
         }
 
-        function showListingDetail(title, mainimage, image2, image3, image4, description, price) {
+        function showListingDetail(title, image, condition, location, galleryImages, description, price, contact) {
             const listingDetail = document.getElementById('listing');
+            const galleryHtml = galleryImages.map(img => `<img src="${img}" alt="${title}">`).join('');
             listingDetail.innerHTML = `
                 <h1>Item for Auction: ${title}</h1>
-                <img class="main-image" src="${mainimage}" alt="${title}">
+                <img class="main-image" src="${image}" alt="${title}">
                 <div class="details">
+                    <p><strong>Condition:</strong> ${condition}</p>
+                    <p><strong>Location:</strong> ${location}</p>
                     <p><strong>Description:</strong> ${description}</p>
                     <p><strong>Price:</strong> $${price}</p>
+                    <p><strong>Contact:</strong> ${contact}</p>
                 </div>
                 <div style="clear: both;"></div>
                 <div class="gallery">
                     <h3>Gallery</h3>
-                    <img src="${image2}" alt="${title}">
-                    <img src="${image3}" alt="${title}">
-                    <img src="${image4}" alt="${title}">
+                    ${galleryHtml}
                 </div>
                 <div class="bid-section">
                     <h3>Bid Section</h3>
@@ -199,7 +201,21 @@
             <!-- Add more trending items here -->
             <div class="item">
                 <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_123033.jpg" alt="F22A Raptor Flight Manual - Printed">
-                <a href="javascript:void(0);" onclick="showListingDetail('F22A Flight Manual', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_123033.jpg', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.43.14%20PM.png', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.15%20PM.png', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.52%20PM.png', 'Printed flight manual for the F22A Raptor Fighter Jet.', '9.99')">F22A Flight Manual - Starting at $9.99</a>
+               <a href="javascript:void(0);" onclick="showListingDetail(
+    'F22A Flight Manual',
+    'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_123033.jpg',
+    'Used - Good',
+    'San Francisco, CA',
+    [
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.43.14%20PM.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.15%20PM.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.52%20PM.png'
+    ],
+    'Printed flight manual for the F22A Raptor Fighter Jet.',
+    '9.99',
+    'cosmizy@gmail.com'
+)">F22A Flight Manual - Starting at $9.99</a>
+
                 <div class="clear"></div>
             </div>
             
@@ -220,7 +236,20 @@
             <div class="category">
                 <h3 onclick="toggleItems('category2')">Documents</h3>
                 <ul id="category2" class="category-items hidden">
-                    <li><a href="javascript:void(0);" onclick="showListingDetail('F22A Flight Manual', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_123033.jpg', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.43.14%20PM.png', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.15%20PM.png', 'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.52%20PM.png', 'Printed flight manual for the F22A Raptor Fighter Jet.', '9.99')">F22A Raptor Flight Manual</a></li>
+                    <li><a href="javascript:void(0);" onclick="showListingDetail(
+    'F22A Flight Manual',
+    'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_123033.jpg',
+    'Used - Good',
+    'San Francisco, CA',
+    [
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.43.14%20PM.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.15%20PM.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/Screenshot%202024-09-10%2012.44.52%20PM.png'
+    ],
+    'Printed flight manual for the F22A Raptor Fighter Jet.',
+    '9.99',
+    'cosmizy@gmail.com'
+)">F22A Raptor Flight Manual</a></li>
                     <li><a href="#">The Communist Manifesto</a></li>
                 </ul>
             </div>
