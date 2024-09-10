@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cosmizy's Auction Site</title>
+    <style>
+        body {
+            font-family: Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #000;
+            margin: 0;
+        }
+        .top-bar {
+            background-color: #003366;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        .trending {
+            text-align: left;
+        }
+        .trending h2 {
+            color: #003366;
+        }
+        .item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .item img {
+            float: left;
+            margin-right: 10px;
+            width: 80px;
+            height: 80px;
+            border: 1px solid #ddd;
+        }
+        .item a {
+            text-decoration: none;
+            color: #003366;
+        }
+        .item a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        .clear {
+            clear: both;
+        }
+        .hidden {
+            display: none;
+        }
+        .listing {
+            width: 80%;
+            margin: 0 auto;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+        .main-image {
+            float: left;
+            margin-right: 20px;
+            border: 1px solid #ddd;
+            width: 150px;
+            height: 150px;
+        }
+        .details {
+            text-align: left;
+        }
+        .details p {
+            margin: 0;
+            padding: 5px 0;
+        }
+        .gallery {
+            margin-top: 20px;
+            clear: both;
+            text-align: left;
+        }
+        .gallery img {
+            border: 1px solid #ddd;
+            margin: 5px;
+            width: 100px;
+            height: 100px;
+            display: inline-block;
+        }
+        .bid-section {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #eef;
+            border: 1px solid #ccc;
+        }
+        .categories {
+            text-align: left;
+        }
+        .categories h2 {
+            color: #003366;
+        }
+        .category {
+            margin-top: 10px;
+        }
+        .category-items {
+            margin-left: 20px;
+            list-style-type: square;
+        }
+        .contact-us {
+            text-align: left;
+        }
+        .contact-us h2 {
+            color: #003366;
+        }
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            margin-top: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .contact-form button {
+            background-color: #003366;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .contact-form button:hover {
+            background-color: #002244;
+        }
+    </style>
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function toggleItems(categoryId) {
+            const categoryItems = document.getElementById(categoryId);
+            categoryItems.classList.toggle('hidden');
+        }
+    </script>
+</head>
+<body>
+    <div class="top-bar">
+        <h1>Cosmizy's Auction Site</h1>
+        <p>
+            <a href="javascript:void(0);" onclick="showSection('home')" style="color: white; text-decoration: none;">Home</a> |
+            <a href="javascript:void(0);" onclick="showSection('categories')" style="color: white; text-decoration: none;">Categories</a> |
+            <a href="javascript:void(0);" onclick="showSection('contact')" style="color: white; text-decoration: none;">Contact Us</a>
+        </p>
+    </div>
+
+    <!-- Home Section -->
+    <div id="home" class="container section">
+        <div class="trending">
+            <h2>Trending Items</h2>
+            <div class="item">
+                <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/image.png" alt="Luis, 13yrs">
+                <a href="javascript:void(0);" onclick="showListing()">Luis, 13yrs - Starting at $44.99</a>
+                <div class="clear"></div>
+            </div>
+            <!-- Add more trending items here -->
+        </div>
+    </div>
+
+        <!-- Categories Section -->
+    <div id="categories" class="container section hidden">
+        <div class="categories">
+            <h2>Categories</h2>
+            <div class="category">
+                <h3 onclick="toggleItems('category1')">People</h3>
+                <ul id="category1" class="category-items hidden">
+                    <li><a href="javascript:void(0);" onclick="showSection('listing')">Luis, 13yrs</a></li>
+                    <li><a href="#">Brandon !COMING SOON!</a></li>
+                </ul>
+            </div>
+            <div class="category">
+                <h3 onclick="toggleItems('category2')">Documents</h3>
+                <ul id="category2" class="category-items hidden">
+                    <li><a href="#">F22A Raptor Flight Manual</a></li>
+                    <li><a href="#">The Communist Manifesto</a></li>
+                </ul>
+            </div>
+            <div class="category">
+                <h3 onclick="toggleItems('category3')">Misc</h3>
+                <ul id="category3" class="category-items hidden">
+                    <li><a href="#">Reverse American Flag</a></li>
+                    <li><a href="#">Printed Mattbux</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listing Section -->
+    <div id="listing" class="listing section hidden">
+        <h1>Item for Auction: Luis, 13yrs</h1>
+        <img class="main-image" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/image.png" alt="Luis Main Pic">
+        <div class="details">
+            <p><strong>Condition:</strong> Used - Like New</p>
+            <p><strong>Location:</strong> San Francisco, CA</p>
+            <p><strong>Description:</strong>A charming young man from the late 2010s, perfect for any occasion. He will work great, minor wear and tear.</p>
+            <p><strong>Price:</strong> $44.99</p>
+            <p><strong>Contact:</strong> cosmizy@gmail.com</p>
+        </div>
+        <div style="clear: both;"></div>
+
+        <!-- Gallery Section -->
+        <div class="gallery">
+            <h2>Gallery</h2>
+            <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240909_140122.jpg" alt="Luis Front View">
+            <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_104900.jpg" alt="Luis Side View 1">
+            <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_104939.jpg" alt="Luis Side View 2">
+            <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_105010.jpg" alt="Luis Back View">
+        </div>
+
+        <!-- Bidding Section -->
+        <div class="bid-section">
+            <p><strong>Place Your Bid:</strong></p>
+            <form>
+                <label for="bid-amount">Bid Amount: $</label>
+                <input type="text" id="bid-amount" name="bid-amount" size="5">
+                <button type="button" onclick="alert('Bid placed!')">Bid Now</button>
+            </form>
+        </div>
+        <button onclick="showSection('home')">Back to Home</button>
+    </div>
+
+        <!-- Contact Us Section -->
+    <div id="contact" class="container section hidden">
+        <div class="contact-us">
+            <h2>Contact Us</h2>
+            <form class="contact-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="5" required></textarea>
+                
+                <button type="submit">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        &copy; Cosmizy's Auction Site. All rights reserved.
+    </div>
+</body>
+</html>
