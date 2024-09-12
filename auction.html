@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Cosmizy's Auction Site</title>
     <style>
+
+
+        
         body {
             font-family: Verdana, sans-serif;
             background-color: #f9f9f9;
@@ -138,11 +141,58 @@
             background-color: #002244;
         }
     </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
+    
     <script>
+
+          const firebaseConfig = {
+            apiKey: "AIzaSyAWfZ6mu7IKU28dBnGgX8zLOQ2bK9iprHs",
+            authDomain: "auction-5a21a.firebaseapp.com",
+            databaseURL: "https://auction-5a21a-default-rtdb.firebaseio.com",
+            projectId: "auction-5a21a",
+            storageBucket: "auction-5a21a.appspot.com",
+            messagingSenderId: "271163258393",
+            appId: "1:271163258393:web:7223abcb65cc3659959c88",
+            measurementId: "G-T88CZ3KGPX"
+          };
+        
+        firebase.initializeApp(firebaseConfig);
+        
         function showSection(sectionId) {
             const sections = document.querySelectorAll('.section');
             sections.forEach(section => section.classList.add('hidden'));
             document.getElementById(sectionId).classList.remove('hidden');
+
+            if (sectionId === 'blackjack') {
+                 section.style.display = 'block';
+            }
+        }
+
+            function placeBid() {
+            const bidAmount = parseFloat(document.getElementById('bid-amount').value);
+            const minPrice = parseFloat(document.querySelector('.details p strong:contains("Price:")').nextElementSibling.textContent.replace('$', ''));
+            const currentHighestBid = parseFloat(document.querySelector('.bid-section p').textContent.replace('Current highest bid: $', ''));
+        
+            // Validate bid amount
+            if (isNaN(bidAmount) || bidAmount <= currentHighestBid || bidAmount < minPrice) {
+                document.getElementById('bid-error').textContent = 'Invalid bid amount. Ensure your bid is above the minimum price and higher than the current highest bid.';
+                return;
+            }
+        
+            const cash = getCash();
+            if (bidAmount > cash) {
+                document.getElementById('bid-error').textContent = 'Insufficient funds.';
+                return;
+            }
+        
+            // Update highest bid and cash
+            document.querySelector('.bid-section p').textContent = `Current highest bid: $${bidAmount}`;
+            updateCash(-bidAmount); // Deduct bid amount from cash
+        
+            document.getElementById('bid-error').textContent = ''; // Clear any previous error messages
         }
 
         function showListingDetail(title, image, condition, location, galleryImages, description, price, contact) {
@@ -164,12 +214,34 @@
                     ${galleryHtml}
                 </div>
                 <div class="bid-section">
-                    <h3>Bid Section</h3>
-                    <p>Current highest bid: $${price}</p>
-                    <button>Place a Bid</button>
-                </div>
-                <button onclick="showSection('home')">Back to Home</button>
+            <h3>Bid Section</h3>
+            <p>Current highest bid: $<span id="highest-bid">${price}</span></p>
+            <form id="bid-form">
+                <label for="bid-amount">Bid Amount: $</label>
+                <input type="number" id="bid-amount" name="bid-amount" min="${parseFloat(price) + 0.01}" step="0.01" required>
+                <button type="submit">Place a Bid</button>
+            </form>
+            <p id="bid-error" style="color: red;"></p>
+        </div>
             `;
+
+            // Handle bid form submission
+            document.getElementById('bid-form').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent form submission
+        
+                const bidAmount = parseFloat(document.getElementById('bid-amount').value);
+                const highestBid = parseFloat(document.getElementById('highest-bid').textContent);
+        
+                if (isNaN(bidAmount) || bidAmount <= highestBid) {
+                    document.getElementById('bid-error').textContent = `Your bid must be higher than the current highest bid of $${highestBid}.`;
+                } else {
+                    // Update the highest bid and clear the error
+                    document.getElementById('highest-bid').textContent = bidAmount.toFixed(2);
+                    document.getElementById('bid-error').textContent = '';
+                    document.getElementById('bid-amount').value = ''; // Clear the input
+                    alert(`Your bid of $${bidAmount.toFixed(2)} has been placed!`);
+                }
+            });
             showSection('listing');
         }
         
@@ -183,9 +255,10 @@
     <div class="top-bar">
         <h1>Cosmizy's Auction Site</h1>
         <p>
-            <a href="javascript:void(0);" onclick="showSection('home')" style="color: white; text-decoration: none;">Home</a> |
-            <a href="javascript:void(0);" onclick="showSection('categories')" style="color: white; text-decoration: none;">Categories</a> |
-            <a href="javascript:void(0);" onclick="showSection('contact')" style="color: white; text-decoration: none;">Contact Us</a>
+            <a href="#home" onclick="showSection('home')" style="color: white; text-decoration: none;">Home</a> |
+            <a href="#categories" onclick="showSection('categories')" style="color: white; text-decoration: none;">Categories</a> |
+            <a href="#blackjack" onclick="showSection('blackjack')" style="color: white; text-decoration: none;">Blackjack</a> |
+            <a href="#contact" onclick="showSection('contact')" style="color: white; text-decoration: none;">Contact Us</a>
         </p>
     </div>
 
@@ -194,11 +267,45 @@
         <div class="trending">
             <h2>Trending Items</h2>
             <div class="item">
-                <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/image.png" alt="Luis, 13yrs">
-                <a href="javascript:void(0);" onclick="showSection('listing')">Luis, 13yrs - Starting at $44.99</a>
+                <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png" alt="Luis, 13yrs">
+                <a href="javascript:void(0);" onclick="showListingDetail(
+    'Luis, 13yrs',
+    'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png',
+    'Used - Like New',
+    'San Francisco, CA',
+    [
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png'
+    ],
+    'A charming young man from the late months of 2010, perfect for any occasion. He will work great, minor wear and tear.',
+    '39.99',
+    'cosmizy@gmail.com'
+)">Luis, 13yrs - Starting at $39.99</a>
                 <div class="clear"></div>
             </div>
             <!-- Add more trending items here -->
+
+            <div class="item">
+                <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120420.jpg" alt="Hazen, 12yrs">
+               <a href="javascript:void(0);" onclick="showListingDetail(
+    'Hazen, 12yrs',
+    'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120420.jpg',
+    'Used - Very Good',
+    'San Francisco, CA',
+    [
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120537.jpg',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120544.jpg',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120555.jpg'
+    ],
+    'He is in very good condition, best for his working capabilities. Note that he is from 2012, and he is quite useful in other situations including design, investing, and  anything involving technology.',
+    '19.99',
+    'cosmizy@gmail.com'
+)">Hazen, 12yrs - Starting at $19.99</a>
+
+                <div class="clear"></div>
+            </div>
+            
             <div class="item">
                 <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240910_123033.jpg" alt="F22A Raptor Flight Manual - Printed">
                <a href="javascript:void(0);" onclick="showListingDetail(
@@ -229,8 +336,34 @@
             <div class="category">
                 <h3 onclick="toggleItems('category1')">People</h3>
                 <ul id="category1" class="category-items hidden">
-                    <li><a href="javascript:void(0);" onclick="showSection('listing')">Luis, 13yrs</a></li>
-                    <li><a href="#">Brandon !COMING SOON!</a></li>
+                    <li><a href="javascript:void(0);" onclick="showListingDetail(
+    'Luis, 13yrs',
+    'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png',
+    'Used - Like New',
+    'San Francisco, CA',
+    [
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png'
+    ],
+    'A charming young man from the late months of 2010, perfect for any occasion. He will work great, minor wear and tear.',
+    '39.99',
+    'cosmizy@gmail.com'
+)">Luis, 13yrs</a>
+                    <li><a href="javascript:void(0);"showListingDetail(
+    'Hazen, 12yrs',
+    'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120420.jpg',
+    'Used - Very Good',
+    'San Francisco, CA',
+    [
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120537.jpg',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120544.jpg',
+        'https://raw.githubusercontent.com/Cosmizy/whiptheman/main/IMG_20240911_120555.jpg'
+    ],
+    'He is in very good condition, best for his working capabilities. Note that he is from 2012, and he is quite useful in other situations including design, investing, and  anything involving technology.',
+    '19.99',
+    'cosmizy@gmail.com'
+)">Hazen, 12yrs</a></li>
                 </ul>
             </div>
             <div class="category">
@@ -266,11 +399,11 @@
     <!-- Listing Section -->
     <div id="listing" class="listing section hidden">
         <h1>Item for Auction: Luis, 13yrs</h1>
-        <img class="main-image" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/image.png" alt="Luis Main Pic">
+        <img class="main-image" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/imgnotfound.png" alt="Luis Main Pic">
         <div class="details">
             <p><strong>Condition:</strong> Used - Like New</p>
             <p><strong>Location:</strong> San Francisco, CA</p>
-            <p><strong>Description:</strong>A charming young man from the late 2010s, perfect for any occasion. He will work great, minor wear and tear.</p>
+            <p><strong>Description:</strong>A charming young man from the late months of 2010, perfect for any occasion. He will work great, minor wear and tear.</p>
             <p><strong>Price:</strong> $44.99</p>
             <p><strong>Contact:</strong> cosmizy@gmail.com</p>
         </div>
@@ -286,15 +419,377 @@
         </div>
 
         <!-- Bidding Section -->
-        <div class="bid-section">
-            <p><strong>Place Your Bid:</strong></p>
-            <form>
+       <div class="bid-section">
+            <h3>Bid Section</h3>
+            <p>Current highest bid: $<span id="highest-bid">${price}</span></p>
+            <form id="bid-form">
                 <label for="bid-amount">Bid Amount: $</label>
-                <input type="text" id="bid-amount" name="bid-amount" size="5">
-                <button type="button" onclick="alert('Bid placed!')">Bid Now</button>
+                <input type="number" id="bid-amount" name="bid-amount" min="${parseFloat(price) + 0.01}" step="0.01" required>
+                <button type="submit">Place a Bid</button>
             </form>
+            <p id="bid-error" style="color: red;"></p>
         </div>
-        <button onclick="showSection('home')">Back to Home</button>
+    </div>
+
+    <!-- Blackjack Section -->
+    <div id="blackjack" class="container section hidden">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack</title>
+    <style>
+
+        body {
+            font-family: Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #game {
+            max-width: 700px;
+            margin: 20px auto;
+            background-color: #004d00; /* Slightly lighter green for the game area */
+            color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+        }
+
+        #cash {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .button {
+            padding: 12px 25px;
+            font-size: 18px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #ffcc00;
+            color: #003d00;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #e0e0e0;
+            color: #003d00;
+        }
+
+        .card {
+            display: inline-block;
+            width: 90px;
+            height: 130px;
+            margin: 8px;
+            text-align: center;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        #bet-container {
+            margin: 15px 0;
+        }
+
+        #bet-input {
+            width: 100px;
+            padding: 8px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        #error {
+            color: #ff0000;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>Blackjack</h1>
+        <div>Cash: $<span id="cash">100</span></div>
+        <div id="bet-container">
+            <input type="number" id="bet-input" min="1" placeholder="Bet" />
+            <button id="set-bet" class="button">Set Bet</button>
+        </div>
+        <div>
+            <button id="deal" class="button">Deal</button>
+            <button id="hit" class="button">Hit</button>
+            <button id="stand" class="button">Stand</button>
+        </div>
+        <div id="player-cards"></div>
+        <div id="dealer-cards"></div>
+        <div id="status"></div>
+        <div id="error"></div>
+    </div>
+
+<script>
+
+        // Map suits to image folder prefixes
+        const suitMap = {
+            'clubs': 'CLUB',
+            'spades': 'SPADE',
+            'diamonds': 'DIAMOND',
+            'hearts': 'HEART'
+        };
+
+        // Map card values to their respective file names
+        function getCardFileName(suit, value) {
+            let valueName = value; // Default value
+
+            // Map special card names
+            if (value === '1' || value === 'A') {
+                valueName = '1'; // Ace is usually denoted as '1' in your naming
+            } else if (value === 'J') {
+                valueName = '11-JACK';
+            } else if (value === 'Q') {
+                valueName = '12-QUEEN';
+            } else if (value === 'K') {
+                valueName = '13-KING';
+            }
+
+            // Construct the filename
+            const suitPrefix = suitMap[suit.toLowerCase()];
+            return `${suitPrefix}-${valueName}.svg`; // Adjust the extension if not .svg
+        }
+
+        // Render a card based on suit and value
+        function renderCard(suit, value) {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card';
+
+            const img = document.createElement('img');
+            img.src = `https://raw.githubusercontent.com/Cosmizy/cardSVG/8f653f6580ad19d7e7f5464e55b893eed481b78d/${getCardFileName(suit, value)}`;
+            
+            cardDiv.appendChild(img);
+            return cardDiv;
+        }
+    
+    // Save cash to Local Storage
+    function setCash(amount) {
+        localStorage.setItem('cash', amount);
+    }
+
+    // Retrieve cash from Local Storage
+    function getCash() {
+        const cash = localStorage.getItem('cash');
+        return cash ? parseInt(cash, 10) : 100; // Default to $100 if no cash is found
+    }
+
+    // Function to update cash display
+    function updateCashDisplay() {
+        document.getElementById('cash').textContent = cash;
+    }
+
+    // Deal cards to a player or dealer
+    function dealCard() {
+        const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const suit = suits[Math.floor(Math.random() * suits.length)];
+        const value = values[Math.floor(Math.random() * values.length)];
+        return { suit, value };
+    }
+
+    // Calculate the total value of a hand
+    function calculateTotal(hand) {
+        let total = 0;
+        let hasAce = false;
+        hand.forEach(card => {
+            if (['J', 'Q', 'K'].includes(card.value)) {
+                total += 10;
+            } else if (card.value === 'A') {
+                hasAce = true;
+                total += 1;
+            } else {
+                total += parseInt(card.value, 10);
+            }
+        });
+        if (hasAce && total <= 11) {
+            total += 10; // Add 10 for the Ace if it doesn’t bust the hand
+        }
+        return total;
+    }
+
+function updateDisplay() {
+    const playerCardsDiv = document.getElementById('player-cards');
+    const dealerCardsDiv = document.getElementById('dealer-cards');
+    const statusDiv = document.getElementById('status');
+
+    // Clear previous cards
+    playerCardsDiv.innerHTML = '';
+    dealerCardsDiv.innerHTML = '';
+
+    // Render player and dealer cards
+    playerHand.forEach(card => {
+        const cardDiv = renderCard(card.suit, card.value);
+        playerCardsDiv.appendChild(cardDiv);
+    });
+
+    dealerHand.forEach(card => {
+        const cardDiv = renderCard(card.suit, card.value);
+        dealerCardsDiv.appendChild(cardDiv);
+    });
+
+    // Calculate and display totals
+    const playerTotal = calculateTotal(playerHand);
+    const dealerTotal = calculateTotal(dealerHand);
+
+    if (playerTotal > 21) {
+        statusDiv.textContent = 'Player Busts! Dealer Wins.';
+        updateCash(-bet);
+        endRound();
+    } else if (dealerTotal > 21) {
+        statusDiv.textContent = 'Dealer Busts! Player Wins.';
+        updateCash(bet);
+        endRound();
+    } else if (playerTotal === 21 && playerHand.length === 2) {
+        statusDiv.textContent = 'Blackjack! Player Wins.';
+        updateCash(bet);
+        endRound();
+    } else if (dealerTotal === 21 && dealerHand.length === 2) {
+        statusDiv.textContent = 'Dealer has Blackjack. Dealer Wins.';
+        updateCash(-bet);
+        endRound();
+    } else {
+        statusDiv.textContent = `Player Total: ${playerTotal} | Dealer Total: ${dealerTotal}`;
+    }
+
+    updateCashDisplay(); // Ensure cash display is always updated
+}
+
+
+    // Clear cards and reset game
+    function clearCards() {
+        document.getElementById('player-cards').innerHTML = '';
+        document.getElementById('dealer-cards').innerHTML = '';
+        document.getElementById('status').textContent = '';
+        document.getElementById('error').textContent = '';
+        playerHand = [];
+        dealerHand = [];
+        enableButton('deal'); // Enable deal button for a new game
+    }
+
+    // Start a new game
+    function newGame() {
+        if (isNaN(bet) || bet <= 0 || bet > cash) {
+            document.getElementById('error').textContent = 'Please set a valid bet amount.';
+            return;
+        }
+        clearCards();
+        playerHand = [dealCard(), dealCard()];
+        dealerHand = [dealCard(), dealCard()];
+        disableButton('deal'); // Disable deal button during the game
+        enableButton('hit');
+        enableButton('stand');
+        updateDisplay();
+    }
+
+    // Update cash and display
+    function updateCash(amount) {
+        cash += amount;
+        if (cash < 10) cash = 10; // Ensure cash does not go below $10
+        setCash(cash);
+        updateCashDisplay();
+    }
+
+    // End the round and disable buttons
+    function endRound() {
+        disableButton('hit');
+        disableButton('stand');
+        setTimeout(clearCards, 2000); // Clear cards after 2 seconds
+    }
+
+    // Enable a button by id
+    function enableButton(buttonId) {
+        document.getElementById(buttonId).disabled = false;
+    }
+
+    // Disable a button by id
+    function disableButton(buttonId) {
+        document.getElementById(buttonId).disabled = true;
+    }
+
+    let playerHand = [];
+    let dealerHand = [];
+    let cash = getCash();
+    let bet = 10; // Default bet amount
+
+    // Ensure cash display is accurate on page load
+    window.onload = function() {
+        updateCashDisplay();
+        disableButton('hit'); // Disable hit and stand on load
+        disableButton('stand');
+    };
+
+    document.getElementById('set-bet').addEventListener('click', () => {
+        bet = parseInt(document.getElementById('bet-input').value, 10);
+        if (isNaN(bet) || bet <= 0 || bet > cash) {
+            document.getElementById('error').textContent = 'Invalid bet amount. Ensure you do not bet more than you have.';
+        } else {
+            document.getElementById('error').textContent = '';
+        }
+    });
+
+    document.getElementById('deal').addEventListener('click', newGame);
+    document.getElementById('hit').addEventListener('click', () => {
+        playerHand.push(dealCard());
+        updateDisplay();
+        const playerTotal = calculateTotal(playerHand);
+        if (playerTotal > 21) { // End the round if player busts
+            document.getElementById('status').textContent = 'Player Busts! Dealer Wins.';
+            updateCash(-bet);
+            endRound();
+        }
+    });
+
+    document.getElementById('stand').addEventListener('click', () => {
+        // Dealer's turn
+        while (calculateTotal(dealerHand) < 17) {
+            dealerHand.push(dealCard());
+        }
+        updateDisplay();
+
+        const playerTotal = calculateTotal(playerHand);
+        const dealerTotal = calculateTotal(dealerHand);
+
+        if (dealerTotal > 21) {
+            document.getElementById('status').textContent = 'Dealer Busts! Player Wins.';
+            updateCash(bet);
+        } else if (playerTotal > dealerTotal) {
+            document.getElementById('status').textContent = 'Player Wins!';
+            updateCash(bet);
+        } else if (playerTotal < dealerTotal) {
+            document.getElementById('status').textContent = 'Dealer Wins!';
+            updateCash(-bet);
+        } else {
+            document.getElementById('status').textContent = 'It\'s a Push!'; // Handle Push scenario
+        }
+
+        endRound();
+    });
+</script>
+
+
+</body>
+</html>
     </div>
 
         <!-- Contact Us Section -->
