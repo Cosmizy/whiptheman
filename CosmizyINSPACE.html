@@ -16,13 +16,13 @@
       display: block;
       background: #343d46; /* Dark background */
     }
-    #titleScreen {
+    #titleScreen, #difficultyScreen, #gameOverScreen {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.5); /* Transparent background */
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -31,20 +31,31 @@
       z-index: 10;
       color: white;
     }
-    #titleScreen h1, #titleScreen h2 {
-      margin: 1;
+    #titleScreen h1, #titleScreen h2, #gameOverScreen h1 {
+      margin: 10px;
     }
+    
     #titleScreen h1 {
       font-size: 72px;
     }
+    
     #titleScreen h2 {
       font-size: 48px;
-      margin-top: -40px;
+      margin-top: 0px;
     }
-    #playButton {
+    
+    #gameOverScreen h1 {
+      font-size: 60px;
+    }
+
+    #difficultyScreen h1 {
+      font-size: 48px;
+    }
+
+    #difficultyScreen button {
       padding: 15px 30px;
       font-size: 24px;
-      background-color: #25222f;
+      background-color: rgba(0, 0, 0, 0.1);
       color: white;
       border: none;
       cursor: pointer;
@@ -52,8 +63,44 @@
       margin-top: 20px;
       font-family: 'Press Start 2P', cursive;
     }
-    #playButton:hover {
-      background-color: #201d2a;
+
+    #difficultyScreen button:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+      
+    #playButton {
+      padding: 15px 30px;
+      font-size: 24px;
+      background-color: rgba(0, 0, 0, 0.1);
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-family: 'Press Start 2P', cursive;
+    }
+    
+    #playButton:hover  {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    #gameOverScreen {
+      display: none; /* Initially hidden */
+    }
+    
+    #gameOverScreen img {
+        width: 150px; /* Broken rocket image size */
+        height: auto;
+        margin-top: 30px;
+    }
+    
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      color: white;
+      z-index: 10;
     }
   </style>
 </head>
@@ -67,9 +114,24 @@
   <button id="playButton">Play</button>
 </div>
 
+<div id="difficultyScreen" style="display: none;">
+  <h1>Select Difficulty</h1>
+  <button id="easyButton">Easy</button>
+  <button id="normalButton">Normal</button>
+  <button id="hardButton">Hard</button>
+  <button id="nightmareButton">Nightmare</button>
+</div>
+
+<div id="gameOverScreen">
+  <h1></h1>
+</div>
+
 <script>
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
+  const playButton = document.getElementById('playButton');
+  const difficultyScreen = document.getElementById('difficultyScreen');
+  const difficultyButtons = document.querySelectorAll('.difficultyButton');
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -91,17 +153,34 @@
   ];
 
 const planetImages = [
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_earth.png", size: 100, speed: 6, health: 200},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_venus.png", size: 100, speed: 5, health: 200},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_mars.png", size: 50, speed: 7, health: 100},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_neptune.png", size: 200, speed: 2, health: 300},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:1, health: 500},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_earth.png", size: 100, speed: 7, health: 200},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_venus.png", size: 100, speed: 6, health: 200},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_mars.png", size: 50, speed: 8, health: 100},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_neptune.png", size: 200, speed: 3, health: 300},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:2, health: 500},
 ];
+
+  let score = 0; // Initialize score variable
+
+  let playerDamage = 50;
+    
+  let asteroidSpawnRate = 1000;
+  let asteroidMinSpeed = 4;
+  let asteroidMaxSpeed = 8;
+  let asteroidHealth = 50;
+    
+  let planetSpawnRate = 20000;
+  let planetHealthMultiplier = 1;
+  let planetSpeedMultiplier = 1;
 
   let currentPlayerImageIndex = 0;
   let gameOver = false;
   let playerImage = new Image();
   playerImage.src = playerImages[currentPlayerImageIndex];
+
+  // Game difficulty
+  let defaultDifficulty = 'normal';
+  let selectedDifficulty = 'normal';
 
 const player = {
   x: 50,
@@ -109,7 +188,7 @@ const player = {
   width: 60,
   height: 60,
   health: 100,
-  damage: 50,
+  damage: playerDamage,
   hitbox: {
     x: 0,
     y: 0,
@@ -246,12 +325,19 @@ function checkCollisions() {
       player.hitbox.y = player.y + player.hitbox.offsetY;
     }
 
+function gameOverScreen() {
+  const gameOverDiv = document.getElementById("gameOverScreen");
+  const gameOverText = gameOverDiv.querySelector("h1");
+  gameOverText.textContent = "Game Over";
+  gameOverDiv.style.display = "flex";
+  const brokenRocket = document.createElement("img");
+  brokenRocket.src = brokenImageSrc;
+  gameOverDiv.appendChild(brokenRocket);
+}
+
   function gameLoop() {
     if (gameOver) {
-      ctx.font = "48px Arial";
-      ctx.fillStyle = "red";
-      ctx.textAlign = "center";
-      ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+    gameOverScreen();
       return;
     }
 
@@ -270,6 +356,11 @@ function checkCollisions() {
     requestAnimationFrame(gameLoop);
   }
 
+    function showDifficultyScreen() {
+        playButton.style.display = 'none';
+        difficultyScreen.style.display = 'block';
+    }
+
 class Asteroid {
   constructor() {
     this.minSize = 30;
@@ -280,13 +371,12 @@ class Asteroid {
     this.image.src = asteroidImages[Math.floor(Math.random() * asteroidImages.length)];
     this.x = canvas.width;
     this.y = Math.random() * (canvas.height - this.imageSize);
-    this.minSpeed = 4;
-    this.maxSpeed = 8;
+    this.minSpeed = asteroidMinSpeed;
+    this.maxSpeed = asteroidMaxSpeed;
     this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
     this.rotation = 0; // Initial rotation angle
     this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
-    this.health = 50;
-    this.maxHealth = 50;
+    this.health = asteroidHealth;
     this.isDamaged = false;
   }
 
@@ -346,6 +436,8 @@ class Planet {
     this.rotationSpeed = (Math.random() - 1) * 0.1 / (this.size / 20); // Random rotation speed
     this.health = planetData.health;
     this.maxHealth = planetData.health;
+    this.healthMultiplier = planetHealthMultiplier;
+    this.speedMultiplier = planetSpeedMultiplier;
     this.isDamaged = false;
   }
 
@@ -402,22 +494,69 @@ class Planet {
     keys[e.key] = false;
   });
 
-  // Hide the title screen and start the game when "Play" is clicked
-  document.getElementById("playButton").addEventListener("click", () => {
-    document.getElementById("titleScreen").style.display = "none";
+function startGame(selectedDifficulty) {
+    document.getElementById("difficultyScreen").style.display = "none";
     createStars();
     gameLoop();
 
+    if (selectedDifficulty === "easy") {
+      asteroidSpawnRate = 2000;
+      asteroidMinSpeed = 2;
+      asteroidMaxSpeed = 5;
+      planetSpawnRate = 30000;
+      planetHealthMultiplier = 0.75;
+      planetSpeedMultiplier = 0.85;
+    }
+
+    if (selectedDifficulty === "normal") {
+      asteroidSpawnRate = 1000;
+      asteroidMinSpeed = 4;
+      asteroidMaxSpeed = 8;
+      planetSpawnRate = 20000;
+      planetHealthMultiplier = 1;
+      planetSpeedMultiplier = 1;
+    }
+
+    if (selectedDifficulty === "hard") {
+      asteroidSpawnRate = 600;
+      asteroidMinSpeed = 6.5;
+      asteroidMaxSpeed = 13;
+      planetSpawnRate = 15000;
+      planetHealthMultiplier = 1.6;
+      planetSpeedMultiplier = 1.5;
+    }
+
+    if (selectedDifficulty === "nightmare") {
+      asteroidSpawnRate = 400;
+      asteroidMinSpeed = 11;
+      asteroidMaxSpeed = 21.5;
+      planetSpawnRate = 10000;
+      planetHealthMultiplier = 3;
+      planetSpeedMultiplier = 2;
+    }
+    
     setInterval(() => {
       const planet = new Planet();
       enemies.push(planet); // Add planets to the same enemies array
-    }, 20000); // Spawn a planet every 15 seconds
+    }, planetSpawnRate); // Spawn a planet every 20 seconds
       
     setInterval(() => {
       const asteroid = new Asteroid();
       enemies.push(asteroid);
-    }, 1000);
+    }, asteroidSpawnRate);
+}   
+
+  // Hide the title screen and start the game when "Play" is clicked
+  document.getElementById("playButton").addEventListener("click", () => {
+    document.getElementById("difficultyScreen").style.display = "flex";
+    document.getElementById("titleScreen").style.display = "none";
   });
+
+  document.getElementById("easyButton").addEventListener("click", () => startGame("easy"));
+  document.getElementById("normalButton").addEventListener("click", () => startGame("normal"));
+  document.getElementById("hardButton").addEventListener("click", () => startGame("hard"));
+  document.getElementById("nightmareButton").addEventListener("click", () => startGame("nightmare"));
+    
     createStars();
     drawStars(); // Ensure stars are created even on title screen
 </script>
