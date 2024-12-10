@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COSMIZY: In Space?!</title>
+  <link rel="icon" href="https://raw.githubusercontent.com/Cosmizy/whiptheman/fd7f9ff18354599a982499100dc663def260b3bf/favicon_spacegame.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Press Start 2P', cursive;
+    }
+    canvas {
+      display: block;
+      background: #343d46; /* Dark background */
+    }
+    #titleScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 10;
+      color: white;
+    }
+    #titleScreen h1, #titleScreen h2 {
+      margin: 1;
+    }
+    #titleScreen h1 {
+      font-size: 72px;
+    }
+    #titleScreen h2 {
+      font-size: 48px;
+      margin-top: -40px;
+    }
+    #playButton {
+      padding: 15px 30px;
+      font-size: 24px;
+      background-color: #25222f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-family: 'Press Start 2P', cursive;
+    }
+    #playButton:hover {
+      background-color: #201d2a;
+    }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+
+<!-- Title Screen -->
+<div id="titleScreen">
+  <h1>COSMIZY</h1>
+  <h2>In Space?!</h2>
+  <button id="playButton">Play</button>
+</div>
+
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const playerImages = [
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_default_1.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_default_2.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_default_3.png",
+  ];
+  const brokenImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_broken.png";
+
+  const asteroidImages = [
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_1.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_2.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_3.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_4.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_5.png",
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_6.png"
+  ];
+
+const planetImages = [
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_earth.png", size: 100, speed: 6, health: 200},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_venus.png", size: 100, speed: 5, health: 200},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_mars.png", size: 50, speed: 7, health: 100},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_neptune.png", size: 200, speed: 2, health: 300},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:1, health: 500},
+];
+
+  let currentPlayerImageIndex = 0;
+  let gameOver = false;
+  let playerImage = new Image();
+  playerImage.src = playerImages[currentPlayerImageIndex];
+
+const player = {
+  x: 50,
+  y: canvas.height / 2 - 20,
+  width: 60,
+  height: 60,
+  health: 100,
+  damage: 50,
+  hitbox: {
+    x: 0,
+    y: 0,
+    offsetX: 15, // Padding from the left/right
+    offsetY: 18, // Padding from the top/bottom
+    width: 42.5, // Width of the hitbox
+    height: 25, // Height of the hitbox (less tall)
+  },
+  bullets: [],
+};
+
+  const bullets = [];
+  const enemies = [];
+  const stars = [];
+  const keys = {};
+  let frameCounter = 0;
+
+  // Create stars
+  function createStars() {
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 1,
+        color: "#c0c5ce",
+        speed: Math.random() * 0.5 + 0.2,
+      });
+    }
+  }
+
+  function drawStars() {
+    stars.forEach(star => {
+      star.x -= star.speed;
+      if (star.x < 0) {
+        star.x = canvas.width;
+        star.y = Math.random() * canvas.height;
+      }
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fillStyle = star.color;
+      ctx.fill();
+      ctx.closePath();
+    });
+  }
+
+  // Cycle through spaceship images
+  function cyclePlayerImage() {
+    if (frameCounter % 10 === 0) {
+      currentPlayerImageIndex = (currentPlayerImageIndex + 1) % playerImages.length;
+      playerImage.src = playerImages[currentPlayerImageIndex];
+    }
+    frameCounter++;
+  }
+
+  function drawPlayer() {
+    ctx.save()
+    ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
+    ctx.rotate(Math.PI / 2);
+    ctx.drawImage(playerImage, -player.width / 2, -player.height / 2, player.width, player.height);
+    ctx.restore();
+    //debug
+    //ctx.strokeStyle = "lime";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height);
+  }
+
+  function drawBullets() {
+    bullets.forEach((bullet, index) => {
+      bullet.x += bullet.speed;
+      if (bullet.x > canvas.width) {
+        bullets.splice(index, 1);
+      }
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+    });
+  }
+
+function checkCollisions() {
+  bullets.forEach((bullet, bulletIndex) => {
+    enemies.forEach((enemy, enemyIndex) => {
+      if (
+        bullet.x < enemy.x + enemy.size &&
+        bullet.x + bullet.width > enemy.x &&
+        bullet.y < enemy.y + enemy.size &&
+        bullet.y + bullet.height > enemy.y
+      ) {
+        // Reduce health of the enemy
+        enemy.takeDamage(player.damage);
+
+        // Remove bullet
+        bullets.splice(bulletIndex, 1);
+
+        // Check if enemy health is zero or below
+        if (enemy.health <= 0) {
+          enemies.splice(enemyIndex, 1);
+        }
+      }
+    });
+  });
+
+  enemies.forEach(enemy => {
+    if (
+      player.hitbox.x < enemy.x + enemy.size &&
+      player.hitbox.x + player.hitbox.width > enemy.x &&
+      player.hitbox.y < enemy.y + enemy.size &&
+      player.hitbox.y + player.hitbox.height > enemy.y
+    ) {
+      playerImage.src = brokenImageSrc;
+      gameOver = true;
+    }
+  });
+}
+
+
+  function shootBullet() {
+    bullets.push({
+      x: player.x + player.width,
+      y: player.y + player.height / 2 - 5,
+      width: 10,
+      height: 10,
+      speed: 5,
+    });
+  }
+
+  function updatePlayer() {
+    if (keys["ArrowUp"] && player.y > 0) player.y -= 5;
+    if (keys["w"] && player.y > 0) player.y -= 5;
+    if (keys["ArrowDown"] && player.y + player.height < canvas.height) player.y += 5;
+    if (keys["s"] && player.y + player.height < canvas.height) player.y += 5;
+  }
+
+    function updatePlayerHitbox() {
+      player.hitbox.x = player.x + player.hitbox.offsetX;
+      player.hitbox.y = player.y + player.hitbox.offsetY;
+    }
+
+  function gameLoop() {
+    if (gameOver) {
+      ctx.font = "48px Arial";
+      ctx.fillStyle = "red";
+      ctx.textAlign = "center";
+      ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+      return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    updatePlayerHitbox();
+      
+    drawStars();
+    updatePlayer();
+    cyclePlayerImage();
+    drawPlayer();
+    enemies.forEach(enemy => enemy.update());
+    drawBullets();
+    checkCollisions();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+class Asteroid {
+  constructor() {
+    this.minSize = 30;
+    this.maxSize = 80;
+    this.size = Math.random() * (this.maxSize - this.minSize) + this.minSize; // Hitbox size
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = asteroidImages[Math.floor(Math.random() * asteroidImages.length)];
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.minSpeed = 4;
+    this.maxSpeed = 8;
+    this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
+    this.rotation = 0; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
+    this.health = 50;
+    this.maxHealth = 50;
+    this.isDamaged = false;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
+    ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the asteroid
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move asteroid left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
+class Planet {
+  constructor() {
+    const planetData = planetImages[Math.floor(Math.random() * planetImages.length)];
+    this.size = planetData.size;
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = planetData.src;
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.speed = planetData.speed;
+    this.rotation = 0; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 1) * 0.1 / (this.size / 20); // Random rotation speed
+    this.health = planetData.health;
+    this.maxHealth = planetData.health;
+    this.isDamaged = false;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to planet center
+    ctx.rotate(this.rotation); // Rotate canvas around the planet center
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the planet
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+    
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move planet left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
+  window.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+    if (e.key === "d" || e.key === "ArrowRight") {
+      shootBullet();
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+  });
+
+  // Hide the title screen and start the game when "Play" is clicked
+  document.getElementById("playButton").addEventListener("click", () => {
+    document.getElementById("titleScreen").style.display = "none";
+    createStars();
+    gameLoop();
+
+    setInterval(() => {
+      const planet = new Planet();
+      enemies.push(planet); // Add planets to the same enemies array
+    }, 20000); // Spawn a planet every 15 seconds
+      
+    setInterval(() => {
+      const asteroid = new Asteroid();
+      enemies.push(asteroid);
+    }, 1000);
+  });
+    createStars();
+    drawStars(); // Ensure stars are created even on title screen
+</script>
+</body>
+</html>
