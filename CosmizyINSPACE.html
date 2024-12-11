@@ -16,7 +16,7 @@
       display: block;
       background: #343d46; /* Dark background */
     }
-    #titleScreen, #difficultyScreen, #gameOverScreen {
+    #titleScreen, #difficultyScreen, #gameOverScreen, #controlsScreen, #creditsScreen {
       position: absolute;
       top: 0;
       left: 0;
@@ -31,21 +31,59 @@
       z-index: 10;
       color: white;
     }
-    #titleScreen h1, #titleScreen h2, #gameOverScreen h1 {
+    
+    #titleScreen h1, #titleScreen h2, #gameOverScreen h1, #gameOverScreen h2 {
       margin: 10px;
     }
-    
+
+    #titleScreen h1, #titleScreen h2 {
+      margin-top: -100px;
+    }
+      
     #titleScreen h1 {
       font-size: 72px;
+      color: darkviolet;
     }
-    
+      
     #titleScreen h2 {
       font-size: 48px;
       margin-top: 0px;
+      color: yellow;
     }
+
+      #controlsScreen h1, #creditsScreen h1 {
+        font-size: 36px;
+        margin-bottom: 20px;
+      }
+          
+      #controlsScreen p, #creditsScreen p {
+        font-size: 18px;
+        max-width: 600px;
+        line-height: 1.6;
+        margin: 10px 20px;
+      }
+
+  #backButton {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: white;
+    cursor: pointer;
+    border-radius: 0px;
+    margin-top: 20px;
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  #backButton:hover {
+    background-color: rgba(0, 0, 0, 0);
+  }
     
     #gameOverScreen h1 {
       font-size: 60px;
+    }
+
+    #gameOverScreen h2 {
+      font-size: 24px;
     }
 
     #difficultyScreen h1 {
@@ -69,19 +107,48 @@
     }
       
     #playButton {
-      padding: 15px 30px;
-      font-size: 24px;
-      background-color: rgba(0, 0, 0, 0.1);
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 20px;
-      font-family: 'Press Start 2P', cursive;
+        padding: 10px 20px;
+        font-size: 48px;
+        background-color: rgba(0, 0, 0, 0.1);
+        color: white;
+        cursor: pointer;
+        border-radius: 0px;
+        margin-top: 100px;
+        font-family: 'Press Start 2P', cursive;
+    }
+
+    #playButton:hover  {
+      background-color: rgba(0, 0, 0, 0);
+    }
+
+    #controlsButton {
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: rgba(0, 0, 0, 0.1);
+        color: white;
+        cursor: pointer;
+        border-radius: 0px;
+        margin-top: 20px;
+        font-family: 'Press Start 2P', cursive;
     }
     
-    #playButton:hover  {
-      background-color: rgba(0, 0, 0, 0.2);
+    #controlsButton:hover  {
+      background-color: rgba(0, 0, 0, 0);
+    }
+
+    #creditsButton {
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: rgba(0, 0, 0, 0.1);
+        color: white;
+        cursor: pointer;
+        border-radius: 0px;
+        margin-top: 20px;
+        font-family: 'Press Start 2P', cursive;
+    }
+    
+    #creditsButton:hover  {
+      background-color: rgba(0, 0, 0, 0);
     }
 
     #gameOverScreen {
@@ -89,16 +156,32 @@
     }
     
     #gameOverScreen img {
-        width: 150px; /* Broken rocket image size */
+        width: 300px; /* Broken rocket image size */
         height: auto;
         margin-top: 30px;
+    }
+
+    #gameOverButton {
+      padding: 15px 30px;
+      font-size: 24px;
+      background-color: rgba(0, 0, 0, 0.1);
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: -40px;
+      font-family: 'Press Start 2P', cursive;
+    }
+    
+    #gameOverButton:hover  {
+      background-color: rgba(0, 0, 0, 0.2);
     }
     
     #score {
       position: absolute;
       top: 10px;
       left: 10px;
-      font-size: 24px;
+      font-size: 18px;
       color: white;
       z-index: 10;
     }
@@ -109,21 +192,54 @@
 
 <!-- Title Screen -->
 <div id="titleScreen">
-  <h1>COSMIZY</h1>
-  <h2>In Space?!</h2>
-  <button id="playButton">Play</button>
+  <h1 style ="color: darkviolet;" >COSMIZY</h1>
+  <h2 style ="color: yellow;"><em>In Space?!</h2></em>
+  <button id="playButton" style="color: lime;" >Play</button>
+  <button id="controlsButton">Controls</button>
+  <button id="creditsButton">Credits</button>
+</div>
+
+<div id="controlsScreen" style = "display: none;">
+  <h1>Controls</h1>
+  <p>
+    Use the arrow keys to navigate your spaceship:
+    <ul>
+      <li><strong>Up Arrow:</strong> Move up</li>
+      <li><strong>Down Arrow:</strong> Move down</li>
+      <li><strong>Left Arrow:</strong> Move left</li>
+      <li><strong>Right Arrow:</strong> Move right</li>
+    </ul>
+    Press the <strong>Spacebar</strong> to fire your weapon.
+  </p>
+  <button id="backButton">Back</button>
+</div>
+
+<div id="creditsScreen" style = "display: none;">
+  <h1>Credits</h1>
+  <p>
+    Developed by: Cosmizy<br>
+    Art and Design: Cosmizy<br>
+    Music: Arthur Benedict Baker<br>
+    Special Thanks: Hector Alvarado, Joseph Sanchez Sanchez Sanchez, and Samuel Ashlock. <br> <br> I couldn't have done it without all of you guy's help.
+  </p>
+  <button id="backButton">Back</button>
 </div>
 
 <div id="difficultyScreen" style="display: none;">
   <h1>Select Difficulty</h1>
-  <button id="easyButton">Easy</button>
-  <button id="normalButton">Normal</button>
-  <button id="hardButton">Hard</button>
-  <button id="nightmareButton">Nightmare</button>
+  <button id="easyButton" style="color: lime;">Easy</button>
+  <button id="normalButton" style="color: yellow;">Normal</button>
+  <button id="hardButton" style="color: red;">Hard</button>
+  <button id="nightmareButton" style="color: darkmagenta;">Nightmare</button>
 </div>
 
+<div id="score"style="display: none;">Score: 0</div>
+    
 <div id="gameOverScreen">
   <h1></h1>
+  <h2></h2>
+  <img id="gameOverImage" src="https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_broken.png">
+  <button id="gameOverButton">Play Again</button>
 </div>
 
 <script>
@@ -131,6 +247,7 @@
   const ctx = canvas.getContext("2d");
   const playButton = document.getElementById('playButton');
   const difficultyScreen = document.getElementById('difficultyScreen');
+  const scoreElement = document.getElementById('score');
   const difficultyButtons = document.querySelectorAll('.difficultyButton');
 
   canvas.width = window.innerWidth;
@@ -284,6 +401,7 @@ function checkCollisions() {
         // Check if enemy health is zero or below
         if (enemy.health <= 0) {
           enemies.splice(enemyIndex, 1);
+          score += 1
         }
       }
     });
@@ -328,12 +446,16 @@ function checkCollisions() {
 function gameOverScreen() {
   const gameOverDiv = document.getElementById("gameOverScreen");
   const gameOverText = gameOverDiv.querySelector("h1");
+  const gameOverScoreText = gameOverDiv.querySelector("h2");
   gameOverText.textContent = "Game Over";
+  gameOverScoreText.textContent = "Final Score:" + score;
   gameOverDiv.style.display = "flex";
-  const brokenRocket = document.createElement("img");
-  brokenRocket.src = brokenImageSrc;
-  gameOverDiv.appendChild(brokenRocket);
+  scoreElement.style.display = "none";
 }
+
+function updateScore() {
+    scoreElement.textContent = "Score: " + score;
+}    
 
   function gameLoop() {
     if (gameOver) {
@@ -346,6 +468,7 @@ function gameOverScreen() {
     updatePlayerHitbox();
       
     drawStars();
+    updateScore();
     updatePlayer();
     cyclePlayerImage();
     drawPlayer();
@@ -377,6 +500,7 @@ class Asteroid {
     this.rotation = 0; // Initial rotation angle
     this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
     this.health = asteroidHealth;
+    this.maxHealth = asteroidHealth;
     this.isDamaged = false;
   }
 
@@ -496,10 +620,12 @@ class Planet {
 
 function startGame(selectedDifficulty) {
     document.getElementById("difficultyScreen").style.display = "none";
+    scoreElement.style.display = "block";
     createStars();
     gameLoop();
 
     if (selectedDifficulty === "easy") {
+      asteroidHealth = 25;
       asteroidSpawnRate = 2000;
       asteroidMinSpeed = 2;
       asteroidMaxSpeed = 5;
@@ -509,6 +635,7 @@ function startGame(selectedDifficulty) {
     }
 
     if (selectedDifficulty === "normal") {
+      asteroidHealth = 50;
       asteroidSpawnRate = 1000;
       asteroidMinSpeed = 4;
       asteroidMaxSpeed = 8;
@@ -518,6 +645,7 @@ function startGame(selectedDifficulty) {
     }
 
     if (selectedDifficulty === "hard") {
+      asteroidHealth = 100;
       asteroidSpawnRate = 600;
       asteroidMinSpeed = 6.5;
       asteroidMaxSpeed = 13;
@@ -527,6 +655,7 @@ function startGame(selectedDifficulty) {
     }
 
     if (selectedDifficulty === "nightmare") {
+      asteroidHealth = 150;
       asteroidSpawnRate = 400;
       asteroidMinSpeed = 11;
       asteroidMaxSpeed = 21.5;
@@ -546,6 +675,20 @@ function startGame(selectedDifficulty) {
     }, asteroidSpawnRate);
 }   
 
+  document.getElementById("gameOverButton").addEventListener("click", () => {
+      location.reload();
+  });
+
+  document.getElementById("controlsButton").addEventListener("click", () => {
+    document.getElementById("controlsScreen").style.display = "flex";
+    document.getElementById("titleScreen").style.display = "none";
+  });
+
+  document.getElementById("creditsButton").addEventListener("click", () => {
+    document.getElementById("creditsScreen").style.display = "flex";
+    document.getElementById("titleScreen").style.display = "none";
+  });
+    
   // Hide the title screen and start the game when "Play" is clicked
   document.getElementById("playButton").addEventListener("click", () => {
     document.getElementById("difficultyScreen").style.display = "flex";
