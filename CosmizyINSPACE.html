@@ -297,7 +297,23 @@
   border-color: black;
   border-width: 2px;
   position: relative;
-  top: -450%;
+  top: -250%;
+  left: 0%;
+  z-index: 20;
+}
+
+.hud-bar-text2 {
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  width: 100%; /* Default fill */
+  transition: width 0.3s ease; 
+  padding: 10px 0px;
+  text-align: center;
+  border-style: none;
+  border-color: black;
+  border-width: 2px;
+  position: relative;
+  top: -250%;
   left: 0%;
   z-index: 20;
 }
@@ -330,7 +346,7 @@
 </div>
 
 <!-- HUD -->
-<div id="hud" style="">
+<div id="hud" style="display: none">
   <div id="hud-score">Score:0</div>
   <div id="hud-health">
     <div class="hud-bar">
@@ -339,19 +355,21 @@
             
     </div>
         
-      <div class="hud-bar-background" id="hud-bar-background" style="background-color: red;"></div>
+      <div class="hud-bar-background" id="hud-bar-background" style="background-color: red; display: none;"></div>
       <div class="hud-bar-text" id="hud-bar-text">100/100</div>
             
     </div>
   </div>
   <div id="hud-fuel">
     <div class="hud-bar">
-      <div class="hud-bar-fill" id="fuel-bar" style="background-color: orange;">100/100</div>
+      <div class="hud-bar-fill" id="fuel-bar" style="background-color: orange;"></div>
+      <div class="hud-bar-text2" id="hud-bar-text2">100/100</div>
     </div>
   </div>
   <div id="hud-level">
     <div class="hud-bar">
-      <div class="hud-bar-fill" id="level-bar" style="background-color: mediumblue;">0/10</div>
+      <div class="hud-bar-fill" id="level-bar" style="background-color: mediumblue;"></div>
+      <div class="hud-bar-text2" id="hud-bar-text3">0/10</div>
     </div>
   </div>
 </div>
@@ -405,11 +423,14 @@
   const ctx = canvas.getContext("2d");
   const playButton = document.getElementById('playButton');
   const difficultyScreen = document.getElementById('difficultyScreen');
+  const hudElement = document.getElementById('hud');
   const scoreElement = document.getElementById('hud-score');
   const healthElement = document.getElementById('health-bar');
   const healthElementText = document.getElementById('hud-bar-text');
   const fuelElement = document.getElementById('fuel-bar');
+  const fuelElementText = document.getElementById('hud-bar-text2');
   const levelElement = document.getElementById('level-bar');
+  const levelElementText = document.getElementById('hud-bar-text3');
   const difficultyButtons = document.querySelectorAll('.difficultyButton');
 
   canvas.width = window.innerWidth;
@@ -421,7 +442,10 @@
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_default_3.png",
   ];
   const brokenImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_broken.png";
+  const noFuelImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_nofuel.png";
 
+  const fuelCanImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/gas_can.png";
+    
   const asteroidImages = [
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_1.png",
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_2.png",
@@ -450,6 +474,8 @@ const planetImages = [
   let playerMaxFuel = 100;
   let playerHealth = 100;
   let playerMaxHealth = 100;
+
+  let fuelSpawnRate = 1000;
     
   let asteroidSpawnRate = 1000;
   let asteroidMinSpeed = 4;
@@ -464,8 +490,9 @@ const planetImages = [
 
   let currentPlayerImageIndex = 0;
   let gameOver = false;
+  let outOfFuel = false;
   let playerImage = new Image();
-  playerImage.src = playerImages[currentPlayerImageIndex];
+  
 
   // Game difficulty
   let defaultDifficulty = 'normal';
@@ -525,12 +552,22 @@ const player = {
       ctx.closePath();
     });
   }
+ 
+  function checkFuel() {
+    if (outOfFuel === true) {
+        playerImage.src = noFuelImageSrc;
+    }
+  }
 
   // Cycle through spaceship images
   function cyclePlayerImage() {
     if (frameCounter % 10 === 0) {
-      currentPlayerImageIndex = (currentPlayerImageIndex + 1) % playerImages.length;
-      playerImage.src = playerImages[currentPlayerImageIndex];
+      if (outOfFuel === false) {
+          currentPlayerImageIndex = (currentPlayerImageIndex + 1) % playerImages.length;
+          playerImage.src = playerImages[currentPlayerImageIndex];
+     } else {
+        playerImage.src = noFuelImageSrc;
+     }
     }
     frameCounter++;
   }
@@ -621,11 +658,43 @@ function checkCollisions() {
     });
   }
 
+  function updatePlayerFuel() {
+    if (playerFuel > 0) {
+
+        if (keys["ArrowUp"] && player.y > 0) {
+            playerFuel -= 1;
+        }
+    
+        if (keys["w"] && player.y > 0) {
+            playerFuel -= 1;
+        }
+    
+        if (keys["ArrowDown"] && player.y > 0) {
+            playerFuel -= 1;
+        }
+    
+        if (keys["s"] && player.y > 0) {
+            playerFuel -= 1;
+        }
+        
+    }
+  }
+
   function updatePlayer() {
-    if (keys["ArrowUp"] && player.y > 0) player.y -= 5;
-    if (keys["w"] && player.y > 0) player.y -= 5;
-    if (keys["ArrowDown"] && player.y + player.height < canvas.height) player.y += 5;
-    if (keys["s"] && player.y + player.height < canvas.height) player.y += 5;
+    if (playerFuel > 0) {
+
+        if (keys["ArrowUp"] && player.y > 0) {
+            player.y -= 5;
+        }
+        if (keys["w"] && player.y > 0) player.y -= 5;
+        if (keys["ArrowDown"] && player.y + player.height < canvas.height) player.y += 5;
+        if (keys["s"] && player.y + player.height < canvas.height) player.y += 5;
+        
+    } else if (playerFuel <= 0) {
+    
+        playerFuel = 0;
+        outOfFuel = true;
+    }
   }
 
     function updatePlayerHitbox() {
@@ -654,8 +723,10 @@ function updateHUD() {
     scoreElement.textContent = "Score:" + score;
     healthElementText.textContent = playerHealth + "/" + playerMaxHealth;
     updateBar(healthElement, playerHealth);
-    fuelElement.textContent = playerFuel + "/" + playerMaxFuel;
-    levelElement.textContent = currentLevel + "/" + levelGoal;
+    fuelElementText.textContent = playerFuel + "/" + playerMaxFuel;
+    updateBar(fuelElement, playerFuel);
+    levelElementText.textContent = currentLevel + "/" + levelGoal;
+    updateBar(levelElement, currentLevel);
 }    
 
   function gameLoop() {
@@ -671,6 +742,7 @@ function updateHUD() {
     drawStars();
     updateHUD()
     updatePlayer();
+    checkFuel();
     cyclePlayerImage();
     drawPlayer();
     enemies.forEach(enemy => enemy.update());
@@ -812,6 +884,68 @@ class Planet {
   }
 }
 
+class fuelCan {
+  constructor() {
+    this.size = 60; // Hitbox size
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = fuelCanImageSrc;
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.minSpeed = asteroidMinSpeed;
+    this.maxSpeed = asteroidMaxSpeed;
+    this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
+    this.rotation = 0; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
+    this.health = 1;
+    this.maxHealth = 1;
+    this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = 0;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
+    ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the asteroid
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move asteroid left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
   window.addEventListener("keydown", (e) => {
     keys[e.key] = true;
     if (e.key === " ") {
@@ -826,6 +960,7 @@ class Planet {
 function startGame(selectedDifficulty) {
     document.getElementById("difficultyScreen").style.display = "none";
     scoreElement.style.display = "block";
+    hudElement.style.display = "flex";
     createStars();
     gameLoop();
 
@@ -868,6 +1003,10 @@ function startGame(selectedDifficulty) {
       planetHealthMultiplier = 3;
       planetSpeedMultiplier = 2;
     }
+
+    setInterval(() => {
+        updatePlayerFuel();
+    }, 100); // Spawn a planet every spawn rate
     
     setInterval(() => {
       const planet = new Planet();
@@ -878,6 +1017,20 @@ function startGame(selectedDifficulty) {
       const asteroid = new Asteroid();
       enemies.push(asteroid);
     }, asteroidSpawnRate);
+
+    setInterval(() => {
+        if (playerFuel < 100) {
+            if (playerFuel + 10 <= 100) {
+                playerFuel += 10;
+            }
+        }
+    }, 5000);
+    
+    setInterval(() => {
+      const fuelCan = new fuelCan();
+      enemies.push(fuelCan);
+    }, 1000);
+    
 }
 
   document.getElementById("gameOverButton").addEventListener("click", () => {
