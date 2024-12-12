@@ -77,6 +77,21 @@
   #backButton:hover {
     background-color: rgba(0, 0, 0, 0);
   }
+
+#backButton2 {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: white;
+    cursor: pointer;
+    border-radius: 0px;
+    margin-top: 20px;
+    font-family: 'Press Start 2P', cursive;
+  }
+
+  #backButton2:hover {
+    background-color: rgba(0, 0, 0, 0);
+  }
     
     #gameOverScreen h1 {
       font-size: 60px;
@@ -95,15 +110,14 @@
       font-size: 24px;
       background-color: rgba(0, 0, 0, 0.1);
       color: white;
-      border: none;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 0px;
       margin-top: 20px;
       font-family: 'Press Start 2P', cursive;
     }
 
     #difficultyScreen button:hover {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: rgba(0, 0, 0, 0);
     }
       
     #playButton {
@@ -150,6 +164,10 @@
     #creditsButton:hover  {
       background-color: rgba(0, 0, 0, 0);
     }
+    
+    #creditsButton:hover  {
+      background-color: rgba(0, 0, 0, 0);
+    }
 
     #gameOverScreen {
       display: none; /* Initially hidden */
@@ -166,9 +184,8 @@
       font-size: 24px;
       background-color: rgba(0, 0, 0, 0.1);
       color: white;
-      border: none;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 0px;
       margin-top: -40px;
       font-family: 'Press Start 2P', cursive;
     }
@@ -185,6 +202,119 @@
       color: white;
       z-index: 10;
     }
+
+#hud {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  align-items: center;
+  border-style: outset;
+  border-color: black;
+
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-width: 2px;
+  margin-top: 100px;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#hud-score {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 10px 30px;
+  text-align: center;
+  border-style: outset;
+  border-color: black;
+  border-width: 2px;
+}
+
+#hud-health, #hud-fuel, #hud-level {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0px;
+  text-align: center;
+  border-style: outset;
+  border-color: black;
+  border-width: 2px;
+  position: relative;
+}
+
+.hud-bar {
+  width: 200px;
+  height: 20px;
+  background-color: rgba(255, 0, 0, 0);
+  border-radius: 0px;
+  position: relative;
+}
+
+.hud-bar-fill {
+  height: 100%;
+  background-color: rgba(0, 255, 0, 1);
+  width: 100%; /* Default fill */
+  transition: width 0.3s ease; 
+  padding: 10px 0px;
+  text-align: center;
+  border-style: none;
+  border-color: black;
+  border-width: 2px;
+  position: relative;
+  top: -50%;
+  left: 0%;
+  z-index: 19;
+}
+
+.hud-bar-background {
+  height: 100%;
+  background-color: rgba(255, 0, 0, 1);
+  width: 100%; /* Default fill */
+  transition: width 0.3s ease; 
+  padding: 10px 0px;
+  text-align: center;
+  border-style: none;
+  border-color: black;
+  border-width: 2px;
+  position: relative;
+  top: -250%;
+  left: 0%;
+  z-index: 18;
+}
+
+.hud-bar-text {
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  width: 100%; /* Default fill */
+  transition: width 0.3s ease; 
+  padding: 10px 0px;
+  text-align: center;
+  border-style: none;
+  border-color: black;
+  border-width: 2px;
+  position: relative;
+  top: -450%;
+  left: 0%;
+  z-index: 20;
+}
+
+#health-bar {
+  background-color: lime;
+}
+
+#fuel-bar {
+  background-color: orange;
+}
+
+#level-bar {
+  background-color: mediumblue;
+}
+
+
   </style>
 </head>
 <body>
@@ -199,15 +329,43 @@
   <button id="creditsButton">Credits</button>
 </div>
 
+<!-- HUD -->
+<div id="hud" style="">
+  <div id="hud-score">Score:0</div>
+  <div id="hud-health">
+    <div class="hud-bar">
+
+    <div class="hud-bar-fill" id="health-bar" style="background-color: lime;">
+            
+    </div>
+        
+      <div class="hud-bar-background" id="hud-bar-background" style="background-color: red;"></div>
+      <div class="hud-bar-text" id="hud-bar-text">100/100</div>
+            
+    </div>
+  </div>
+  <div id="hud-fuel">
+    <div class="hud-bar">
+      <div class="hud-bar-fill" id="fuel-bar" style="background-color: orange;">100/100</div>
+    </div>
+  </div>
+  <div id="hud-level">
+    <div class="hud-bar">
+      <div class="hud-bar-fill" id="level-bar" style="background-color: mediumblue;">0/10</div>
+    </div>
+  </div>
+</div>
+
+
 <div id="controlsScreen" style = "display: none;">
   <h1>Controls</h1>
   <p>
     Use the arrow keys to navigate your spaceship:
     <ul>
-      <li><strong>Up Arrow:</strong> Move up</li>
-      <li><strong>Down Arrow:</strong> Move down</li>
-      <li><strong>Left Arrow:</strong> Move left</li>
-      <li><strong>Right Arrow:</strong> Move right</li>
+      <li><strong>Up Arrow or W:</strong> Move up</li>
+      <li><strong>Down Arrow or S:</strong> Move down</li>
+      <li><strong>Left Arrow or A:</strong> Brake</li>
+      <li><strong>Right Arrow or D:</strong> Boost</li>
     </ul>
     Press the <strong>Spacebar</strong> to fire your weapon.
   </p>
@@ -220,9 +378,9 @@
     Developed by: Cosmizy<br>
     Art and Design: Cosmizy<br>
     Music: Arthur Benedict Baker<br>
-    Special Thanks: Hector Alvarado, Joseph Sanchez Sanchez Sanchez, and Samuel Ashlock. <br> <br> I couldn't have done it without all of you guy's help.
+    Special Thanks: Hector Alvarado, Joseph Sanchez Sanchez Sanchez, and Samuel Ashlock. <br> <br> I couldn't have done it without all of your guy's help.
   </p>
-  <button id="backButton">Back</button>
+  <button id="backButton2">Back</button>
 </div>
 
 <div id="difficultyScreen" style="display: none;">
@@ -247,7 +405,11 @@
   const ctx = canvas.getContext("2d");
   const playButton = document.getElementById('playButton');
   const difficultyScreen = document.getElementById('difficultyScreen');
-  const scoreElement = document.getElementById('score');
+  const scoreElement = document.getElementById('hud-score');
+  const healthElement = document.getElementById('health-bar');
+  const healthElementText = document.getElementById('hud-bar-text');
+  const fuelElement = document.getElementById('fuel-bar');
+  const levelElement = document.getElementById('level-bar');
   const difficultyButtons = document.querySelectorAll('.difficultyButton');
 
   canvas.width = window.innerWidth;
@@ -278,17 +440,27 @@ const planetImages = [
 ];
 
   let score = 0; // Initialize score variable
+  let highscore = 0; // Initialize score variable
 
+  let currentLevel = 0; // Initialize level variable
+  let levelGoal = 10;
+    
   let playerDamage = 50;
+  let playerFuel = 100;
+  let playerMaxFuel = 100;
+  let playerHealth = 100;
+  let playerMaxHealth = 100;
     
   let asteroidSpawnRate = 1000;
   let asteroidMinSpeed = 4;
   let asteroidMaxSpeed = 8;
   let asteroidHealth = 50;
+  let asteroidDamage = 50;
     
   let planetSpawnRate = 20000;
   let planetHealthMultiplier = 1;
   let planetSpeedMultiplier = 1;
+  let planetDamage = 100;
 
   let currentPlayerImageIndex = 0;
   let gameOver = false;
@@ -304,8 +476,11 @@ const player = {
   y: canvas.height / 2 - 20,
   width: 60,
   height: 60,
-  health: 100,
-  damage: playerDamage,
+  //health: playerHealth,
+  //maxHealth: playerMaxHealth,
+  //fuel: playerFuel,
+  //maxfuel: playerMaxFuel,
+  //damage: playerDamage,
   hitbox: {
     x: 0,
     y: 0,
@@ -393,7 +568,7 @@ function checkCollisions() {
         bullet.y + bullet.height > enemy.y
       ) {
         // Reduce health of the enemy
-        enemy.takeDamage(player.damage);
+        enemy.takeDamage(playerDamage);
 
         // Remove bullet
         bullets.splice(bulletIndex, 1);
@@ -402,6 +577,7 @@ function checkCollisions() {
         if (enemy.health <= 0) {
           enemies.splice(enemyIndex, 1);
           score += 1
+          updateHUD();
         }
       }
     });
@@ -414,8 +590,22 @@ function checkCollisions() {
       player.hitbox.y < enemy.y + enemy.size &&
       player.hitbox.y + player.hitbox.height > enemy.y
     ) {
-      playerImage.src = brokenImageSrc;
-      gameOver = true;
+        if (enemy.damagedPlayer === false) {
+        
+        
+        // Reduce health of the player
+        playerHealth -= enemy.damage;
+        enemy.damagedPlayer = true;
+        // Check if player health is zero or below
+        if (playerHealth <= 0) {
+          if (score >= highscore) {
+            highscore = score
+          }
+          playerImage.src = brokenImageSrc;
+          gameOver = true;
+        }
+        updateHUD();
+      }
     }
   });
 }
@@ -450,11 +640,22 @@ function gameOverScreen() {
   gameOverText.textContent = "Game Over";
   gameOverScoreText.textContent = "Final Score:" + score;
   gameOverDiv.style.display = "flex";
-  scoreElement.style.display = "none";
 }
 
 function updateScore() {
-    scoreElement.textContent = "Score: " + score;
+    scoreElement.textContent = "Score:" + score;
+}
+
+function updateBar(bar, percentage) {
+  bar.style.width = `${percentage}%`;
+}
+    
+function updateHUD() {
+    scoreElement.textContent = "Score:" + score;
+    healthElementText.textContent = playerHealth + "/" + playerMaxHealth;
+    updateBar(healthElement, playerHealth);
+    fuelElement.textContent = playerFuel + "/" + playerMaxFuel;
+    levelElement.textContent = currentLevel + "/" + levelGoal;
 }    
 
   function gameLoop() {
@@ -468,7 +669,7 @@ function updateScore() {
     updatePlayerHitbox();
       
     drawStars();
-    updateScore();
+    updateHUD()
     updatePlayer();
     cyclePlayerImage();
     drawPlayer();
@@ -502,6 +703,8 @@ class Asteroid {
     this.health = asteroidHealth;
     this.maxHealth = asteroidHealth;
     this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = asteroidDamage;
   }
 
   draw() {
@@ -555,14 +758,16 @@ class Planet {
     this.image.src = planetData.src;
     this.x = canvas.width;
     this.y = Math.random() * (canvas.height - this.imageSize);
-    this.speed = planetData.speed;
+    this.speed = planetData.speed * planetSpeedMultiplier;
     this.rotation = 0; // Initial rotation angle
     this.rotationSpeed = (Math.random() - 1) * 0.1 / (this.size / 20); // Random rotation speed
-    this.health = planetData.health;
-    this.maxHealth = planetData.health;
+    this.health = planetData.health * healthMultiplier;
+    this.maxHealth = planetData.health * healthMultiplier;
     this.healthMultiplier = planetHealthMultiplier;
     this.speedMultiplier = planetSpeedMultiplier;
     this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = planetDamage;
   }
 
   draw() {
@@ -609,7 +814,7 @@ class Planet {
 
   window.addEventListener("keydown", (e) => {
     keys[e.key] = true;
-    if (e.key === "d" || e.key === "ArrowRight") {
+    if (e.key === " ") {
       shootBullet();
     }
   });
@@ -667,16 +872,26 @@ function startGame(selectedDifficulty) {
     setInterval(() => {
       const planet = new Planet();
       enemies.push(planet); // Add planets to the same enemies array
-    }, planetSpawnRate); // Spawn a planet every 20 seconds
+    }, planetSpawnRate); // Spawn a planet every spawn rate
       
     setInterval(() => {
       const asteroid = new Asteroid();
       enemies.push(asteroid);
     }, asteroidSpawnRate);
-}   
+}
 
   document.getElementById("gameOverButton").addEventListener("click", () => {
       location.reload();
+  });
+
+  document.getElementById("backButton").addEventListener("click", () => {
+    document.getElementById("controlsScreen").style.display = "none";
+    document.getElementById("titleScreen").style.display = "flex";
+  });
+
+  document.getElementById("backButton2").addEventListener("click", () => {
+    document.getElementById("creditsScreen").style.display = "none";
+    document.getElementById("titleScreen").style.display = "flex";
   });
 
   document.getElementById("controlsButton").addEventListener("click", () => {
