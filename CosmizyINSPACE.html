@@ -119,6 +119,8 @@
     #difficultyScreen button:hover {
       background-color: rgba(0, 0, 0, 0);
     }
+
+    
       
     #playButton {
         padding: 10px 20px;
@@ -234,7 +236,7 @@
   border-width: 2px;
 }
 
-#hud-health, #hud-fuel, #hud-level {
+#hud-health, #hud-fuel, #hud-ammo {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -326,7 +328,7 @@
   background-color: orange;
 }
 
-#level-bar {
+#ammo-bar {
   background-color: mediumblue;
 }
 
@@ -366,10 +368,10 @@
       <div class="hud-bar-text2" id="hud-bar-text2">100/100</div>
     </div>
   </div>
-  <div id="hud-level">
+  <div id="hud-ammo">
     <div class="hud-bar">
-      <div class="hud-bar-fill" id="level-bar" style="background-color: mediumblue;"></div>
-      <div class="hud-bar-text2" id="hud-bar-text3">0/10</div>
+      <div class="hud-bar-fill" id="ammo-bar" style="background-color: mediumblue;"></div>
+      <div class="hud-bar-text2" id="hud-bar-text3">20/100</div>
     </div>
   </div>
 </div>
@@ -402,12 +404,25 @@
 </div>
 
 <div id="difficultyScreen" style="display: none;">
-  <h1>Select Difficulty</h1>
-  <button id="easyButton" style="color: lime;">Easy</button>
-  <button id="normalButton" style="color: yellow;">Normal</button>
-  <button id="hardButton" style="color: red;">Hard</button>
-  <button id="nightmareButton" style="color: darkmagenta;">Nightmare</button>
+  <h1>Game Settings</h1>
+  <div id="difficultyOptions" style="display: flex; justify-content: center; gap: 40px;">
+    <div id="difficultyButtons" style = "display: flex; flex-direction: column;">
+      <h2 style="color: white;">Difficulty</h2>
+      <button id="easyButton" style="color: lime;">Easy</button>
+      <button id="normalButton" style="color: yellow;">Normal</button>
+      <button id="hardButton" style="color: red;">Hard</button>
+      <button id="nightmareButton" style="color: darkmagenta;">Nightmare</button>
+    </div>
+    <div id="multipliers" style="text-align: center; display: flex; flex-direction: column;">
+      <h2 style="color: white;">Multipliers</h2>
+      <button id="multiplierButton1" style="color: white;">Planets Only</button>
+      <button id="multiplierButton2" style="color: white;">Infinite Fuel</button>
+      <button id="multiplierButton3" style="color: white;">Infinite Ammo</button>
+      <button id="multiplierButton4" style="color: white;">Placeholder 4</button>
+    </div>
+  </div>
 </div>
+
 
 <div id="score"style="display: none;">Score: 0</div>
     
@@ -429,8 +444,8 @@
   const healthElementText = document.getElementById('hud-bar-text');
   const fuelElement = document.getElementById('fuel-bar');
   const fuelElementText = document.getElementById('hud-bar-text2');
-  const levelElement = document.getElementById('level-bar');
-  const levelElementText = document.getElementById('hud-bar-text3');
+  const ammoElement = document.getElementById('ammo-bar');
+  const ammoElementText = document.getElementById('hud-bar-text3');
   const difficultyButtons = document.querySelectorAll('.difficultyButton');
 
   canvas.width = window.innerWidth;
@@ -466,33 +481,39 @@ const planetImages = [
   let score = 0; // Initialize score variable
   let highscore = 0; // Initialize score variable
 
-  let currentLevel = 0; // Initialize level variable
-  let levelGoal = 10;
-    
+  // Player settings
   let playerDamage = 50;
   let playerFuel = 100;
   let playerMaxFuel = 100;
   let playerHealth = 100;
   let playerMaxHealth = 100;
-
-  let fuelSpawnRate = 1000;
-    
+  let playerAmmo = 20;
+  let playerMaxAmmo = 100;
+//Fuel settings
+  let fuelSpawnRate = 15000;
+  let fuelCanHealth = 1;
+  let fuelCanMaxHealth = 1;
+    //Asteroid settings
   let asteroidSpawnRate = 1000;
   let asteroidMinSpeed = 4;
   let asteroidMaxSpeed = 8;
   let asteroidHealth = 50;
   let asteroidDamage = 50;
-    
+    //Planet settings
   let planetSpawnRate = 20000;
   let planetHealthMultiplier = 1;
   let planetSpeedMultiplier = 1;
-  let planetDamage = 100;
-
+  let planetDamage = 200;
+//Random Settings
   let currentPlayerImageIndex = 0;
   let gameOver = false;
   let outOfFuel = false;
   let playerImage = new Image();
-  
+  // Multipliers
+  let planetsOnly = false;
+  let infiniteFuel = false;
+  let infiniteAmmo = false;
+  let multiplier4 = false;
 
   // Game difficulty
   let defaultDifficulty = 'normal';
@@ -612,8 +633,27 @@ function checkCollisions() {
 
         // Check if enemy health is zero or below
         if (enemy.health <= 0) {
+
+          if (enemy.isGas === true) {
+
+            if (playerFuel < playerMaxFuel) {
+                if (playerFuel + 10 <= playerMaxFuel) {
+                    playerFuel += 20;
+                } else {
+                    playerFuel += playerMaxFuel - playerFuel;
+                }
+            }
+              
+          }
+            
           enemies.splice(enemyIndex, 1);
-          score += 1
+
+          if (enemy.name === "Planet") {
+            score += 5
+          } else {
+            score += 1
+          }
+            
           updateHUD();
         }
       }
@@ -660,30 +700,30 @@ function checkCollisions() {
 
   function updatePlayerFuel() {
     if (playerFuel > 0) {
-
-        if (keys["ArrowUp"] && player.y > 0) {
-            playerFuel -= 1;
-        }
-    
-        if (keys["w"] && player.y > 0) {
-            playerFuel -= 1;
-        }
-    
-        if (keys["ArrowDown"] && player.y > 0) {
-            playerFuel -= 1;
-        }
-    
-        if (keys["s"] && player.y > 0) {
-            playerFuel -= 1;
-        }
+        if (infiniteFuel === false) {
+            if (keys["ArrowUp"] && player.y > 0) {
+                playerFuel -= 1;
+            }
         
+            if (keys["w"] && player.y > 0) {
+                playerFuel -= 1;
+            }
+        
+            if (keys["ArrowDown"] && player.y + player.height < window.innerHeight) {
+                playerFuel -= 1;
+            }
+        
+            if (keys["s"] && player.y > 0) {
+                playerFuel -= 1;
+            }
+      }
     }
   }
 
   function updatePlayer() {
     if (playerFuel > 0) {
 
-        if (keys["ArrowUp"] && player.y > 0) {
+        if (keys["ArrowUp"] && player.y > 0 && player.y < canvas.height) {
             player.y -= 5;
         }
         if (keys["w"] && player.y > 0) player.y -= 5;
@@ -725,8 +765,8 @@ function updateHUD() {
     updateBar(healthElement, playerHealth);
     fuelElementText.textContent = playerFuel + "/" + playerMaxFuel;
     updateBar(fuelElement, playerFuel);
-    levelElementText.textContent = currentLevel + "/" + levelGoal;
-    updateBar(levelElement, currentLevel);
+    ammoElementText.textContent = playerAmmo + "/" + playerMaxAmmo;
+    updateBar(ammoElement, playerAmmo);
 }    
 
   function gameLoop() {
@@ -759,6 +799,7 @@ function updateHUD() {
 
 class Asteroid {
   constructor() {
+    this.name = "Asteroid";
     this.minSize = 30;
     this.maxSize = 80;
     this.size = Math.random() * (this.maxSize - this.minSize) + this.minSize; // Hitbox size
@@ -777,6 +818,7 @@ class Asteroid {
     this.isDamaged = false;
     this.damagedPlayer = false;
     this.damage = asteroidDamage;
+    this.isGas = false;
   }
 
   draw() {
@@ -824,6 +866,7 @@ class Asteroid {
 class Planet {
   constructor() {
     const planetData = planetImages[Math.floor(Math.random() * planetImages.length)];
+    this.name = "Planet";
     this.size = planetData.size;
     this.imageSize = this.size * 1; // Image size
     this.image = new Image();
@@ -832,76 +875,13 @@ class Planet {
     this.y = Math.random() * (canvas.height - this.imageSize);
     this.speed = planetData.speed * planetSpeedMultiplier;
     this.rotation = 0; // Initial rotation angle
-    this.rotationSpeed = (Math.random() - 1) * 0.1 / (this.size / 20); // Random rotation speed
-    this.health = planetData.health * healthMultiplier;
-    this.maxHealth = planetData.health * healthMultiplier;
-    this.healthMultiplier = planetHealthMultiplier;
-    this.speedMultiplier = planetSpeedMultiplier;
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
+    this.health = planetData.health * planetHealthMultiplier;
+    this.maxHealth = this.health;
     this.isDamaged = false;
     this.damagedPlayer = false;
     this.damage = planetDamage;
-  }
-
-  draw() {
-    ctx.save(); // Save the current canvas state
-    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to planet center
-    ctx.rotate(this.rotation); // Rotate canvas around the planet center
-    ctx.drawImage(
-      this.image,
-      -this.size / 2, // Draw image centered on the planet
-      -this.size / 2,
-      this.size,
-      this.size
-    );
-    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
-
-    if (this.isDamaged) {
-      ctx.fillStyle = "red";
-      ctx.fillRect(this.x, this.y - 10, this.size, 5);
-      ctx.fillStyle = "green";
-      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
-    }
-    
-    // Draw hitbox (optional for debugging)
-    //ctx.strokeStyle = "red";
-    //ctx.lineWidth = 2;
-    //ctx.strokeRect(this.x, this.y, this.size, this.size);
-  }
-
-  takeDamage(amount) {
-    this.health -= amount;
-    this.isDamaged = true;
-  }
-
-  update() {
-    this.x -= this.speed; // Move planet left
-    this.rotation += this.rotationSpeed; // Increment rotation angle
-    if (this.x + this.size < 0) {
-      const index = enemies.indexOf(this);
-      if (index > -1) enemies.splice(index, 1);
-    }
-    this.draw();
-  }
-}
-
-class fuelCan {
-  constructor() {
-    this.size = 60; // Hitbox size
-    this.imageSize = this.size * 1; // Image size
-    this.image = new Image();
-    this.image.src = fuelCanImageSrc;
-    this.x = canvas.width;
-    this.y = Math.random() * (canvas.height - this.imageSize);
-    this.minSpeed = asteroidMinSpeed;
-    this.maxSpeed = asteroidMaxSpeed;
-    this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
-    this.rotation = 0; // Initial rotation angle
-    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
-    this.health = 1;
-    this.maxHealth = 1;
-    this.isDamaged = false;
-    this.damagedPlayer = false;
-    this.damage = 0;
+    this.isGas = false;
   }
 
   draw() {
@@ -946,10 +926,82 @@ class fuelCan {
   }
 }
 
+
+
+class FuelCan {
+  constructor() {
+    this.name = "Fuel Can";
+    this.size = 60; // Hitbox size
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = fuelCanImageSrc;
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.minSpeed = asteroidMinSpeed;
+    this.maxSpeed = asteroidMaxSpeed;
+    this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
+    this.rotation = (Math.random() - 0.5) * 0.25 / (this.size / 20);; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 15); // Random rotation speed
+    this.health = fuelCanHealth;
+    this.maxHealth = fuelCanMaxHealth;
+    this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = 0;
+    this.isGas = true;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
+    ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the asteroid
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move asteroid left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
   window.addEventListener("keydown", (e) => {
     keys[e.key] = true;
     if (e.key === " ") {
-      shootBullet();
+      if (playerAmmo > 0) {
+         shootBullet();
+         if (infiniteAmmo === false) {
+            playerAmmo -= 1;
+        }
+        
+     }
     }
   });
 
@@ -965,6 +1017,9 @@ function startGame(selectedDifficulty) {
     gameLoop();
 
     if (selectedDifficulty === "easy") {
+      fuelSpawnRate = 4000;
+      fuelCanHealth = 1;
+      fuelCanMaxHealth = 1;
       asteroidHealth = 25;
       asteroidSpawnRate = 2000;
       asteroidMinSpeed = 2;
@@ -972,9 +1027,13 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 30000;
       planetHealthMultiplier = 0.75;
       planetSpeedMultiplier = 0.85;
+      playerAmmo =  100;
     }
 
     if (selectedDifficulty === "normal") {
+      fuelSpawnRate = 5000;
+      fuelCanHealth = 1;
+      fuelCanMaxHealth = 1;
       asteroidHealth = 50;
       asteroidSpawnRate = 1000;
       asteroidMinSpeed = 4;
@@ -982,9 +1041,13 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 20000;
       planetHealthMultiplier = 1;
       planetSpeedMultiplier = 1;
+      playerAmmo = 50;
     }
 
     if (selectedDifficulty === "hard") {
+      fuelSpawnRate = 5000;
+      fuelCanHealth = 100;
+      fuelCanMaxHealth = 100;
       asteroidHealth = 100;
       asteroidSpawnRate = 600;
       asteroidMinSpeed = 6.5;
@@ -992,44 +1055,60 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 15000;
       planetHealthMultiplier = 1.6;
       planetSpeedMultiplier = 1.5;
+      playerAmmo = 30;
     }
 
     if (selectedDifficulty === "nightmare") {
+      fuelSpawnRate = 6000;
+      fuelCanHealth = 150;
+      fuelCanMaxHealth = 150;
       asteroidHealth = 150;
       asteroidSpawnRate = 400;
       asteroidMinSpeed = 11;
       asteroidMaxSpeed = 21.5;
       planetSpawnRate = 10000;
       planetHealthMultiplier = 3;
-      planetSpeedMultiplier = 2;
+      planetSpeedMultiplier = 1.5;
+      playerAmmo = 20;
     }
 
     setInterval(() => {
         updatePlayerFuel();
-    }, 100); // Spawn a planet every spawn rate
-    
-    setInterval(() => {
-      const planet = new Planet();
-      enemies.push(planet); // Add planets to the same enemies array
-    }, planetSpawnRate); // Spawn a planet every spawn rate
-      
-    setInterval(() => {
-      const asteroid = new Asteroid();
-      enemies.push(asteroid);
-    }, asteroidSpawnRate);
+    }, 100); // Update fuel every 100 miliseconds
 
-    setInterval(() => {
-        if (playerFuel < 100) {
-            if (playerFuel + 10 <= 100) {
-                playerFuel += 10;
-            }
-        }
-    }, 5000);
-    
-    setInterval(() => {
-      const fuelCan = new fuelCan();
-      enemies.push(fuelCan);
-    }, 1000);
+    if (planetsOnly === false) {
+        setInterval(() => {
+          const planet = new Planet();
+          enemies.push(planet); // Add planets to the same enemies array
+        }, planetSpawnRate); // Spawn a planet every spawn rate
+    } else {
+        setInterval(() => {
+          const planet = new Planet();
+          enemies.push(planet); // Add planets to the same enemies array
+        }, 2500); // Spawn a planet every spawn rate
+    }
+
+    if (planetsOnly === false) {
+        setInterval(() => {
+          const asteroid = new Asteroid();
+          enemies.push(asteroid);
+        }, asteroidSpawnRate);
+    }
+
+    //setInterval(() => {
+        //if (playerFuel < 100) {
+            //if (playerFuel + 10 <= 100) {
+                //playerFuel += 10;
+            //}
+        //}
+    //}, 10000);
+
+    if (infiniteFuel === false) {
+        setInterval(() => {
+          const fuelCan = new FuelCan();
+          enemies.push(fuelCan);
+        }, fuelSpawnRate);
+    }
     
 }
 
@@ -1067,6 +1146,45 @@ function startGame(selectedDifficulty) {
   document.getElementById("normalButton").addEventListener("click", () => startGame("normal"));
   document.getElementById("hardButton").addEventListener("click", () => startGame("hard"));
   document.getElementById("nightmareButton").addEventListener("click", () => startGame("nightmare"));
+    
+    //planets only multiplier
+  document.getElementById("multiplierButton1").addEventListener("click", () => {
+    if (document.getElementById("multiplierButton1").style.color === "white") {
+        document.getElementById("multiplierButton1").style.color = "lime";
+        planetsOnly = true;
+    } else {
+        document.getElementById("multiplierButton1").style.color = "white";
+        planetsOnly = false;
+    }
+  });
+//infinite fuel multiplier
+  document.getElementById("multiplierButton2").addEventListener("click", () => {
+    if (document.getElementById("multiplierButton2").style.color === "white") {
+        document.getElementById("multiplierButton2").style.color = "lime";
+        infiniteFuel = true;
+    } else {
+        document.getElementById("multiplierButton2").style.color = "white";
+        infiniteFuel = false;
+    }
+  });
+//infinite ammo multiplier
+  document.getElementById("multiplierButton3").addEventListener("click", () => {
+    if (document.getElementById("multiplierButton3").style.color === "white") {
+        document.getElementById("multiplierButton3").style.color = "lime";
+        infiniteAmmo = true;
+    } else {
+        document.getElementById("multiplierButton3").style.color = "white";
+        infiniteAmmo = false;
+    }
+  });
+
+  document.getElementById("multiplierButton4").addEventListener("click", () => {
+    if (document.getElementById("multiplierButton4").style.color === "white") {
+        document.getElementById("multiplierButton4").style.color = "lime";
+    } else {
+        document.getElementById("multiplierButton4").style.color = "white";
+    }
+  });
     
     createStars();
     drawStars(); // Ensure stars are created even on title screen
