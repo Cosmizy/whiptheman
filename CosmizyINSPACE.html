@@ -196,11 +196,11 @@
       background-color: rgba(0, 0, 0, 0.2);
     }
     
-    #score {
+    #globalHighscore {
       position: absolute;
       top: 10px;
       left: 10px;
-      font-size: 18px;
+      font-size: 16px;
       color: white;
       z-index: 10;
     }
@@ -426,7 +426,7 @@
 </div>
 
 
-<div id="score"style="display: none;">Score: 0</div>
+<div id="globalHighscore"style="display: none;">Global Highscore: 105</div>
     
 <div id="gameOverScreen">
   <h1></h1>
@@ -435,7 +435,54 @@
   <button id="gameOverButton">Play Again</button>
 </div>
 
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
+
+
+    
 <script>
+
+    //boring firebase stuff
+    
+  const firebaseConfig = {
+    apiKey: "AIzaSyClGT1FA0eD1DwPGgXmZik9wsab_6zb1Qs",
+    authDomain: "spacegame-ff48c.firebaseapp.com",
+    projectId: "spacegame-ff48c",
+    storageBucket: "spacegame-ff48c.firebasestorage.app",
+    messagingSenderId: "594875157883",
+    appId: "1:594875157883:web:f15c176ff002eaced781de"
+  };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Reference to the Firebase database
+    var database = firebase.database().ref("highscore");
+
+        database.on('value', (snapshot) => {
+          let retrievedData = snapshot.val().score;
+          highscore = retrievedData;
+        }, (errorObject) => {
+          console.log('The read failed: ' + errorObject.name);
+        }); 
+
+
+database.once('value')
+  .then(function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+      var snapshotData = childSnapshot.val();
+      if (snapshotData.score > highscore) {
+        highscore = snapshotData.score;
+        alert(highscore);
+        return; // Exit the loop since we found the score
+      }
+    });
+  })
+  .catch(function(error) {
+    alert("Error getting data:", error);
+  });
+    
+    
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   const playButton = document.getElementById('playButton');
@@ -481,7 +528,7 @@ const planetImages = [
 ];
 
   let score = 0; // Initialize score variable
-  let highscore = 0; // Initialize score variable
+  let highscore = 10; // Initialize score variable
 
   // Player settings
   let playerDamage = 50;
@@ -677,8 +724,12 @@ function checkCollisions() {
         enemy.damagedPlayer = true;
         // Check if player health is zero or below
         if (playerHealth <= 0) {
+            
           if (score >= highscore) {
-            highscore = score
+            //highscore = score
+              database.set({
+                score: score
+              });
           }
           playerImage.src = brokenImageSrc;
           gameOver = true;
@@ -1023,11 +1074,13 @@ class FuelCan {
 
 function startGame(selectedDifficulty) {
     document.getElementById("difficultyScreen").style.display = "none";
+    document.getElementById("globalHighscore").innerText = "Global Highscore: " + highscore;
+    document.getElementById("globalHighscore").style.display =  "flex";
     scoreElement.style.display = "block";
     hudElement.style.display = "flex";
     createStars();
     gameLoop();
-
+    
     if (selectedDifficulty === "easy") {
       fuelSpawnRate = 4000;
       fuelCanHealth = 1;
