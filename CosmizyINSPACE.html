@@ -388,6 +388,7 @@
       <li><strong>Right Arrow or D:</strong> Boost</li>
     </ul>
     Press the <strong>Spacebar</strong> to fire your weapon.
+    Press <strong>R</strong> to reload your weapon.
   </p>
   <button id="backButton">Back</button>
 </div>
@@ -717,6 +718,16 @@ function checkCollisions() {
                 playerFuel -= 1;
             }
       }
+    }
+  }
+
+  function checkReload() {
+    if (playerAmmo < playerMaxAmmo) {
+
+        if (keys["r"] && infiniteAmmo === false) {
+            playerAmmo += 1;
+            playerFuel -= 1;
+        }
     }
   }
 
@@ -1075,6 +1086,10 @@ function startGame(selectedDifficulty) {
     setInterval(() => {
         updatePlayerFuel();
     }, 100); // Update fuel every 100 miliseconds
+
+    setInterval(() => {
+        checkReload();
+    }, 200); // Update fuel every 100 miliseconds
 
     if (planetsOnly === false) {
         setInterval(() => {
