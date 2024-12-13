@@ -1095,6 +1095,10 @@ function startGame(selectedDifficulty) {
         }, asteroidSpawnRate);
     }
 
+    if (infiniteAmmo === true) {
+        playerAmmo = playerMaxAmmo;
+    }
+
     //setInterval(() => {
         //if (playerFuel < 100) {
             //if (playerFuel + 10 <= 100) {
