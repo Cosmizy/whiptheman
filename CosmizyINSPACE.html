@@ -420,7 +420,7 @@
       <button id="multiplierButton1" style="color: white;">Planets Only</button>
       <button id="multiplierButton2" style="color: white;">Infinite Fuel</button>
       <button id="multiplierButton3" style="color: white;">Infinite Ammo</button>
-      <button id="multiplierButton4" style="color: white;">Placeholder 4</button>
+      <button id="multiplierButton4" style="color: white;">Infinite Health</button>
     </div>
   </div>
 </div>
@@ -536,7 +536,7 @@ const planetImages = [
   let playerMaxFuel = 100;
   let playerHealth = 100;
   let playerMaxHealth = 100;
-  let playerAmmo = 20;
+  let playerAmmo = 50;
   let playerMaxAmmo = 100;
 //Fuel settings
   let fuelSpawnRate = 15000;
@@ -562,7 +562,7 @@ const planetImages = [
   let planetsOnly = false;
   let infiniteFuel = false;
   let infiniteAmmo = false;
-  let multiplier4 = false;
+  let infiniteHealth = false;
 
   // Game difficulty
   let defaultDifficulty = 'normal';
@@ -686,8 +686,8 @@ function checkCollisions() {
           if (enemy.isGas === true) {
 
             if (playerFuel < playerMaxFuel) {
-                if (playerFuel + 10 <= playerMaxFuel) {
-                    playerFuel += 20;
+                if (playerFuel + 15 <= playerMaxFuel) {
+                    playerFuel += 15;
                 } else {
                     playerFuel += playerMaxFuel - playerFuel;
                 }
@@ -718,18 +718,36 @@ function checkCollisions() {
     ) {
         if (enemy.damagedPlayer === false) {
         
-        
+          if (enemy.isGas === true) {
+
+            if (playerFuel < playerMaxFuel) {
+                if (playerFuel + 15 <= playerMaxFuel) {
+                    playerFuel += 15;
+                } else {
+                    playerFuel += playerMaxFuel - playerFuel;
+                }
+            }
+              
+          }
+            
         // Reduce health of the player
-        playerHealth -= enemy.damage;
+
+        if (infiniteHealth === false) {
+            playerHealth -= enemy.damage;
+        }
+    
         enemy.damagedPlayer = true;
         // Check if player health is zero or below
         if (playerHealth <= 0) {
             
           if (score >= highscore) {
             //highscore = score
-              database.set({
-                score: score
-              });
+
+              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+                  database.set({
+                    score: score
+                  });
+            }
           }
           playerImage.src = brokenImageSrc;
           gameOver = true;
@@ -1139,7 +1157,7 @@ function startGame(selectedDifficulty) {
 
     setInterval(() => {
         updatePlayerFuel();
-    }, 100); // Update fuel every 100 miliseconds
+    }, 150); // Update fuel every 150 miliseconds
 
     setInterval(() => {
         checkReload();
@@ -1254,8 +1272,10 @@ function startGame(selectedDifficulty) {
   document.getElementById("multiplierButton4").addEventListener("click", () => {
     if (document.getElementById("multiplierButton4").style.color === "white") {
         document.getElementById("multiplierButton4").style.color = "lime";
+        infiniteHealth = true;
     } else {
         document.getElementById("multiplierButton4").style.color = "white";
+        infiniteHealth = false;
     }
   });
     
