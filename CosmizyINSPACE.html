@@ -16,7 +16,7 @@
       display: block;
       background: #343d46; /* Dark background */
     }
-    #titleScreen, #difficultyScreen, #gameOverScreen, #controlsScreen, #creditsScreen {
+    #titleScreen, #difficultyScreen, #gameOverScreen, #controlsScreen, #creditsScreen, #settingsScreen {
       position: absolute;
       top: 0;
       left: 0;
@@ -51,12 +51,12 @@
       color: yellow;
     }
 
-      #controlsScreen h1, #creditsScreen h1 {
+      #controlsScreen h1, #creditsScreen h1, #settingsScreen h1 {
         font-size: 36px;
         margin-bottom: 20px;
       }
           
-      #controlsScreen p, #creditsScreen p {
+      #controlsScreen p, #creditsScreen p, #settingsScreen p {
         font-size: 18px;
         max-width: 600px;
         line-height: 1.6;
@@ -120,7 +120,22 @@
       background-color: rgba(0, 0, 0, 0);
     }
 
-    
+
+    #secretButton {
+        padding: 2px 6px;
+        font-size: 3px;
+        background-color: rgba(0, 0, 0, 0.1);
+        color: white;
+        cursor: pointer;
+        border-radius: 0px;
+        margin-top: 10px;
+        font-family: 'Press Start 2P', cursive;
+    }
+
+    #secretButton:hover  {
+      background-color: rgba(0, 0, 0, 0);
+    }
+      
       
     #playButton {
         padding: 10px 20px;
@@ -129,11 +144,26 @@
         color: white;
         cursor: pointer;
         border-radius: 0px;
-        margin-top: 100px;
+        margin-top: 50px;
         font-family: 'Press Start 2P', cursive;
     }
 
     #playButton:hover  {
+      background-color: rgba(0, 0, 0, 0);
+    }
+
+    #settingsButton {
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: rgba(0, 0, 0, 0.1);
+        color: white;
+        cursor: pointer;
+        border-radius: 0px;
+        margin-top: 20px;
+        font-family: 'Press Start 2P', cursive;
+    }
+    
+    #settingsButton:hover  {
       background-color: rgba(0, 0, 0, 0);
     }
 
@@ -338,6 +368,8 @@
 <body>
 <canvas id="gameCanvas"></canvas>
 
+
+    
 <!-- Title Screen -->
 <div id="titleScreen">
   <h1 style ="color: darkviolet;" >COSMIZY</h1>
@@ -345,6 +377,7 @@
   <button id="playButton" style="color: lime;" >Play</button>
   <button id="controlsButton">Controls</button>
   <button id="creditsButton">Credits</button>
+    <button id="secretButton">Secret</button>
 </div>
 
 <!-- HUD -->
@@ -668,6 +701,31 @@ const player = {
 function checkCollisions() {
   bullets.forEach((bullet, bulletIndex) => {
     enemies.forEach((enemy, enemyIndex) => {
+      if (enemy.name === "Planet") {
+
+        const dx = bullet.x + bullet.width / 2 - (enemy.x + enemy.size / 2); // Horizontal distance between centers
+        const dy = bullet.y + bullet.height / 2 - (enemy.y + enemy.size / 2); // Vertical distance between centers
+        const distance = Math.sqrt(dx * dx + dy * dy); // Pythagorean distance
+          
+        if (distance < enemy.size / 2 + Math.min(bullet.width, bullet.height) / 2) { //COLLISION DETECTED!!
+
+        enemy.takeDamage(playerDamage);
+
+        // Remove bullet
+        bullets.splice(bulletIndex, 1);
+
+        // Check if enemy health is zero or below
+        if (enemy.health <= 0) {
+          enemies.splice(enemyIndex, 1);
+
+          score += 5;
+            
+          updateHUD();
+        }
+
+      }
+      } else {
+        
       if (
         bullet.x < enemy.x + enemy.size &&
         bullet.x + bullet.width > enemy.x &&
@@ -706,10 +764,51 @@ function checkCollisions() {
           updateHUD();
         }
       }
+        
+        }
     });
   });
 
   enemies.forEach(enemy => {
+    if (enemy.name === "Planet") {
+
+        const dx = player.hitbox.x + player.hitbox.width / 2 - (enemy.x + enemy.size / 2); // Horizontal distance between centers
+        const dy = player.hitbox.y + player.hitbox.height / 2 - (enemy.y + enemy.size / 2); // Vertical distance between centers
+        const distance = Math.sqrt(dx * dx + dy * dy); // Pythagorean distance
+          
+        if (distance < enemy.size / 2 + Math.min(player.hitbox.width, player.hitbox.height) / 2) { //COLLISION DETECTED!!
+
+        if (enemy.damagedPlayer === false) {
+            
+        // Reduce health of the player
+
+        if (infiniteHealth === false) {
+            playerHealth -= enemy.damage;
+        }
+    
+        enemy.damagedPlayer = true;
+        // Check if player health is zero or below
+        if (playerHealth <= 0) {
+            
+          if (score >= highscore) {
+            //highscore = score
+
+              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+                  database.set({
+                    score: score
+                  });
+            }
+          }
+          playerImage.src = brokenImageSrc;
+          gameOver = true;
+        }
+        updateHUD();
+      }
+            
+    }
+        
+    } else 
+        
     if (
       player.hitbox.x < enemy.x + enemy.size &&
       player.hitbox.x + player.hitbox.width > enemy.x &&
@@ -721,8 +820,8 @@ function checkCollisions() {
           if (enemy.isGas === true) {
 
             if (playerFuel < playerMaxFuel) {
-                if (playerFuel + 15 <= playerMaxFuel) {
-                    playerFuel += 15;
+                if (playerFuel + 10 <= playerMaxFuel) {
+                    playerFuel += 10;
                 } else {
                     playerFuel += playerMaxFuel - playerFuel;
                 }
@@ -969,6 +1068,7 @@ class Planet {
     ctx.save(); // Save the current canvas state
     ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
     ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+      
     ctx.drawImage(
       this.image,
       -this.size / 2, // Draw image centered on the asteroid
