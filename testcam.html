@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture Photo</title>
+    <style>
+        #snapshot {
+            display: none;
+            margin-top: 20px;
+            border: 2px solid #000;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Take a Picture</h1>
+
+    <button id="captureButton">Capture</button>
+    <video id="videoElement" autoplay style="display: none;"></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <img id="snapshot" alt="Snapshot">
+
+    <script>
+        const captureButton = document.getElementById('captureButton');
+        const videoElement = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvas');
+        const snapshot = document.getElementById('snapshot');
+        let cameraStream = null;
+
+        // Capture photo when the "Capture" button is clicked
+        captureButton.addEventListener('click', () => {
+            // If camera is not already active, start it
+            if (!cameraStream) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        videoElement.srcObject = stream;
+                        cameraStream = stream;
+                        videoElement.style.display = 'block';  // Show video temporarily
+                        setTimeout(() => {
+                            // Draw the current frame from the video onto the canvas
+                            const context = canvas.getContext('2d');
+                            canvas.width = videoElement.videoWidth;
+                            canvas.height = videoElement.videoHeight;
+                            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                            // Convert the canvas to an image and show it
+                            snapshot.src = canvas.toDataURL('image/png');
+                            snapshot.style.display = 'block';
+
+                            // Stop the video stream after capturing
+                            cameraStream.getTracks().forEach(track => track.stop());
+                            videoElement.style.display = 'none';  // Hide the video after capturing
+                        }, 500); // Adjust delay to ensure the camera is ready to capture
+                    })
+                    .catch(error => {
+                        console.error('Error accessing the camera', error);
+                    });
+            }
+        });
+    </script>
+
+</body>
+</html>
