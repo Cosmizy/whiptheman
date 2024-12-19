@@ -235,6 +235,42 @@
       z-index: 10;
     }
 
+        #webcam {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            font-size: 48px;
+            background-color: rgba(0, 0, 0, 0.1);
+            color: white;
+            border-radius: 0px;
+            font-family: 'Press Start 2P', cursive;
+            transform: scaleX(-1);
+        }
+        #webcamContainer {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            font-size: 48px;
+            background-color: rgba(0, 0, 0, 0.1);
+            color: white;
+            border-radius: 0px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        #webcam:hover {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        #webcamContainer:hover {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
 #hud {
   position: absolute;
   bottom: 10px;
@@ -368,7 +404,8 @@
 <body>
 <canvas id="gameCanvas"></canvas>
 
-
+    <video id="webcam" autoplay muted; style ="display: none;"></video>
+    <button id="webcamContainer" style ="display: none;"></button>
     
 <!-- Title Screen -->
 <div id="titleScreen">
@@ -1325,6 +1362,21 @@ function startGame(selectedDifficulty) {
   document.getElementById("creditsButton").addEventListener("click", () => {
     document.getElementById("creditsScreen").style.display = "flex";
     document.getElementById("titleScreen").style.display = "none";
+  });
+
+  document.getElementById("secretButton").addEventListener("click", () => {
+    document.getElementById("webcam").style.display = "flex";
+    document.getElementById("webcamContainer").style.display = "flex";
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                const webcam = document.getElementById('webcam');
+                webcam.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.log('Error accessing webcam: ', err);
+            });
+      
   });
     
   // Hide the title screen and start the game when "Play" is clicked
