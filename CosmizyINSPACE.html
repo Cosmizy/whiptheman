@@ -67,7 +67,7 @@
     padding: 10px 20px;
     font-size: 18px;
     background-color: rgba(0, 0, 0, 0.1);
-    color: white;
+    color: #c0c5ce;
     cursor: pointer;
     border-radius: 0px;
     margin-top: 20px;
@@ -82,7 +82,7 @@
     padding: 10px 20px;
     font-size: 18px;
     background-color: rgba(0, 0, 0, 0.1);
-    color: white;
+    color: #c0c5ce;
     cursor: pointer;
     border-radius: 0px;
     margin-top: 20px;
@@ -103,13 +103,14 @@
 
     #difficultyScreen h1 {
       font-size: 48px;
+      color: #c0c5ce;
     }
 
     #difficultyScreen button {
       padding: 15px 30px;
       font-size: 24px;
       background-color: rgba(0, 0, 0, 0.1);
-      color: white;
+      color: #c0c5ce;
       cursor: pointer;
       border-radius: 0px;
       margin-top: 20px;
@@ -125,7 +126,7 @@
         padding: 2px 6px;
         font-size: 3px;
         background-color: rgba(0, 0, 0, 0.1);
-        color: white;
+        color: #c0c5ce;
         cursor: pointer;
         border-radius: 0px;
         margin-top: 10px;
@@ -141,7 +142,7 @@
         padding: 10px 20px;
         font-size: 48px;
         background-color: rgba(0, 0, 0, 0.1);
-        color: white;
+        color: #c0c5ce;
         cursor: pointer;
         border-radius: 0px;
         margin-top: 50px;
@@ -156,7 +157,7 @@
         padding: 10px 20px;
         font-size: 18px;
         background-color: rgba(0, 0, 0, 0.1);
-        color: white;
+        color: #c0c5ce;
         cursor: pointer;
         border-radius: 0px;
         margin-top: 20px;
@@ -171,7 +172,7 @@
         padding: 10px 20px;
         font-size: 18px;
         background-color: rgba(0, 0, 0, 0.1);
-        color: white;
+        color: #c0c5ce;
         cursor: pointer;
         border-radius: 0px;
         margin-top: 20px;
@@ -186,7 +187,7 @@
         padding: 10px 20px;
         font-size: 18px;
         background-color: rgba(0, 0, 0, 0.1);
-        color: white;
+        color: #c0c5ce;
         cursor: pointer;
         border-radius: 0px;
         margin-top: 20px;
@@ -215,7 +216,7 @@
       padding: 15px 30px;
       font-size: 24px;
       background-color: rgba(0, 0, 0, 0.1);
-      color: white;
+      color: #c0c5ce;
       cursor: pointer;
       border-radius: 0px;
       margin-top: -40px;
@@ -231,9 +232,24 @@
       top: 10px;
       left: 10px;
       font-size: 16px;
-      color: white;
+      color: #c0c5ce;
       z-index: 10;
     }
+
+
+        #log-content {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            font-size: 48px;
+            background-color: rgba(0, 0, 0, 0);
+            color: white;
+            border-radius: 0px;
+            font-family: 'Press Start 2P', cursive;
+        }
 
         #webcam {
             position: fixed;
@@ -404,6 +420,11 @@
 <body>
 <canvas id="gameCanvas"></canvas>
 
+    <div id="console-output" style="z-index: 0;">
+        <strong>Console Output:</strong>
+        <div id="log-content"></div>
+    </div>
+
     <video id="webcam" autoplay muted; style ="display: none;"></video>
     <button id="webcamContainer" style ="display: none;"></button>
     
@@ -479,14 +500,14 @@
   <h1>Game Settings</h1>
   <div id="difficultyOptions" style="display: flex; justify-content: center; gap: 40px;">
     <div id="difficultyButtons" style = "display: flex; flex-direction: column;">
-      <h2 style="color: white;">Difficulty</h2>
+      <h2 style="color: #c0c5ce;">Difficulty</h2>
       <button id="easyButton" style="color: lime;">Easy</button>
       <button id="normalButton" style="color: yellow;">Normal</button>
       <button id="hardButton" style="color: red;">Hard</button>
       <button id="nightmareButton" style="color: darkmagenta;">Nightmare</button>
     </div>
     <div id="multipliers" style="text-align: center; display: flex; flex-direction: column;">
-      <h2 style="color: white;">Multipliers</h2>
+      <h2 style="color: #c0c5ce;">Multipliers</h2>
       <button id="multiplierButton1" style="color: white;">Planets Only</button>
       <button id="multiplierButton2" style="color: white;">Infinite Fuel</button>
       <button id="multiplierButton3" style="color: white;">Infinite Ammo</button>
@@ -597,6 +618,10 @@ const planetImages = [
   { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:2, health: 500},
 ];
 
+  const UFOImages = [
+    "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/ufo_1.png"
+  ];
+
   let score = 0; // Initialize score variable
   let highscore = 10; // Initialize score variable
 
@@ -623,6 +648,14 @@ const planetImages = [
   let planetHealthMultiplier = 1;
   let planetSpeedMultiplier = 1;
   let planetDamage = 200;
+    //UFO settings
+  let UFOSpawnRate = 4000;
+  let UFOMinSpeed = 6;
+  let UFOMaxSpeed = 9;
+  let UFOHealth = 100;
+  let UFODamage = 50;
+  let UFOBulletDamage = 50;
+  let UFOBulletInterval = 1500;
 //Random Settings
   let currentPlayerImageIndex = 0;
   let gameOver = false;
@@ -662,6 +695,7 @@ const player = {
   const bullets = [];
   const enemies = [];
   const stars = [];
+  const logs = [];
   const keys = {};
   let frameCounter = 0;
 
@@ -726,11 +760,18 @@ const player = {
 
   function drawBullets() {
     bullets.forEach((bullet, index) => {
-      bullet.x += bullet.speed;
+
+      if (bullet.direction === 1) {
+        bullet.x += bullet.speed;
+        ctx.fillStyle = "#ff0000";
+      } else {
+        bullet.x -= bullet.speed;
+         ctx.fillStyle = "#00ff00";
+      }
+        
       if (bullet.x > canvas.width) {
         bullets.splice(index, 1);
       }
-      ctx.fillStyle = "#ff0000";
       ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
   }
@@ -754,6 +795,7 @@ function checkCollisions() {
         // Check if enemy health is zero or below
         if (enemy.health <= 0) {
           enemies.splice(enemyIndex, 1);
+          enemy.dead = true;
 
           score += 5;
             
@@ -791,6 +833,7 @@ function checkCollisions() {
           }
             
           enemies.splice(enemyIndex, 1);
+          enemy.dead = true;
 
           if (enemy.name === "Planet") {
             score += 5
@@ -804,6 +847,49 @@ function checkCollisions() {
         
         }
     });
+  });
+
+
+bullets.forEach((bullet, bulletIndex) => {
+    
+    if (
+      player.hitbox.x < bullet.x + bullet.width &&
+      player.hitbox.x + player.hitbox.width > bullet.x &&
+      player.hitbox.y < bullet.y + bullet.height &&
+      player.hitbox.y + player.hitbox.height > bullet.y
+    ) {
+
+        if (bullet.damagedPlayer === false) {
+            
+        // Reduce health of the player
+
+        if (infiniteHealth === false) {
+            playerHealth -= bullet.damage;
+        }
+
+    
+        bullet.damagedPlayer = true;
+
+        bullets.splice(bulletIndex, 1);
+        // Check if player health is zero or below
+        if (playerHealth <= 0) {
+            
+          if (score >= highscore) {
+            //highscore = score
+
+              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+                  database.set({
+                    score: score
+                  });
+            }
+          }
+          playerImage.src = brokenImageSrc;
+          gameOver = true;
+        }
+        updateHUD();
+      }
+    
+    }
   });
 
   enemies.forEach(enemy => {
@@ -895,14 +981,33 @@ function checkCollisions() {
 }
 
 
-  function shootBullet() {
-    bullets.push({
-      x: player.x + player.width,
-      y: player.y + player.height / 2 - 5,
-      width: 10,
-      height: 10,
-      speed: 5,
-    });
+  function shootBullet(xPos,yPos,objHeight,objWidth,bSpeed,bDirection,xOffset, bDamage) {
+    if (bDirection === 1) {
+        // Player shoot bullet
+        bullets.push({
+              x: xPos + objWidth,
+              y: yPos + objHeight / 2 - 5,
+              width: 10,
+              height: 10,
+              speed: bSpeed,
+              direction: bDirection,
+              damage: bDamage,
+              damagedPlayer: false
+            });
+            
+        } else {
+        // Enemy shoot bullet
+            bullets.push({
+              x: xPos - objWidth + xOffset,
+              y: yPos + objHeight / 2 - 5,
+              width: 10,
+              height: 10,
+              speed: bSpeed,
+              direction: bDirection,
+              damage: bDamage,
+              damagedPlayer: false
+            });
+        }
   }
 
   function updatePlayerFuel() {
@@ -1036,6 +1141,7 @@ class Asteroid {
     this.damagedPlayer = false;
     this.damage = asteroidDamage;
     this.isGas = false;
+    this.dead = false;
   }
 
   draw() {
@@ -1099,6 +1205,7 @@ class Planet {
     this.damagedPlayer = false;
     this.damage = planetDamage;
     this.isGas = false;
+    this.dead = false;
   }
 
   draw() {
@@ -1144,7 +1251,103 @@ class Planet {
   }
 }
 
+class UFO {
+  constructor() {
+    this.name = "UFO";
+    this.minSize = 40;
+    this.maxSize = 60;
+    this.size = Math.random() * (this.maxSize - this.minSize) + this.minSize; // Hitbox size
 
+    this.targetY = this.y;
+    
+    this.originalWidth = 500;  // Original width of the image
+    this.originalHeight = 280; // Original height of the image
+    this.aspectRatio = this.originalWidth / this.originalHeight; // Aspect ratio of the image
+
+    this.scaledWidth;
+    this.scaledHeight;
+
+    this.ySpeed = 2;        // Vertical speed (adjustable)
+      
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = UFOImages[Math.floor(Math.random() * UFOImages.length)];
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.minSpeed = UFOMinSpeed;
+    this.maxSpeed = UFOMaxSpeed;
+    this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
+    this.rotation = 0; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
+    this.health = UFOHealth;
+    this.maxHealth = UFOHealth;
+    this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = UFODamage;
+    this.bulletDamage = UFOBulletDamage;
+    this.randomShotDelay = 1500
+    this.isGas = false;
+    this.dead = false;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to UFO center
+    ctx.rotate(this.rotation); // Rotate canvas around the UFO center
+
+    this.scaledHeight = this.size;
+    this.scaledWidth = this.size * this.aspectRatio;
+          
+    ctx.drawImage(
+      this.image,
+      -this.scaledWidth / 2, // Center the image horizontally
+      -this.scaledHeight / 2, // Center the image vertically
+      this.scaledWidth,
+      this.scaledHeight
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  fireBullet() {
+    const bSpeed = 5 + this.speed;
+    shootBullet(this.x, this.y, this.scaledHeight, this.scaledWidth, bSpeed, 0, 40, this.bulletDamage);
+  }
+    
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move UFO left
+
+    // Set a new target y every 3 seconds
+
+    //setInterval(() => {
+      //this.targetY = Math.random() * (canvas.height - this.imageSize); // Random y within bounds
+   // }, 1000);
+      
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
+    
 
 class FuelCan {
   constructor() {
@@ -1166,6 +1369,7 @@ class FuelCan {
     this.damagedPlayer = false;
     this.damage = 0;
     this.isGas = true;
+    this.dead = false;
   }
 
   draw() {
@@ -1214,7 +1418,7 @@ class FuelCan {
     keys[e.key] = true;
     if (e.key === " ") {
       if (playerAmmo > 0) {
-         shootBullet();
+         shootBullet(player.x, player.y, player.height, player.width, 5, 1, 0, playerDamage);
          if (infiniteAmmo === false) {
             playerAmmo -= 1;
         }
@@ -1227,7 +1431,13 @@ class FuelCan {
     keys[e.key] = false;
   });
 
+function detectEnemySpawn(enemy) {
+    
+}
+
 function startGame(selectedDifficulty) {
+    startConsoleMonitor();
+    setInterval(checkLogs, 5000);
     document.getElementById("difficultyScreen").style.display = "none";
     document.getElementById("globalHighscore").innerText = "Global Highscore: " + highscore;
     document.getElementById("globalHighscore").style.display =  "flex";
@@ -1247,6 +1457,11 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 30000;
       planetHealthMultiplier = 0.75;
       planetSpeedMultiplier = 0.85;
+      UFOHealth = 100;
+      UFOSpawnRate = 5500;
+      UFOMinSpeed = 5;
+      UFOMaxSpeed = 8;
+      UFOBulletInterval = 2000;
       playerAmmo =  100;
     }
 
@@ -1261,6 +1476,11 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 20000;
       planetHealthMultiplier = 1;
       planetSpeedMultiplier = 1;
+      UFOHealth = 100;
+      UFOSpawnRate = 4000;
+      UFOMinSpeed = 6;
+      UFOMaxSpeed = 9;
+      UFOBulletInterval = 1500;
       playerAmmo = 50;
     }
 
@@ -1275,6 +1495,11 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 15000;
       planetHealthMultiplier = 1.6;
       planetSpeedMultiplier = 1.5;
+      UFOHealth = 150;
+      UFOSpawnRate = 3000;
+      UFOMinSpeed = 6;
+      UFOMaxSpeed = 12;
+      UFOBulletInterval = 1000;
       playerAmmo = 30;
     }
 
@@ -1289,9 +1514,37 @@ function startGame(selectedDifficulty) {
       planetSpawnRate = 10000;
       planetHealthMultiplier = 3;
       planetSpeedMultiplier = 1.5;
+      UFOHealth = 150;
+      UFOSpawnRate = 2500;
+      UFOMinSpeed = 8;
+      UFOMaxSpeed = 15;
+      UFOBulletInterval = 800;
       playerAmmo = 20;
     }
 
+    let startUFO = false;
+
+    setInterval(() => {
+        // start making ufos
+        if (score >= 40) {
+            //alert('test');
+
+            startUFO = true;
+    
+        }
+    }, 10000); // 60000 milliseconds = 60 seconds
+    
+    
+    //enemies.forEach(enemy => {
+        //alert('hi');
+        //if (enemy.name === "UFO") {
+            //setInterval(() => {
+                //enemy.fireBullet();
+                //alert("eeee");
+            //}, enemy.randomShotDelay); // Update fuel every 150 miliseconds
+        //}
+    //});
+    
     setInterval(() => {
         updatePlayerFuel();
     }, 150); // Update fuel every 150 miliseconds
@@ -1319,6 +1572,32 @@ function startGame(selectedDifficulty) {
         }, asteroidSpawnRate);
     }
 
+            if (planetsOnly === false) {
+                setInterval(() => {
+                  if (startUFO === true) {
+                      const ufo = new UFO();
+                      enemies.push(ufo);
+                  }
+                }, UFOSpawnRate);
+            }
+
+    setInterval(() => {
+        enemies.forEach(enemy => {
+            if (enemy.name === "UFO") {
+                setInterval(() => {
+                    if (enemy.dead === false) {
+                        enemy.fireBullet();
+                    }
+                }, UFOBulletInterval);
+            }
+        });
+    }, 1000);
+
+
+
+
+    
+
     if (infiniteAmmo === true) {
         playerAmmo = playerMaxAmmo;
     }
@@ -1339,6 +1618,37 @@ function startGame(selectedDifficulty) {
     }
     
 }
+
+
+// boring debug log stuff
+
+        function startConsoleMonitor() {
+            const originalConsoleLog = console.log;
+
+            // Override console.log
+            console.log = function (...args) {
+                const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+                capturedLogs.push(message); // Store captured message
+                originalConsoleLog.apply(console, args); // Call original log
+            };
+        }
+
+        function checkLogs() {
+            const logContainer = document.getElementById('log-content');
+
+            capturedLogs.forEach((message, index) => {
+                if (!message.processed) {
+                    // Append new log to the output container
+                    const logElement = document.createElement('div');
+                    logElement.textContent = message;
+                    logContainer.appendChild(logElement);
+
+                    // Mark as processed
+                    capturedLogs[index] = { processed: true, message };
+                }
+            });
+        }
+    
 
   document.getElementById("gameOverButton").addEventListener("click", () => {
       location.reload();
