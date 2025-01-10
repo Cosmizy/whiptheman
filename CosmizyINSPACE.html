@@ -618,6 +618,12 @@ const planetImages = [
   { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:2, health: 500},
 ];
 
+const musicTracks = [
+  { name: "default_1", src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/default_track_1.wav"},
+  { name: "boss_1", src: ""},
+  { name: "TBD", src: ""},
+];
+
   const UFOImages = [
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/ufo_1.png"
   ];
@@ -726,6 +732,39 @@ const player = {
       ctx.closePath();
     });
   }
+
+    let currentTrackIndex = 0; // Index of the current track
+let audioPlayer = null; // Initialize without a specific track
+    
+function playMusic(trackName) {
+  // Find the track object in the list by name
+  const track = musicTracks.find(t => t.name === trackName);
+
+  if (track) {
+    // Stop the currently playing track if one exists
+    if (audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+    }
+
+    // Set up and play the new track
+    audioPlayer = new Audio(track.src);
+    audioPlayer.play();
+    audioPlayer.volume = 0.5;
+    audioPlayer.loop = true;
+    
+
+    //audioPlayer.addEventListener("ended", () => {
+      //audioPlayer.currentTime = 0; // Reset the time to the beginning
+      //audioPlayer.play(); // Play again
+    //});
+
+    // Log the track being played
+    console.log(`Now playing: ${track.name}`);
+  } else {
+    console.log(`Track "${trackName}" not found.`);
+  }
+}
  
   function checkFuel() {
     if (outOfFuel === true) {
@@ -1445,6 +1484,7 @@ function startGame(selectedDifficulty) {
     hudElement.style.display = "flex";
     createStars();
     gameLoop();
+    playMusic("default_1");
     
     if (selectedDifficulty === "easy") {
       fuelSpawnRate = 4000;
@@ -1526,13 +1566,13 @@ function startGame(selectedDifficulty) {
 
     setInterval(() => {
         // start making ufos
-        if (score >= 40) {
+        if (score >= 50) {
             //alert('test');
 
             startUFO = true;
     
         }
-    }, 10000); // 60000 milliseconds = 60 seconds
+    }, 2500); // 60000 milliseconds = 60 seconds
     
     
     //enemies.forEach(enemy => {
