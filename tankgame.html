@@ -105,7 +105,7 @@ class Tank {
 
     shoot() {
         if (this.ammo > 0 && !this.shootCooldown && !this.isReloading) {
-            this.bullets.push({ x: this.x, y: this.y, angle: this.angle, speed: 8 });
+            this.bullets.push({ x: this.x, y: this.y, angle: this.angle, speed: 16 });
             this.ammo--;
             this.shootCooldown = true;
             
