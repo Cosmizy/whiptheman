@@ -19,16 +19,66 @@
             padding: 20px;
             display: none;
         }
+
+        .menu, .options {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: block;
+        }
+        .options { display: none; }
+        button { margin: 10px; padding: 10px; font-size: 18px; cursor: pointer; display: block; width: 200px; }
+        
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     <div id="winMessage" class="win-message"></div>
+
+    <div id="menu" class="menu">
+        <h1>Tank Duel</h1>
+        <button onclick="openOptions()">Play</button>
+    </div>
+    <div id="options" class="options">
+        <h2>Select Game Mode</h2>
+        <button onclick="startGame(1)">1 Player</button>
+        <button onclick="startGame(2)">2 Player</button>
+    </div>
+   
+    
     <script>
+        let gameRunning;
+        let playersSelected;
+        
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+
+        function openOptions() {
+            document.getElementById("menu").style.display = "none";
+            document.getElementById("options").style.display = "block";
+        }
+        function startGame(players) {
+            document.getElementById("options").style.display = "none";
+            document.getElementById("gameCanvas").style.display = "block";
+            initGame(players);
+        }
+function initGame(players) {
+    console.log("Starting game with", players, "players");
+    playersSelected = players;
+    gameRunning = true;
+    if (players === 1) {
+        tank2.isAI = true; // Mark tank2 as AI-controlled
+        aiControl(); // Start AI behavior
+    }
+    gameLoop(players);
+}
 
 class Tank {
     constructor(x, y, color, keys) {
@@ -164,11 +214,6 @@ class Tank {
     }
 }
 
-
-
-
-
-
         class Obstacle {
             constructor(x, y, width, height) {
                 this.x = x;
@@ -202,12 +247,91 @@ class Tank {
             return obstacles;
         }
 
+function aiControl() {
+    if (!gameRunning || !tank2.isAI) return;
+    
+    // AI movement: move toward the player but avoid getting too close
+    let dx = tank1.x - tank2.x;
+    let dy = tank1.y - tank2.y;
+    let targetAngle = Math.atan2(dy, dx);
+    let distanceToPlayer = Math.hypot(dx, dy);
+
+    // Minimum distance threshold to avoid getting too close
+    let minDistance = 200; // Set to the desired minimum distance
+
+    if (distanceToPlayer > minDistance) {
+        // Rotate towards the player
+        let angleDifference = Math.abs(targetAngle - tank2.angle);
+        if (angleDifference > 0.1) {
+            // Smooth rotation
+            if ((targetAngle - tank2.angle + Math.PI * 2) % (Math.PI * 2) > Math.PI) {
+                tank2.angle -= 0.05;
+            } else {
+                tank2.angle += 0.05;
+            }
+        }
+
+        // Move toward the player if it’s not too close
+        let newX = tank2.x + Math.cos(tank2.angle) * tank2.speed;
+        let newY = tank2.y + Math.sin(tank2.angle) * tank2.speed;
+
+        // Check if moving to the new position will collide with any obstacles
+        let collidesWithObstacle = obstacles.some(obstacle => 
+            obstacle.collides({ x: newX, y: newY, width: tank2.width, height: tank2.height })
+        );
+
+        if (!collidesWithObstacle) {
+            tank2.x = newX;
+            tank2.y = newY;
+        } else {
+            // If collision detected, try to move in a different direction
+            let randomTurn = Math.random() > 0.5 ? 0.1 : -0.1;
+            tank2.angle += randomTurn;
+        }
+    } else {
+        let angleDifference = Math.abs(targetAngle - tank2.angle);
+        if (angleDifference > 0.1) {
+            // Smooth rotation
+            if ((targetAngle - tank2.angle + Math.PI * 2) % (Math.PI * 2) > Math.PI) {
+                tank2.angle -= 0.05;
+            } else {
+                tank2.angle += 0.05;
+            }
+        }
+    }
+
+    // AI shooting: fire if facing the player and in range with a clear line of sight
+    let angleDifference = Math.abs(targetAngle - tank2.angle);
+    if (angleDifference < 0.2 && distanceToPlayer < 9999) {
+        // Check for clear path to the player
+        let pathClear = true;
+        for (let i = 10; i < distanceToPlayer; i += 10) {
+            let checkX = tank2.x + Math.cos(tank2.angle) * i;
+            let checkY = tank2.y + Math.sin(tank2.angle) * i;
+            if (obstacles.some(obstacle => 
+                obstacle.collides({ x: checkX, y: checkY, width: 5, height: 5 })
+            )) {
+                pathClear = false;
+                break;
+            }
+        }
+
+        if (pathClear) {
+            tank2.shoot();
+        }
+    }
+}
+
+
+
+
+
+
+
         const keysPressed = {};
         const tank1 = new Tank(200, 350, "blue", { up: "w", down: "s", left: "a", right: "d", shoot: " " });
         const tank2 = new Tank(1000, 350, "red", { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight", shoot: "Enter" });
         let obstacles = randomObstacles();
-
-        let gameRunning = true;
 
         window.addEventListener("keydown", (e) => {
             keysPressed[e.key] = true;
@@ -218,21 +342,29 @@ class Tank {
         });
         window.addEventListener("keyup", (e) => { delete keysPressed[e.key]; });
 
-        function gameLoop() {
+        function gameLoop(players) {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             obstacles.forEach(obstacle => obstacle.draw());
+
             tank1.move(keysPressed, obstacles);
-            tank2.move(keysPressed, obstacles);
             tank1.updateBullets(tank2, obstacles);
-            tank2.updateBullets(tank1, obstacles);
             tank1.updateReloading();
-            tank2.updateReloading();
             tank1.draw();
+
+            if (playersSelected === 2) {
+                tank2.move(keysPressed, obstacles);
+            } else {
+                aiControl();
+            }
+            tank2.updateBullets(tank1, obstacles);
+            tank2.updateReloading();
             tank2.draw();
+
             requestAnimationFrame(gameLoop);
         }
-        gameLoop();
+        //gameLoop(playersSelected);
+        gameRunning = true;
     </script>
 </body>
 </html>
