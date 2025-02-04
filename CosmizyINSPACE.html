@@ -1475,8 +1475,6 @@ function detectEnemySpawn(enemy) {
 }
 
 function startGame(selectedDifficulty) {
-    startConsoleMonitor();
-    setInterval(checkLogs, 5000);
     document.getElementById("difficultyScreen").style.display = "none";
     document.getElementById("globalHighscore").innerText = "Global Highscore: " + highscore;
     document.getElementById("globalHighscore").style.display =  "flex";
