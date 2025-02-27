@@ -6,7 +6,7 @@
     <title>Tank Duel</title>
     <style>
         body { text-align: center; overflow: hidden; margin: 0; }
-        canvas { background: #222; display: block; margin: auto; }
+        canvas { background: #111; display: block; margin: auto; }
         .win-message {
             position: absolute;
             top: 50%;
@@ -247,13 +247,33 @@ class Tank {
             this.ammo--;
             this.shootCooldown = true;
             
-            // Apply recoil when shot is fired
-            this.recoil = -5;  // Move the barrel back
+// Apply recoil when shot is fired
+this.recoil = -5;  // Move the barrel back
 
-            // Return recoil to normal after 150ms
-            setTimeout(() => {
-                this.recoil = 0;
-            }, 150);
+// Return recoil to normal after 150ms with easing
+let recoilDuration = 1000;  // Total duration
+let startTime = Date.now();
+
+let updateRecoil = () => {
+    let elapsedTime = Date.now() - startTime;
+    let progress = Math.min(elapsedTime / recoilDuration, 1);  // Progress from 0 to 1
+
+    // Easing: fast at first, then slower (quadratic ease-out)
+    let easingFactor = 1 - (1 - progress) * (1 - progress);
+
+    // Adjust recoil based on easing factor
+    this.recoil = -5 * (1 - easingFactor);  // -5 is the initial recoil value
+
+    // If the recoil has completed, stop the update
+    if (progress < 1) {
+        requestAnimationFrame(updateRecoil);
+    } else {
+        this.recoil = 0;  // Ensure recoil ends at 0
+    }
+};
+
+requestAnimationFrame(updateRecoil);
+
 
             setTimeout(() => this.shootCooldown = false, 1000);
         } else if (this.ammo === 0 && !this.isReloading) {
@@ -268,9 +288,22 @@ class Tank {
             bullet.x += Math.cos(bullet.angle) * bullet.speed;
             bullet.y += Math.sin(bullet.angle) * bullet.speed;
             ctx.fillStyle = "yellow";
-            ctx.beginPath();
-            ctx.arc(bullet.x, bullet.y, 5, 0, Math.PI * 2);
-            ctx.fill();
+
+            
+            const bulletImg = new Image();
+            bulletImg.src = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankShell.png";
+            
+            ctx.save();
+            
+            
+            ctx.translate(bullet.x, bullet.y);
+            ctx.rotate(bullet.angle);
+            
+            
+            ctx.drawImage(bulletImg, -2.5, -5, 20, 10);
+            
+            
+            ctx.restore();
             
             if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
                 return false;
@@ -470,7 +503,7 @@ function aiControl() {
 
 
         const keysPressed = {};
-        const tank1 = new Tank(200, 350, "blue", { up: "w", down: "s", left: "a", right: "d", shoot: " "}, "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankBodyRed.png", "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankTurretRed.png");
+        const tank1 = new Tank(200, 350, "blue", { up: "w", down: "s", left: "a", right: "d", shoot: " "}, "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankBodyBlue.png", "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankTurretBlue.png");
         const tank2 = new Tank(1000, 350, "red", { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight", shoot: "Enter" }, "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankBodyRed.png", "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankTurretRed.png");
             
         obstacles = randomObstacles();
