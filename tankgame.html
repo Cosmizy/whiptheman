@@ -20,7 +20,27 @@
             display: none;
         }
 
-        .menu, .options {
+        #mapButton0 {
+            background: #outset; /* Change background color on hover */
+            border-style: inset;  /* Change border style on hover */
+        }
+
+        #mapButton1 {
+            background: #outset; /* Change background color on hover */
+            border-style: inset;  /* Change border style on hover */
+        }
+
+        #mapButton2 {
+            background: #outset; /* Change background color on hover */
+            border-style: inset;  /* Change border style on hover */
+        }
+
+        #mapButton3 {
+            background: #outset; /* Change background color on hover */
+            border-style: inset;  /* Change border style on hover */
+        }
+        
+        .menu, .options, .map-selection {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -29,10 +49,19 @@
             color: white;
             padding: 20px;
             text-align: center;
-            display: block;
+            display: none;
         }
-        .options { display: none; }
-        button { margin: 10px; padding: 10px; font-size: 18px; cursor: pointer; display: block; width: 200px; }
+
+        .options {
+            left: 40%;
+        }
+
+        .map-selection {
+            left: 60%;
+        }
+        
+        .menu { display: block; }
+        button { margin: 10px; padding: 10px; font-size: 18px; background: "#f0f0f0"; cursor: pointer; display: block; width: 200px; }
         
     </style>
 </head>
@@ -45,27 +74,74 @@
         <button onclick="openOptions()">Play</button>
     </div>
     <div id="options" class="options">
-        <h2>Select Game Mode</h2>
+        <h2>Start Game Mode</h2>
         <button onclick="startGame(1)">1 Player</button>
         <button onclick="startGame(2)">2 Player</button>
     </div>
-   
+       <div id="mapSelection" class="map-selection">
+        <h2>Select Map</h2>
+        <button id="mapButton0" onclick="selectMap('map0')">Random Map</button>
+        <button id="mapButton1" onclick="selectMap('map1')">Map 1</button>
+        <button id="mapButton2" onclick="selectMap('map2')">Map 2</button>
+        <button id="mapButton3" onclick="selectMap('map3')">Map 3</button>
+    </div>
     
     <script>
         let gameRunning;
         let playersSelected;
+        let mapSelected;
+        let obstacles;
         
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        function selectMap(map) {
+
+            if (map === 'map0') {
+                document.getElementById("mapButton0").style.background = "silver";
+                document.getElementById("mapButton1").style.background = "#f0f0f0";
+                document.getElementById("mapButton2").style.background = "#f0f0f0";
+                document.getElementById("mapButton3").style.background = "#f0f0f0";
+            }
+            
+            if (map === 'map1') {
+                document.getElementById("mapButton1").style.background = "silver";
+                document.getElementById("mapButton2").style.background = "#f0f0f0";
+                document.getElementById("mapButton3").style.background = "#f0f0f0";
+                document.getElementById("mapButton0").style.background = "#f0f0f0";
+            }
+
+            if (map === 'map2') {
+                document.getElementById("mapButton2").style.background = "silver";
+                document.getElementById("mapButton1").style.background = "#f0f0f0";
+                document.getElementById("mapButton3").style.background = "#f0f0f0";
+                document.getElementById("mapButton0").style.background = "#f0f0f0";
+            }
+
+            if (map === 'map3') {
+                document.getElementById("mapButton3").style.background = "silver";
+                document.getElementById("mapButton2").style.background = "#f0f0f0";
+                document.getElementById("mapButton1").style.background = "#f0f0f0";
+                document.getElementById("mapButton0").style.background = "#f0f0f0";
+            }
+            
+            document.getElementById("menu").style.display = "none";
+            document.getElementById("options").style.display = "block";
+            document.getElementById("mapSelection").style.display = "block";
+
+            mapSelected = map
+        }
+        
         function openOptions() {
             document.getElementById("menu").style.display = "none";
             document.getElementById("options").style.display = "block";
+            document.getElementById("mapSelection").style.display = "block";
         }
         function startGame(players) {
             document.getElementById("options").style.display = "none";
+            document.getElementById("mapSelection").style.display = "none";
             document.getElementById("gameCanvas").style.display = "block";
             initGame(players);
         }
@@ -78,15 +154,16 @@ function initGame(players) {
         aiControl(); // Start AI behavior
     }
     gameLoop(players);
+    obstacles = createMap(mapSelected);
 }
 
 class Tank {
-    constructor(x, y, color, keys) {
+    constructor(x, y, color, keys, bodyImgSrc, turretImgSrc) {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.width = 40;
-        this.height = 40;
+        this.width = 60;
+        this.height = 60;
         this.angle = 0;
         this.speed = 3;
         this.keys = keys;
@@ -97,6 +174,12 @@ class Tank {
         this.isReloading = false;
         this.reloadTimer = 0;
         this.recoil = 0; // New property for recoil
+
+        // Load images
+        this.bodyImg = new Image();
+        this.bodyImg.src = bodyImgSrc;
+        this.turretImg = new Image();
+        this.turretImg.src = turretImgSrc;
     }
 
     draw() {
@@ -104,13 +187,18 @@ class Tank {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
-        ctx.fillStyle = "black";
+
+        ctx.drawImage(this.bodyImg, -this.width / 2, -this.height / 2, this.width, this.height);
+        
+        //ctx.fillStyle = this.color;
+        //ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        //ctx.fillStyle = "black";
         
         // Apply recoil to the barrel's x-position
-        const barrelX = this.width / 2.5 - 5 + this.recoil;
-        ctx.fillRect(barrelX, -5, 25, 10);
+        //const barrelX = -this.width / 2 + this.recoil;
+        //ctx.fillRect(barrelX, -5, 25, 10);
+
+        ctx.drawImage(this.turretImg, -this.width / 2 + this.recoil, -this.height / 2, this.width, this.height);
         
         ctx.restore();
 
@@ -247,35 +335,93 @@ class Tank {
             return obstacles;
         }
 
+        function createMap(map) {
+            let obstacles = [];
+
+            if (map === 'map0') {
+                obstacles = randomObstacles();
+            }
+            
+            if (map === 'map1') {
+                obstacles.push(new Obstacle(100, 200, 100, 300));
+                obstacles.push(new Obstacle(500, 200, 100, 300));
+                obstacles.push(new Obstacle(200, 100, 125, 100));
+                obstacles.push(new Obstacle(375, 100, 125, 100));
+                obstacles.push(new Obstacle(200, 500, 125, 100));
+                obstacles.push(new Obstacle(375, 500, 125, 100));
+                obstacles.push(new Obstacle(1200, 300, 100, 100));
+            }
+
+if (map === 'map2') {
+    // Central Fountain (Large, completely blocks movement and shots)
+    obstacles.push(new Obstacle(600, 250, 300, 300));  
+
+    // Large Outer Trees (Block movement and shots, forming park boundaries)
+    obstacles.push(new Obstacle(50, 50, 150, 150));  // Enlarged
+    obstacles.push(new Obstacle(50, 450, 150, 150));  // Enlarged
+    obstacles.push(new Obstacle(1150, 50, 150, 150));  // Enlarged
+    obstacles.push(new Obstacle(1150, 450, 150, 150));  // Enlarged
+
+    // Rows of Trees (Create cover and pathways)
+    obstacles.push(new Obstacle(300, 100, 100, 100));  // Enlarged
+    obstacles.push(new Obstacle(300, 300, 100, 100));  // Enlarged
+    obstacles.push(new Obstacle(300, 500, 100, 100));  // Enlarged
+
+    obstacles.push(new Obstacle(900, 100, 100, 100));  // Enlarged
+    obstacles.push(new Obstacle(900, 300, 100, 100));  // Enlarged
+    obstacles.push(new Obstacle(900, 500, 100, 100));  // Enlarged
+
+    // Park Benches (Provide additional cover, blocking movement)
+    obstacles.push(new Obstacle(550, 200, 180, 60));  // Enlarged
+    obstacles.push(new Obstacle(550, 400, 180, 60));  // Enlarged
+    obstacles.push(new Obstacle(750, 200, 180, 60));  // Enlarged
+    obstacles.push(new Obstacle(750, 400, 180, 60));  // Enlarged
+
+    // Statues or Decorative Elements (More cover points)
+    obstacles.push(new Obstacle(650, 100, 150, 150));  // Enlarged
+    obstacles.push(new Obstacle(650, 500, 150, 150));  // Enlarged
+
+    // Pathways are **not** obstacles, meaning tanks can move through the spaces between the objects.
+}
+
+
+
+
+
+
+
+
+            
+            return obstacles;
+        }
+
 function aiControl() {
     if (!gameRunning || !tank2.isAI) return;
     
-    // AI movement: move toward the player but avoid getting too close
     let dx = tank1.x - tank2.x;
     let dy = tank1.y - tank2.y;
     let targetAngle = Math.atan2(dy, dx);
     let distanceToPlayer = Math.hypot(dx, dy);
+    let minDistance = 200; 
 
-    // Minimum distance threshold to avoid getting too close
-    let minDistance = 200; // Set to the desired minimum distance
+    // Calculate the shortest rotation direction
+    let angleDifference = (targetAngle - tank2.angle + Math.PI * 2) % (Math.PI * 2);
+    if (angleDifference > Math.PI) angleDifference -= Math.PI * 2;
 
+    // Rotate faster for better tracking
+    let rotationSpeed = 0.1;
+    if (angleDifference > 0.05) {
+        tank2.angle += Math.min(rotationSpeed, angleDifference);
+    } else if (angleDifference < -0.05) {
+        tank2.angle -= Math.min(rotationSpeed, -angleDifference);
+    }
+
+    // Adjust movement strategy
+    let moveSpeed = tank2.speed;
     if (distanceToPlayer > minDistance) {
-        // Rotate towards the player
-        let angleDifference = Math.abs(targetAngle - tank2.angle);
-        if (angleDifference > 0.1) {
-            // Smooth rotation
-            if ((targetAngle - tank2.angle + Math.PI * 2) % (Math.PI * 2) > Math.PI) {
-                tank2.angle -= 0.05;
-            } else {
-                tank2.angle += 0.05;
-            }
-        }
+        let newX = tank2.x + Math.cos(tank2.angle) * moveSpeed;
+        let newY = tank2.y + Math.sin(tank2.angle) * moveSpeed;
 
-        // Move toward the player if it’s not too close
-        let newX = tank2.x + Math.cos(tank2.angle) * tank2.speed;
-        let newY = tank2.y + Math.sin(tank2.angle) * tank2.speed;
-
-        // Check if moving to the new position will collide with any obstacles
         let collidesWithObstacle = obstacles.some(obstacle => 
             obstacle.collides({ x: newX, y: newY, width: tank2.width, height: tank2.height })
         );
@@ -283,27 +429,24 @@ function aiControl() {
         if (!collidesWithObstacle) {
             tank2.x = newX;
             tank2.y = newY;
-        } else {
-            // If collision detected, try to move in a different direction
-            let randomTurn = Math.random() > 0.5 ? 0.1 : -0.1;
-            tank2.angle += randomTurn;
         }
     } else {
-        let angleDifference = Math.abs(targetAngle - tank2.angle);
-        if (angleDifference > 0.1) {
-            // Smooth rotation
-            if ((targetAngle - tank2.angle + Math.PI * 2) % (Math.PI * 2) > Math.PI) {
-                tank2.angle -= 0.05;
-            } else {
-                tank2.angle += 0.05;
-            }
+        let newX = tank2.x - Math.cos(tank2.angle) * (moveSpeed / 2);
+        let newY = tank2.y - Math.sin(tank2.angle) * (moveSpeed / 2);
+
+        let collidesWithObstacle = obstacles.some(obstacle => 
+            obstacle.collides({ x: newX, y: newY, width: tank2.width, height: tank2.height })
+        );
+
+        if (!collidesWithObstacle) {
+            tank2.x = newX;
+            tank2.y = newY;
         }
     }
 
     // AI shooting: fire if facing the player and in range with a clear line of sight
-    let angleDifference = Math.abs(targetAngle - tank2.angle);
-    if (angleDifference < 0.2 && distanceToPlayer < 9999) {
-        // Check for clear path to the player
+    let shootingAngleTolerance = 0.2; // Increased from 0.1 for smoother shooting
+    if (Math.abs(angleDifference) < shootingAngleTolerance && distanceToPlayer < 9999) {
         let pathClear = true;
         for (let i = 10; i < distanceToPlayer; i += 10) {
             let checkX = tank2.x + Math.cos(tank2.angle) * i;
@@ -323,15 +466,14 @@ function aiControl() {
 }
 
 
-
-
-
+        
 
 
         const keysPressed = {};
-        const tank1 = new Tank(200, 350, "blue", { up: "w", down: "s", left: "a", right: "d", shoot: " " });
-        const tank2 = new Tank(1000, 350, "red", { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight", shoot: "Enter" });
-        let obstacles = randomObstacles();
+        const tank1 = new Tank(200, 350, "blue", { up: "w", down: "s", left: "a", right: "d", shoot: " "}, "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankBodyRed.png", "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankTurretRed.png");
+        const tank2 = new Tank(1000, 350, "red", { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight", shoot: "Enter" }, "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankBodyRed.png", "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/TankTurretRed.png");
+            
+        obstacles = randomObstacles();
 
         window.addEventListener("keydown", (e) => {
             keysPressed[e.key] = true;
@@ -345,6 +487,10 @@ function aiControl() {
         function gameLoop(players) {
             if (!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            
+            
+            
             obstacles.forEach(obstacle => obstacle.draw());
 
             tank1.move(keysPressed, obstacles);
