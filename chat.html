@@ -289,7 +289,7 @@ function verifyCode() {
     // Save cosmizyConfirmed locally
     //localStorage.setItem('cosmizyConfirmed', cosmizyConfirmed);
     // Hide the code verification modal
-    document.getElementById('codeModal').style.display = 'none';
+    //document.getElementById('codeModal').style.display = 'none';
   } else {
     // Display an error message or handle the incorrect code scenario
     alert('nuh uh');
@@ -394,6 +394,28 @@ function sendMessage() {
                   name: "Server",
                   message: 'Your unique ID is: ' + userID,
                   timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                document.getElementById('messageInput').value = "";
+                return; // Exit the function
+            }
+
+            if (message.toLowerCase() === '!accesscode') {
+                
+                var database = firebase.database().ref("messages");
+
+                var codeRef = firebase.database().ref('accesscode/code');
+                
+                codeRef.once('value', (snapshot) => {
+                    const snapshotVal = snapshot.val();
+                
+                    const accessCode = snapshotVal.toString();
+
+                    database.push().set({
+                          name: "Server",
+                          message: 'The access code is: ' + accessCode,
+                          timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+
                 });
                 document.getElementById('messageInput').value = "";
                 return; // Exit the function
