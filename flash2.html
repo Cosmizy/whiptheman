@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>flash2.html</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            perspective: 1000px; /* Add perspective for 3D effect */
+            animation: colorShift 0.5s infinite;
+        }
+
+        .overlay, .overlay2, .overlay3 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transform-origin: center;
+            pointer-events: none;
+
+            background-repeat: repeat;
+            opacity: 0.75;
+        }
+
+        .overlay {
+            width: 500vw;
+            height: 500vw;
+            animation: patternChange 0.5s infinite, distortion 0.2s infinite;
+        }
+
+        .overlay2 {
+            width: 300vw;
+            height: 300vw;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0));
+            animation: patternChange 1s infinite, rotate 0.2s infinite;
+        }
+
+        .overlay3 {
+            width: 100vw;
+            height: 100vw;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/15_Order_Dragon_Curve.svg/800px-15_Order_Dragon_Curve.svg.png');
+            background-size: cover;
+            animation: flip 0.5s infinite, pulse 0.5s infinite, scaleRotate 1s infinite;
+            opacity: 0;
+        }
+
+        .interactive {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            background: rgba(255, 255, 255, 0.1);
+            animation: interactEffect 3s infinite;
+        }
+
+        .symbols {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            font-size: 5em;
+            color: white;
+            text-align: center;
+            line-height: 100vh;
+            animation: changeSymbols 1s infinite;
+        }
+
+        .symbols::before {
+            content: '✪'; /* Initial symbol */
+            display: block;
+            animation: changeSymbols 0.5s infinite;
+        }
+
+        @keyframes colorShift {
+            0% { background-color: #ff0000; }
+            25% { background-color: #00ff00; }
+            50% { background-color: #0000ff; }
+            75% { background-color: #ffff00; }
+            100% { background-color: #ff00ff; }
+        }
+
+        @keyframes patternChange {
+            0% {
+                background-image: repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(0, 0, 0, 0.5) 50px, rgba(0, 0, 0, 0.5) 100px);
+            }
+            50% {
+                background-image: repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(255, 255, 255, 0.3) 40px, rgba(255, 255, 255, 0.3) 80px);
+            }
+            100% {
+                background-image: repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(0, 0, 0, 0.7) 30px, rgba(0, 0, 0, 0.7) 60px);
+            }
+        }
+
+        @keyframes distortion {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
+        }
+
+        @keyframes flip {
+            0% { transform: translate(-50%, -50%) rotateY(0deg) rotateX(0deg); }
+            25% { transform: translate(-50%, -50%) rotateY(90deg) rotateX(0deg); }
+            50% { transform: translate(-50%, -50%) rotateY(180deg) rotateX(0deg); }
+            75% { transform: translate(-50%, -50%) rotateY(270deg) rotateX(0deg); }
+            100% { transform: translate(-50%, -50%) rotateY(360deg) rotateX(0deg); }
+        }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        @keyframes changeSymbols {
+            0% { content: '✪'; }
+            25% { content: '✧'; }
+            50% { content: '✩'; }
+            75% { content: '✵'; }
+            100% { content: '✯'; }
+        }
+
+        @keyframes interactEffect {
+            0% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 0.2; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+    <div class="overlay3"></div>
+    <div class="symbols"></div>
+    <div class="interactive"></div>
+    <script>
+        const interactiveElement = document.querySelector('.interactive');
+
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            interactiveElement.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)`;
+        });
+    </script>
+</body>
+</html>
