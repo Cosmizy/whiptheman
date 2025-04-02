@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vril.html</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jaini&display=swap" rel="stylesheet">
+    <style>
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            /* animation: colorShift 0.5s infinite; */
+        }
+
+/*        
+        .overlay, .overlay2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transform-origin: center;
+            pointer-events: none;
+
+            background-repeat: repeat;
+            opacity: 0.75;
+        }
+
+        .overlay {
+            width: 500vw;
+            height: 500vw;
+            animation: patternChange 0.5s infinite, distortion 0.2s infinite;
+        }
+
+        .overlay2 {
+            width: 300vw;
+            height: 300vw;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0));
+            animation: patternChange 1s infinite, rotate 0.2s infinite;
+        }
+*/
+
+    .welcomeText {
+        pointer-events: none;
+        position: fixed;
+        font-family: 'Jaini', sans-serif;
+        font-size: 40px;
+        color: black;
+        padding: 10px;
+        text-align: center;
+        top: 5%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .welcomeText2 {
+        cursor: default;
+        position: fixed;
+        font-family: 'Jaini', sans-serif;
+        font-size: 40px;
+        color: black;
+        padding: 10px;
+        text-align: center;
+        top: 95%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+        
+    .welcomeText2:active {
+        animation: textSize 1s 1;
+        animation-timing-function: linear;
+    }
+
+    .testButton {
+        cursor: default;
+        position: fixed;
+        font-family: 'Jaini', sans-serif;
+        font-size: 40px;
+        color: black;
+        padding: 10px;
+        text-align: center;
+        top: 15%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+        
+    .testButton:active {
+        animation: textSize 1s 1;
+        animation-timing-function: linear;
+    }
+
+
+    .symbols {
+        position: fixed;
+
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        width: 300px; /* Adjust size as needed */
+        height: 300px; /* Adjust size as needed */
+        background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Kolovrat_%28%D0%9A%D0%BE%D0%BB%D0%BE%D0%B2%D1%80%D0%B0%D1%82%29_Swastika_%28%D0%A1%D0%B2%D0%B0%D1%81%D1%82%D0%B8%D0%BA%D0%B0%29_-_Rodnovery.svg/512px-Kolovrat_%28%D0%9A%D0%BE%D0%BB%D0%BE%D0%B2%D1%80%D0%B0%D1%82%29_Swastika_%28%D0%A1%D0%B2%D0%B0%D1%81%D1%82%D0%B8%D0%BA%D0%B0%29_-_Rodnovery.svg.png);
+        background-size: contain; /* Ensures the image fits inside */
+        background-position: center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        animation: fullRotate 3s infinite;
+        animation-timing-function: linear;
+    }
+
+    .testSymbol {
+        position: fixed;
+
+        top: 50%;
+        transform: translate(-50%, -50%);
+
+        width: 300px; /* Adjust size as needed */
+        height: 300px; /* Adjust size as needed */
+       /* background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/USVA_headstone_emb-03.svg/800px-USVA_headstone_emb-03.svg.png);*/
+        background-size: contain; /* Ensures the image fits inside */
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .leek {
+        position: fixed;
+
+        top: 50%;
+        left: 25%;
+        transform: translate(-50%, -50%);
+
+        width: 300px; /* Adjust size as needed */
+        height: 300px; /* Adjust size as needed */
+        background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Runic_letter_calc.svg/800px-Runic_letter_calc.svg.png);
+        background-size: contain; /* Ensures the image fits inside */
+        background-position: center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        /*animation: fullRotate 3s infinite;*/
+        animation-timing-function: linear;
+    }
+
+    .celtic {
+        position: fixed;
+
+        top: 50%;
+        left: 75%;
+        transform: translate(-50%, -50%);
+
+        width: 300px; /* Adjust size as needed */
+        height: 300px; /* Adjust size as needed */
+        background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Celtic-style_crossed_circle.svg/800px-Celtic-style_crossed_circle.svg.png);
+        background-size: contain; /* Ensures the image fits inside */
+        background-position: center;
+        background-repeat: no-repeat;
+        pointer-events: none;
+        /*animation: fullRotate 3s infinite;*/
+        animation-timing-function: linear;
+    }
+
+        @keyframes colorShift {
+            0% { background-color: #ff0000; }
+            25% { background-color: #00ff00; }
+            50% { background-color: #0000ff; }
+            75% { background-color: #ffff00; }
+            100% { background-color: #ff00ff; }
+        }
+
+        @keyframes patternChange {
+            0% {
+                background-image: repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(0, 0, 0, 0.5) 50px, rgba(0, 0, 0, 0.5) 100px);
+            }
+            50% {
+                background-image: repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(255, 255, 255, 0.3) 40px, rgba(255, 255, 255, 0.3) 80px);
+            }
+            100% {
+                background-image: repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(0, 0, 0, 0.7) 30px, rgba(0, 0, 0, 0.7) 60px);
+            }
+        }
+
+        @keyframes textSize {
+            0% { font-size: 40px; }
+            100% { font-size: 50px; }
+        }
+
+        @keyframes distortion {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
+        }
+
+        @keyframes flip {
+            0% { transform: translate(-50%, -50%) rotateY(0deg) rotateX(0deg); }
+            25% { transform: translate(-50%, -50%) rotateY(90deg) rotateX(0deg); }
+            50% { transform: translate(-50%, -50%) rotateY(180deg) rotateX(0deg); }
+            75% { transform: translate(-50%, -50%) rotateY(270deg) rotateX(0deg); }
+            100% { transform: translate(-50%, -50%) rotateY(360deg) rotateX(0deg); }
+        }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes fullRotate {
+            0% { transform: translate(-50%, -50%) rotate(-360deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="overlay2"></div>
+    <div class="overlay3"></div>
+    <div class="symbols"></div>
+    <div class="leek"></div>
+    <div class="celtic"></div>
+    <div class="welcomeText">Das ist Cosmizy</div>
+    <div class="welcomeText2">Erläuterung</div>
+    <div class="testButton">Prüfung</div>
+    <div class="testSymbol" id="testSymbol1"></div>
+    <div class="testSymbol" id="testSymbol2"></div>
+    <div class="testSymbol" id="testSymbol3"></div>
+    
+    <script>
+        
+    const testButton = document.querySelector(".testButton");
+        testButton.addEventListener("animationend", function() {
+            // Remove all content
+            document.body.innerHTML = "";
+
+            let testInstruction = document.createElement("div"); // Create a div element
+            
+            // Apply styles using JavaScript
+            testInstruction.style.pointerEvents = "none";
+            testInstruction.style.position = "fixed";
+            testInstruction.style.fontFamily = "'Jaini', sans-serif";
+            testInstruction.style.fontSize = "30px";
+            testInstruction.style.color = "black";
+            testInstruction.style.padding = "10px";
+            testInstruction.style.textAlign = "center";
+            testInstruction.style.top = "15%";
+            testInstruction.style.left = "50%";
+            testInstruction.style.transform = "translate(-50%, -50%)";
+            testInstruction.textContent = "Welches dieser Symbole ist kein Hasssymbol?";
+
+function placeSymbols() {
+    const positions = ["25%", "50%", "75%"];
+    positions.sort(() => Math.random() - 0.5); // Shuffle positions
+
+    // Tables containing background image links
+    const hSymbols = [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Black_Sun_2.svg/800px-Black_Sun_2.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Wolfsangel.svg/800px-Wolfsangel.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wolfsangel_1.svg/800px-Wolfsangel_1.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Nazi_Odal_rune.svg/800px-Nazi_Odal_rune.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Algiz.svg/800px-Algiz.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Sun_Cross_Swastika.svg/800px-Sun_Cross_Swastika.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Swastika_right-facing.svg/800px-Swastika_right-facing.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Totenkopf.svg/800px-Totenkopf.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Earth_symbol_%28black%29.svg/800px-Earth_symbol_%28black%29.svg.png"
+        
+    ];
+    
+    const nSymbols = [
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Drei_Pfeile.svg/800px-Drei_Pfeile.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Swastika.svg/800px-Swastika.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Borjgala.svg/800px-Borjgala.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Christian_cross.svg/800px-Christian_cross.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Lauburu.svg/800px-Lauburu.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/German_Cross.svg/800px-German_Cross.svg.png",
+        
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Raelian_symbol.svg/800px-Raelian_symbol.svg.png"
+    ];
+
+    // Select two random hSymbols
+    let selectedHSymbols = hSymbols.sort(() => Math.random() - 0.5).slice(0, 2);
+    // Select one random nSymbol
+    let selectedNSymbol = nSymbols[Math.floor(Math.random() * nSymbols.length)];
+
+    function createSymbol(leftPosition, imageURL, isNSymbol) {
+        let symbol = document.createElement("div");
+        symbol.style.position = "fixed";
+        symbol.style.top = "50%";
+        symbol.style.transform = "translate(-50%, -50%)";
+        symbol.style.width = "300px";
+        symbol.style.height = "300px";
+        symbol.style.backgroundSize = "contain";
+        symbol.style.backgroundPosition = "center";
+        symbol.style.backgroundRepeat = "no-repeat";
+        symbol.style.left = leftPosition;
+        symbol.style.backgroundImage = `url('${imageURL}')`;
+        symbol.style.cursor = "default";
+
+        // Click event handler
+        symbol.onclick = function () {
+            if (isNSymbol) {
+                // Regenerate symbols if nSymbol is clicked
+                document.body.innerHTML = ""; // Clear all symbols
+                placeSymbols();
+            } else {
+                // Make hSymbol invisible
+                symbol.style.visibility = "hidden";
+            }
+        };
+
+        document.body.appendChild(symbol);
+    }
+
+    createSymbol(positions[0], selectedHSymbols[0], false);
+    createSymbol(positions[1], selectedHSymbols[1], false);
+    createSymbol(positions[2], selectedNSymbol, true);
+}
+
+
+
+
+
+
+            
+            placeSymbols();
+            
+            document.body.appendChild(testInstruction); // Add the element to the body
+            
+    }, { once: true }); // Ensures the event runs only once
+
+        
+
+    const welcomeText = document.querySelector(".welcomeText2");
+        welcomeText.addEventListener("animationend", function() {
+            // Remove all content
+            document.body.innerHTML = "";
+
+            let explanationBox = document.createElement("div"); // Create a div element
+            
+            // Apply styles using JavaScript
+            explanationBox.style.pointerEvents = "none";
+            explanationBox.style.position = "fixed";
+            explanationBox.style.fontFamily = "'Jaini', sans-serif";
+            explanationBox.style.fontSize = "30px";
+            explanationBox.style.color = "black";
+            explanationBox.style.padding = "10px";
+            explanationBox.style.textAlign = "center";
+            explanationBox.style.top = "50%";
+            explanationBox.style.left = "50%";
+            explanationBox.style.transform = "translate(-50%, -50%)";
+            explanationBox.textContent = "In the world we currently live in, symbology is very important. Be it languages, religions, or ideas. However, that being said, symbols have been used for hate for a very, very long time. Some of these symbols I'm sure everyone knows. Perhaps the most well known hate symbol is the Swastika. The Nazi Party in Germany co-opted this symbol, which was originally used for good luck, to spread fear in the Jewish community. Today, however, many of the symbols that were known to be related to the Nazis have been banned in Europe and many other countries. However, there are still many who hate, so they decide to co-opt new symbols that are not as well known. This branch of Cosmizy.com was created to spread awareness and document the symbols that these people use to hate, as well as to show that you may not have even noticed that these are symbols of hate. This page is in no way meant to spread hate to any group.";
+            
+            document.body.appendChild(explanationBox); // Add the element to the body
+            
+    }, { once: true }); // Ensures the event runs only once
+
+
+
+
+
+
+        
+window.onload = window.onresize = function() {
+    setTimeout(500);
+    window.scrollTo(0, 0);
+};
+    </script>
+</body>
+</html>
