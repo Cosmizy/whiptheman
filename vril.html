@@ -240,20 +240,60 @@
             // Remove all content
             document.body.innerHTML = "";
 
-            let testInstruction = document.createElement("div"); // Create a div element
-            
-            // Apply styles using JavaScript
-            testInstruction.style.pointerEvents = "none";
-            testInstruction.style.position = "fixed";
-            testInstruction.style.fontFamily = "'Jaini', sans-serif";
-            testInstruction.style.fontSize = "30px";
-            testInstruction.style.color = "black";
-            testInstruction.style.padding = "10px";
-            testInstruction.style.textAlign = "center";
-            testInstruction.style.top = "15%";
-            testInstruction.style.left = "50%";
-            testInstruction.style.transform = "translate(-50%, -50%)";
-            testInstruction.textContent = "Welches dieser Symbole ist kein Hasssymbol?";
+            function createTestInstruction() {
+                let testInstruction = document.createElement("div"); // Create a div element
+                
+                // Apply styles using JavaScript
+                testInstruction.style.pointerEvents = "none";
+                testInstruction.style.position = "fixed";
+                testInstruction.style.fontFamily = "'Jaini', sans-serif";
+                testInstruction.style.fontSize = "40px";
+                testInstruction.style.color = "black";
+                testInstruction.style.padding = "10px";
+                testInstruction.style.textAlign = "center";
+                testInstruction.style.top = "15%";
+                testInstruction.style.left = "50%";
+                testInstruction.style.transform = "translate(-50%, -50%)";
+                testInstruction.textContent = "Welches dieser Symbole ist kein Hasssymbol?";
+
+                document.body.appendChild(testInstruction); // Add the element to the body
+            }
+
+            function createTestScore(score) {
+                let testScore = document.createElement("div"); // Create a div element
+
+                testScore.id = "testScore"; // Assign an ID for easier selection
+
+                // Apply styles using JavaScript
+                testScore.style.pointerEvents = "none";
+                testScore.style.position = "fixed";
+                testScore.style.fontFamily = "'Jaini', sans-serif";
+                testScore.style.fontSize = "40px";
+                testScore.style.color = "black";
+                testScore.style.padding = "10px";
+                testScore.style.textAlign = "center";
+                testScore.style.top = "10%";
+                testScore.style.left = "50%";
+                testScore.style.transform = "translate(-50%, -50%)";
+                if (score === '1') {
+                    testScore.textContent = Number(testScore.textContent) + 1;
+                } else {
+                    testScore.textContent = "0";
+                }
+
+                document.body.appendChild(testScore); // Add the element to the body
+            }
+
+            function updateTestScore(score) {
+                let testScore = document.getElementById("testScore"); // Get the testScore div
+                
+                if (score === '1') {
+                    testScore.textContent = Number(testScore.textContent) + 1; // Convert and increment
+                } else {
+                    testScore.textContent = "0"; // Reset to 0
+                }
+            }
+
 
 function placeSymbols() {
     const positions = ["25%", "50%", "75%"];
@@ -276,12 +316,15 @@ function placeSymbols() {
     const nSymbols = [
         "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Drei_Pfeile.svg/800px-Drei_Pfeile.svg.png",
         "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Swastika.svg/800px-Swastika.svg.png",
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Borjgala.svg/800px-Borjgala.svg.png",
+        "https://github.com/Cosmizy/whiptheman/blob/main/borjgala.png?raw=true",
         "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Christian_cross.svg/800px-Christian_cross.svg.png",
         "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Lauburu.svg/800px-Lauburu.svg.png",
         "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/German_Cross.svg/800px-German_Cross.svg.png",
-        
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Raelian_symbol.svg/800px-Raelian_symbol.svg.png"
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Tribann.svg/800px-Tribann.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Peace_symbol_%28bold%29.svg/800px-Peace_symbol_%28bold%29.svg.png",
+        "https://github.com/Cosmizy/whiptheman/blob/main/raelism.png?raw=true",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Font_Awesome_5_solid_dharmachakra.svg/640px-Font_Awesome_5_solid_dharmachakra.svg.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/The_letter_Sigma.svg/640px-The_letter_Sigma.svg.png"
     ];
 
     // Select two random hSymbols
@@ -291,6 +334,8 @@ function placeSymbols() {
 
     function createSymbol(leftPosition, imageURL, isNSymbol) {
         let symbol = document.createElement("div");
+        symbol.id = "symbol"; // Assign an ID for easier selection
+        
         symbol.style.position = "fixed";
         symbol.style.top = "50%";
         symbol.style.transform = "translate(-50%, -50%)";
@@ -307,11 +352,14 @@ function placeSymbols() {
         symbol.onclick = function () {
             if (isNSymbol) {
                 // Regenerate symbols if nSymbol is clicked
-                document.body.innerHTML = ""; // Clear all symbols
+               // document.body.innerHTML = ""; // Clear all symbols
+                document.querySelectorAll('div#symbol').forEach(el => el.remove());
+                updateTestScore('1');
                 placeSymbols();
             } else {
                 // Make hSymbol invisible
                 symbol.style.visibility = "hidden";
+                updateTestScore('0');
             }
         };
 
@@ -330,8 +378,8 @@ function placeSymbols() {
 
             
             placeSymbols();
-            
-            document.body.appendChild(testInstruction); // Add the element to the body
+            createTestScore(0);
+            createTestInstruction();
             
     }, { once: true }); // Ensures the event runs only once
 
