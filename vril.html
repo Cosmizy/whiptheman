@@ -234,6 +234,8 @@
     <div class="testSymbol" id="testSymbol3"></div>
     
     <script>
+
+    let wantSpin = false;
         
     const testButton = document.querySelector(".testButton");
         testButton.addEventListener("animationend", function() {
@@ -244,7 +246,7 @@
                 let testInstruction = document.createElement("div"); // Create a div element
                 
                 // Apply styles using JavaScript
-                testInstruction.style.pointerEvents = "none";
+                //testInstruction.style.pointerEvents = "none";
                 testInstruction.style.position = "fixed";
                 testInstruction.style.fontFamily = "'Jaini', sans-serif";
                 testInstruction.style.fontSize = "40px";
@@ -255,6 +257,11 @@
                 testInstruction.style.left = "50%";
                 testInstruction.style.transform = "translate(-50%, -50%)";
                 testInstruction.textContent = "Welches dieser Symbole ist kein Hasssymbol?";
+                testInstruction.style.cursor = "default";
+
+                testInstruction.onclick = function () {
+                    wantSpin = true;
+                };
 
                 document.body.appendChild(testInstruction); // Add the element to the body
             }
@@ -265,7 +272,6 @@
                 testScore.id = "testScore"; // Assign an ID for easier selection
 
                 // Apply styles using JavaScript
-                testScore.style.pointerEvents = "none";
                 testScore.style.position = "fixed";
                 testScore.style.fontFamily = "'Jaini', sans-serif";
                 testScore.style.fontSize = "40px";
@@ -351,6 +357,11 @@ function placeSymbols() {
         symbol.style.cursor = "default";
 
         if (Number(testScore.textContent) > 99) { 
+            symbol.style.animation = "fullRotate 3s infinite"; 
+            symbol.style.animationTimingFunction = "linear"; 
+        }
+
+        if (wantSpin === true) { 
             symbol.style.animation = "fullRotate 3s infinite"; 
             symbol.style.animationTimingFunction = "linear"; 
         }
