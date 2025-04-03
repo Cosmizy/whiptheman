@@ -335,6 +335,7 @@ function placeSymbols() {
 
     function createSymbol(leftPosition, imageURL, isNSymbol) {
         let symbol = document.createElement("div");
+        let testScore = document.getElementById("testScore");
         symbol.id = "symbol"; // Assign an ID for easier selection
         
         symbol.style.position = "fixed";
@@ -348,6 +349,11 @@ function placeSymbols() {
         symbol.style.left = leftPosition;
         symbol.style.backgroundImage = `url('${imageURL}')`;
         symbol.style.cursor = "default";
+
+        if (Number(testScore.textContent) > 99) { 
+            symbol.style.animation = "fullRotate 3s infinite"; 
+            symbol.style.animationTimingFunction = "linear"; 
+        }
 
         // Click event handler
         symbol.onclick = function () {
@@ -377,9 +383,9 @@ function placeSymbols() {
 
 
 
-            
-            placeSymbols();
             createTestScore(0);
+            placeSymbols();
+            
             createTestInstruction();
             
     }, { once: true }); // Ensures the event runs only once
