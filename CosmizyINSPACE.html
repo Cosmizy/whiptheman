@@ -600,6 +600,7 @@ database.once('value')
   const noFuelImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_nofuel.png";
 
   const fuelCanImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/gas_can.png";
+  const powerUpImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/powerup.png";
     
   const asteroidImages = [
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_1.png",
@@ -608,6 +609,10 @@ database.once('value')
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_4.png",
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_5.png",
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/asteroid_6.png"
+  ];
+
+  const starImages = [
+    { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_sun.png", size: 150, speed: 1, health: 100000},
   ];
 
 const planetImages = [
@@ -643,6 +648,8 @@ const musicTracks = [
   let fuelSpawnRate = 15000;
   let fuelCanHealth = 1;
   let fuelCanMaxHealth = 1;
+//PowerUp settings
+  let powerUpSpawnRate = 30000;
     //Asteroid settings
   let asteroidSpawnRate = 1000;
   let asteroidMinSpeed = 4;
@@ -654,6 +661,8 @@ const musicTracks = [
   let planetHealthMultiplier = 1;
   let planetSpeedMultiplier = 1;
   let planetDamage = 200;
+    //Star settings
+  let starDamage = 1000;
     //UFO settings
   let UFOSpawnRate = 4000;
   let UFOMinSpeed = 6;
@@ -990,6 +999,39 @@ bullets.forEach((bullet, bulletIndex) => {
             }
               
           }
+
+          if (enemy.isPowerUp === true) {
+
+              
+
+              if (enemy.rewardType === 1) {
+                  
+                if (playerHealth < playerMaxHealth) {
+                    if (playerHealth + enemy.rewardValue <= playerMaxHealth) {
+                        playerHealth += enemy.rewardValue;
+                    } else {
+                        playerHealth += playerMaxHealth - playerHealth;
+                    }
+                }
+              } else if (enemy.rewardType === 2) {
+                if (playerFuel < playerMaxFuel) {
+                    if (playerFuel + enemy.rewardValue <= playerMaxFuel) {
+                        playerFuel += enemy.rewardValue;
+                    } else {
+                        playerFuel += playerMaxFuel - playerFuel;
+                    }
+                }
+              } else if (enemy.rewardType === 3) {
+                if (playerAmmo < playerMaxAmmo) {
+                    if (playerAmmo + enemy.rewardValue <= playerMaxAmmo) {
+                        playerAmmo += enemy.rewardValue;
+                    } else {
+                        playerAmmo += playerMaxAmmo - playerAmmo;
+                    }
+                }
+              }
+              
+          }
             
         // Reduce health of the player
 
@@ -1180,6 +1222,7 @@ class Asteroid {
     this.damagedPlayer = false;
     this.damage = asteroidDamage;
     this.isGas = false;
+    this.isPowerUp = false;
     this.dead = false;
   }
 
@@ -1244,6 +1287,73 @@ class Planet {
     this.damagedPlayer = false;
     this.damage = planetDamage;
     this.isGas = false;
+    this.isPowerUp = false;
+    this.dead = false;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
+    ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+      
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the asteroid
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move asteroid left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
+class Star {
+  constructor() {
+    const starData = starImages[Math.floor(Math.random() * starImages.length)];
+    this.name = "Star";
+    this.size = starData.size;
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = starData.src;
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.speed = starData.speed;
+    this.rotation = 0; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
+    this.health = starData.health;
+    this.maxHealth = this.health;
+    this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = starDamage;
+    this.isGas = false;
+    this.isPowerUp = false;
     this.dead = false;
   }
 
@@ -1326,6 +1436,7 @@ class UFO {
     this.bulletDamage = UFOBulletDamage;
     this.randomShotDelay = 1500
     this.isGas = false;
+    this.isPowerUp = false;
     this.dead = false;
   }
 
@@ -1386,6 +1497,98 @@ class UFO {
   }
 }
 
+
+    
+class PowerUp {
+  constructor() {
+    this.name = "PowerUp";
+    this.size = 60; // Hitbox size
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = powerUpImageSrc;
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.minSpeed = UFOMinSpeed;
+    this.maxSpeed = UFOMaxSpeed;
+    this.speed = Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed / (this.size / 20); // Total speed
+    this.rotation = (Math.random() - 0.5) * 0.25 / (this.size / 20);; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.1 / (this.size / 15); // Random rotation speed
+    this.health = fuelCanHealth;
+    this.maxHealth = fuelCanMaxHealth;
+    this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = 0;
+    this.isPowerUp = true;
+    this.dead = false;
+
+    // Random reward logic (1 in 3 chance)
+    this.rewardType = Math.floor(Math.random() * 3) + 1;
+    
+    if (this.rewardType === 1) {
+      this.rewardText = "+50";
+      this.rewardColor = "lime";
+      this.rewardValue = 50;
+    } else if (this.rewardType === 2) {
+      this.rewardText = "+50";
+      this.rewardColor = "orange";
+      this.rewardValue = 50;
+    } else if (this.rewardType === 3) {
+      this.rewardText = "+50";
+      this.rewardColor = "mediumblue";
+      this.rewardValue = 50;
+    }
+
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
+    ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the asteroid
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+
+    ctx.fillStyle = this.rewardColor;
+    ctx.font = `${this.size / 7}px "Press Start 2P"`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(this.rewardText, 0, 0);
+      
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move asteroid left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+    
     
 
 class FuelCan {
@@ -1408,6 +1611,7 @@ class FuelCan {
     this.damagedPlayer = false;
     this.damage = 0;
     this.isGas = true;
+    this.isPowerUp = false;
     this.dead = false;
   }
 
@@ -1486,6 +1690,7 @@ function startGame(selectedDifficulty) {
     
     if (selectedDifficulty === "easy") {
       fuelSpawnRate = 4000;
+      powerUpSpawnRate = 20000;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
       asteroidHealth = 25;
@@ -1505,6 +1710,7 @@ function startGame(selectedDifficulty) {
 
     if (selectedDifficulty === "normal") {
       fuelSpawnRate = 5000;
+      powerUpSpawnRate = 30000;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
       asteroidHealth = 50;
@@ -1524,6 +1730,7 @@ function startGame(selectedDifficulty) {
 
     if (selectedDifficulty === "hard") {
       fuelSpawnRate = 5000;
+      powerUpSpawnRate = 45000;
       fuelCanHealth = 100;
       fuelCanMaxHealth = 100;
       asteroidHealth = 100;
@@ -1543,6 +1750,7 @@ function startGame(selectedDifficulty) {
 
     if (selectedDifficulty === "nightmare") {
       fuelSpawnRate = 6000;
+      powerUpSpawnRate = 120000;
       fuelCanHealth = 150;
       fuelCanMaxHealth = 150;
       asteroidHealth = 150;
@@ -1591,6 +1799,15 @@ function startGame(selectedDifficulty) {
         checkReload();
     }, 200); // Update fuel every 100 miliseconds
 
+    setInterval(() => {
+        // Generate a random number between 0 and 1
+        if (Math.random() < 0.1) { // 10% chance
+            const star = new Star();
+            enemies.push(star);
+        }
+    }, 100000); // every 100 seconds
+
+
     if (planetsOnly === false) {
         setInterval(() => {
           const planet = new Planet();
@@ -1633,7 +1850,10 @@ function startGame(selectedDifficulty) {
 
 
 
-
+    setInterval(() => {
+        const powerUp = new PowerUp();
+        enemies.push(powerUp);
+    }, powerUpSpawnRate);
     
 
     if (infiniteAmmo === true) {
