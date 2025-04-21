@@ -1166,7 +1166,7 @@ function gameOverScreen() {
   const gameOverNameInput = document.getElementById("nameInput");
   gameOverText.textContent = "Game Over";
 
-  if (score > 1) { //change to score > highscore
+  if (score > highscore) { //change to score > highscore
       if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
         gameOverScoreText.textContent = "Final Score: " + score + " - New Highest Score!";
         gameOverNameInput.style.display = 'block';
