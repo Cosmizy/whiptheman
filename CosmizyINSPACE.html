@@ -495,7 +495,7 @@
     Developed by: Cosmizy<br>
     Art and Design: Cosmizy<br>
     Music: Arthur Benedict Baker<br>
-    Special Thanks: Hector Alvarado, Joseph Sanchez Sanchez Sanchez, Rupert Pinero, and Samuel Ashlock. <br> <br> I couldn't have done it without all of your guy's help.
+    Special Thanks: Hector Alvarado, Joseph Sanchez Sanchez Sanchez, Rupert Pinero, and Samuel Ashlock.<br> <br>Greatly inspired by Jameson Harrigan's  Atlas Space Academy.
   </p>
   <button id="backButton2">Back</button>
 </div>
@@ -516,6 +516,7 @@
       <button id="multiplierButton2" style="color: white;">Infinite Fuel</button>
       <button id="multiplierButton3" style="color: white;">Infinite Ammo</button>
       <button id="multiplierButton4" style="color: white;">Infinite Health</button>
+      <button id="multiplierNextPageButton" style="color: white;">Next Page</button>
     </div>
   </div>
 </div>
@@ -682,7 +683,7 @@ const musicTracks = [
   let UFOMinSpeed = 6;
   let UFOMaxSpeed = 9;
   let UFOHealth = 100;
-  let UFODamage = 50;
+  let UFODamage = 25;
   let UFOBulletDamage = 50;
   let UFOBulletInterval = 1500;
 //Random Settings
@@ -695,6 +696,10 @@ const musicTracks = [
   let infiniteFuel = false;
   let infiniteAmmo = false;
   let infiniteHealth = false;
+  let oneShot = false;
+  let constantPowerups = false;
+  let constantSpawn = false;
+  let ufoOnly = false;
 
   // Game difficulty
   let defaultDifficulty = 'normal';
@@ -1060,7 +1065,7 @@ bullets.forEach((bullet, bulletIndex) => {
           if (score >= highscore) {
             //highscore = score
 
-              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false && constantPowerups === false && oneShot === false) {
                   database.set({
                     score: score
                   });
@@ -1265,6 +1270,16 @@ class Asteroid {
     this.isGas = false;
     this.isPowerUp = false;
     this.dead = false;
+
+    if (this.size < 50) {
+      this.health = 50;
+    } else if (this.size < 70) {
+      this.health = 100;
+    } else {
+      this.health = 150;
+    }
+    this.maxHealth = this.health;
+
   }
 
   draw() {
@@ -1286,6 +1301,8 @@ class Asteroid {
       ctx.fillStyle = "green";
       ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
     }
+
+
 
     // Draw hitbox (optional for debugging)
     //ctx.strokeStyle = "red";
@@ -1732,6 +1749,7 @@ function startGame(selectedDifficulty) {
     if (selectedDifficulty === "easy") {
       fuelSpawnRate = 4000;
       powerUpSpawnRate = 20000;
+      powerUpSpawnChance = 1.0;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
       asteroidHealth = 25;
@@ -1752,9 +1770,10 @@ function startGame(selectedDifficulty) {
     if (selectedDifficulty === "normal") {
       fuelSpawnRate = 5000;
       powerUpSpawnRate = 30000;
+      powerUpSpawnChance = 1.0;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
-      asteroidHealth = 50;
+      //asteroidHealth = 50;
       asteroidSpawnRate = 1000;
       asteroidMinSpeed = 4;
       asteroidMaxSpeed = 8;
@@ -1766,15 +1785,16 @@ function startGame(selectedDifficulty) {
       UFOMinSpeed = 6;
       UFOMaxSpeed = 9;
       UFOBulletInterval = 1500;
-      playerAmmo = 50;
+      playerAmmo = 100;
     }
 
     if (selectedDifficulty === "hard") {
       fuelSpawnRate = 5000;
-      powerUpSpawnRate = 45000;
+      powerUpSpawnRate = 30000;
+      powerUpSpawnChance = 0.75;
       fuelCanHealth = 100;
       fuelCanMaxHealth = 100;
-      asteroidHealth = 100;
+      //asteroidHealth = 100;
       asteroidSpawnRate = 600;
       asteroidMinSpeed = 6.5;
       asteroidMaxSpeed = 13;
@@ -1786,15 +1806,16 @@ function startGame(selectedDifficulty) {
       UFOMinSpeed = 6;
       UFOMaxSpeed = 12;
       UFOBulletInterval = 1000;
-      playerAmmo = 30;
+      playerAmmo = 50;
     }
 
     if (selectedDifficulty === "nightmare") {
       fuelSpawnRate = 6000;
-      powerUpSpawnRate = 120000;
+      powerUpSpawnRate = 15000;
+      powerUpSpawnChance = 0.25;
       fuelCanHealth = 150;
       fuelCanMaxHealth = 150;
-      asteroidHealth = 150;
+      //asteroidHealth = 150;
       asteroidSpawnRate = 400;
       asteroidMinSpeed = 11;
       asteroidMaxSpeed = 21.5;
@@ -1806,7 +1827,7 @@ function startGame(selectedDifficulty) {
       UFOMinSpeed = 8;
       UFOMaxSpeed = 15;
       UFOBulletInterval = 800;
-      playerAmmo = 20;
+      playerAmmo = 25;
     }
 
     let startUFO = false;
@@ -1848,34 +1869,59 @@ function startGame(selectedDifficulty) {
         }
     }, 100000); // every 100 seconds
 
-
-    if (planetsOnly === false) {
-        setInterval(() => {
-          const planet = new Planet();
-          enemies.push(planet); // Add planets to the same enemies array
-        }, planetSpawnRate); // Spawn a planet every spawn rate
-    } else {
-        setInterval(() => {
-          const planet = new Planet();
-          enemies.push(planet); // Add planets to the same enemies array
-        }, 2500); // Spawn a planet every spawn rate
+    if (ufoOnly === false) {
+        if (planetsOnly === false) {
+          
+            setInterval(() => {
+              const planet = new Planet();
+              enemies.push(planet); // Add planets to the same enemies array
+            }, planetSpawnRate); // Spawn a planet every spawn rate
+        } else {
+            setInterval(() => {
+              const planet = new Planet();
+              enemies.push(planet); // Add planets to the same enemies array
+            }, 2500); // Spawn a planet every spawn rate
+        }
     }
 
     if (planetsOnly === false) {
+      if (ufoOnly === false) {
         setInterval(() => {
           const asteroid = new Asteroid();
           enemies.push(asteroid);
         }, asteroidSpawnRate);
+      }
     }
 
             if (planetsOnly === false) {
+              if (ufoOnly === false) {
                 setInterval(() => {
                   if (startUFO === true) {
                       const ufo = new UFO();
                       enemies.push(ufo);
                   }
                 }, UFOSpawnRate);
+              }
             }
+
+
+    if (planetsOnly === false) {
+        if (ufoOnly === false) {
+
+                setInterval(() => {
+                  if (startUFO === true) {
+                      const ufo = new UFO();
+                      enemies.push(ufo);
+                  }
+                }, UFOSpawnRate);
+            
+        } else {
+                setInterval(() => {
+                    const ufo = new UFO();
+                    enemies.push(ufo);
+                }, 1000);
+        }
+    }
 
     setInterval(() => {
         enemies.forEach(enemy => {
@@ -1892,9 +1938,27 @@ function startGame(selectedDifficulty) {
 
 
     setInterval(() => {
-        const powerUp = new PowerUp();
-        enemies.push(powerUp);
+        if (Math.random() < powerUpSpawnChance) { // 50% chance
+            const powerUp = new PowerUp();
+            enemies.push(powerUp);
+        }
     }, powerUpSpawnRate);
+
+        if (constantPowerups === false) {
+
+            setInterval(() => {
+                if (Math.random() < powerUpSpawnChance) { // 50% chance
+                    const powerUp = new PowerUp();
+                    enemies.push(powerUp);
+                }
+            }, powerUpSpawnRate);
+            
+        } else {
+                setInterval(() => {
+                    const powerUp = new PowerUp();
+                    enemies.push(powerUp);
+                }, 1000);
+        }
     
 
     if (infiniteAmmo === true) {
@@ -1998,45 +2062,101 @@ function startGame(selectedDifficulty) {
   document.getElementById("normalButton").addEventListener("click", () => startGame("normal"));
   document.getElementById("hardButton").addEventListener("click", () => startGame("hard"));
   document.getElementById("nightmareButton").addEventListener("click", () => startGame("nightmare"));
+
+  document.getElementById("multiplierNextPageButton").addEventListener("click", () => {
+        if (document.getElementById("multiplierButton1").textContent === "Planets Only") {
+            document.getElementById("multiplierButton1").textContent = "One Shot";
+            document.getElementById("multiplierButton2").textContent = "Constant Powerups";
+            document.getElementById("multiplierButton3").textContent = "Constant Spawn";
+            document.getElementById("multiplierButton4").textContent = "UFO Only";
+        } else if (document.getElementById("multiplierButton1").textContent === "One Shot") {
+            document.getElementById("multiplierButton1").textContent = "Planets Only";
+            document.getElementById("multiplierButton2").textContent = "Infinite Fuel";
+            document.getElementById("multiplierButton3").textContent = "Infinite Ammo";
+            document.getElementById("multiplierButton4").textContent = "Infinite Health";
+        }
+  });
     
     //planets only multiplier
   document.getElementById("multiplierButton1").addEventListener("click", () => {
     if (document.getElementById("multiplierButton1").style.color === "white") {
         document.getElementById("multiplierButton1").style.color = "lime";
-        planetsOnly = true;
+        
+        if (document.getElementById("multiplierButton1").textContent === "Planets Only") {
+            planetsOnly = true;
+        } else if (document.getElementById("multiplierButton1").textContent === "One Shot") {
+            oneShot = true;
+        }
     } else {
         document.getElementById("multiplierButton1").style.color = "white";
-        planetsOnly = false;
+
+        if (document.getElementById("multiplierButton1").textContent === "Planets Only") {
+            planetsOnly = false;
+        } else if (document.getElementById("multiplierButton1").textContent === "One Shot") {
+            oneShot = false;
+        }
     }
   });
 //infinite fuel multiplier
+
   document.getElementById("multiplierButton2").addEventListener("click", () => {
     if (document.getElementById("multiplierButton2").style.color === "white") {
         document.getElementById("multiplierButton2").style.color = "lime";
-        infiniteFuel = true;
+        
+        if (document.getElementById("multiplierButton2").textContent === "Infinite Fuel") {
+            infiniteFuel = true;
+        } else if (document.getElementById("multiplierButton2").textContent === "Constant Powerups") {
+            constantPowerups = true;
+        }
     } else {
         document.getElementById("multiplierButton2").style.color = "white";
-        infiniteFuel = false;
+
+        if (document.getElementById("multiplierButton2").textContent === "Infinite Fuel") {
+            infiniteFuel = false;
+        } else if (document.getElementById("multiplierButton2").textContent === "Constant Powerups") {
+            constantPowerups = false;
+        }
     }
   });
+    
 //infinite ammo multiplier
   document.getElementById("multiplierButton3").addEventListener("click", () => {
     if (document.getElementById("multiplierButton3").style.color === "white") {
         document.getElementById("multiplierButton3").style.color = "lime";
-        infiniteAmmo = true;
+        
+        if (document.getElementById("multiplierButton3").textContent === "Infinite Ammo") {
+            infiniteAmmo = true;
+        } else if (document.getElementById("multiplierButton3").textContent === "Constant Spawn") {
+            constantSpawn = true;
+        }
     } else {
         document.getElementById("multiplierButton3").style.color = "white";
-        infiniteAmmo = false;
+
+        if (document.getElementById("multiplierButton3").textContent === "Infinite Ammo") {
+            infiniteAmmo = false;
+        } else if (document.getElementById("multiplierButton3").textContent === "Constant Spawn") {
+            constantSpawn = false;
+        }
     }
   });
 
   document.getElementById("multiplierButton4").addEventListener("click", () => {
     if (document.getElementById("multiplierButton4").style.color === "white") {
         document.getElementById("multiplierButton4").style.color = "lime";
-        infiniteHealth = true;
+        
+        if (document.getElementById("multiplierButton4").textContent === "Infinite Health") {
+            infiniteHealth = true;
+        } else if (document.getElementById("multiplierButton4").textContent === "UFO Only") {
+            ufoOnly = true;
+        }
     } else {
         document.getElementById("multiplierButton4").style.color = "white";
-        infiniteHealth = false;
+
+        if (document.getElementById("multiplierButton4").textContent === "Infinite Health") {
+            infiniteHealth = false;
+        } else if (document.getElementById("multiplierButton4").textContent === "UFO Only") {
+            ufoOnly = false;
+        }
     }
   });
     
