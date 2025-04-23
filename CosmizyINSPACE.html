@@ -879,7 +879,12 @@ function checkCollisions() {
         bullet.y + bullet.height > enemy.y
       ) {
         // Reduce health of the enemy
-        enemy.takeDamage(playerDamage);
+        if (oneShot === false) {
+            enemy.takeDamage(playerDamage);
+        } else {
+            enemy.takeDamage(enemy.health);
+        }
+        
 
         // Remove bullet
         bullets.splice(bulletIndex, 1);
@@ -930,14 +935,20 @@ bullets.forEach((bullet, bulletIndex) => {
             
         // Reduce health of the player
 
-        if (infiniteHealth === false) {
-            playerHealth -= bullet.damage;
+         if (infiniteHealth === false) {
+            if (oneShot === false) {
+                playerHealth -= bullet.damage;
+            } else {
+                if (bullet.damage > 0) {
+                    playerHealth = 0;
+                }
+            }
         }
 
     
         bullet.damagedPlayer = true;
 
-        alert("test");
+        //alert("test");
             
         bullets.splice(bulletIndex, 1);
         // Check if player health is zero or below
@@ -975,7 +986,13 @@ bullets.forEach((bullet, bulletIndex) => {
         // Reduce health of the player
 
         if (infiniteHealth === false) {
-            playerHealth -= enemy.damage;
+            if (oneShot === false) {
+                playerHealth -= enemy.damage;
+            } else {
+                if (enemy.damage > 0) {
+                    playerHealth = 0;
+                }
+            }
         }
     
         enemy.damagedPlayer = true;
@@ -1057,7 +1074,13 @@ bullets.forEach((bullet, bulletIndex) => {
         // Reduce health of the player
 
         if (infiniteHealth === false) {
-            playerHealth -= enemy.damage;
+            if (oneShot === false) {
+                playerHealth -= enemy.damage;
+            } else {
+                if (enemy.damage > 0) {
+                    playerHealth = 0;
+                }
+            }
         }
     
         enemy.damagedPlayer = true;
@@ -1739,6 +1762,7 @@ function detectEnemySpawn(enemy) {
 }
 
 function startGame(selectedDifficulty) {
+    let startUFO = false;
     document.getElementById("difficultyScreen").style.display = "none";
     document.getElementById("globalHighscore").innerText = "Global Highscore: " + highscore + " - " + highscoreName;
     document.getElementById("globalHighscore").style.display =  "flex";
@@ -1749,24 +1773,34 @@ function startGame(selectedDifficulty) {
     playMusic("default_1");
     
     if (selectedDifficulty === "easy") {
-      fuelSpawnRate = 4000;
-      powerUpSpawnRate = 20000;
       powerUpSpawnChance = 1.0;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
       asteroidHealth = 25;
-      asteroidSpawnRate = 2000;
       asteroidMinSpeed = 2;
       asteroidMaxSpeed = 5;
-      planetSpawnRate = 30000;
       planetHealthMultiplier = 0.75;
       planetSpeedMultiplier = 0.85;
       UFOHealth = 100;
-      UFOSpawnRate = 5500;
       UFOMinSpeed = 5;
       UFOMaxSpeed = 8;
       UFOBulletInterval = 2000;
       playerAmmo =  100;
+
+    if (constantSpawn === false) {
+        fuelSpawnRate = 4000;
+        powerUpSpawnRate = 20000;
+        asteroidSpawnRate = 2000;
+        planetSpawnRate = 30000;
+        UFOSpawnRate = 5500;
+      } else {
+        fuelSpawnRate = 3000;
+        powerUpSpawnRate = 20000;
+        UFOSpawnRate = 2000;
+        asteroidSpawnRate = 500;
+        planetSpawnRate = 3000;
+        startUFO = true;
+      }
     }
 
     if (selectedDifficulty === "normal") {
@@ -1788,6 +1822,21 @@ function startGame(selectedDifficulty) {
       UFOMaxSpeed = 9;
       UFOBulletInterval = 1500;
       playerAmmo = 100;
+
+      if (constantSpawn === false) {
+        fuelSpawnRate = 5000;
+        powerUpSpawnRate = 30000;
+        asteroidSpawnRate = 1000;
+        planetSpawnRate = 20000;
+        UFOSpawnRate = 4000;
+      } else {
+        fuelSpawnRate = 3000;
+        powerUpSpawnRate = 20000;
+        UFOSpawnRate = 2000;
+        asteroidSpawnRate = 300;
+        planetSpawnRate = 3000;
+        startUFO = true;
+      }
     }
 
     if (selectedDifficulty === "hard") {
@@ -1809,6 +1858,21 @@ function startGame(selectedDifficulty) {
       UFOMaxSpeed = 12;
       UFOBulletInterval = 1000;
       playerAmmo = 50;
+
+      if (constantSpawn === false) {
+        fuelSpawnRate = 5000;
+        powerUpSpawnRate = 30000;
+        asteroidSpawnRate = 600;
+        planetSpawnRate = 15000;
+        UFOSpawnRate = 300;
+      } else {
+        fuelSpawnRate = 3000;
+        powerUpSpawnRate = 10000;
+        UFOSpawnRate = 2000;
+        asteroidSpawnRate = 200;
+        planetSpawnRate = 3000;
+        startUFO = true;
+      }
     }
 
     if (selectedDifficulty === "nightmare") {
@@ -1830,9 +1894,25 @@ function startGame(selectedDifficulty) {
       UFOMaxSpeed = 15;
       UFOBulletInterval = 800;
       playerAmmo = 25;
+
+      if (constantSpawn === false) {
+        fuelSpawnRate = 6000;
+        powerUpSpawnRate = 15000;
+        asteroidSpawnRate = 400;
+        planetSpawnRate = 10000;
+        UFOSpawnRate = 2500;
+      } else {
+        fuelSpawnRate = 3000;
+        powerUpSpawnChance = 1.0;
+        powerUpSpawnRate = 2000;
+        UFOSpawnRate = 2000;
+        asteroidSpawnRate = 100;
+        planetSpawnRate = 3000;
+        startUFO = true;
+      }
     }
 
-    let startUFO = false;
+    
 
     setInterval(() => {
         // start making ufos
