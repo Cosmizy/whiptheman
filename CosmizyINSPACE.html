@@ -683,8 +683,8 @@ const musicTracks = [
   let UFOMinSpeed = 6;
   let UFOMaxSpeed = 9;
   let UFOHealth = 100;
-  let UFODamage = 25;
-  let UFOBulletDamage = 50;
+  let UFODamage = 50;
+  let UFOBulletDamage = 25;
   let UFOBulletInterval = 1500;
 //Random Settings
   let currentPlayerImageIndex = 0;
@@ -937,6 +937,8 @@ bullets.forEach((bullet, bulletIndex) => {
     
         bullet.damagedPlayer = true;
 
+        alert("test");
+            
         bullets.splice(bulletIndex, 1);
         // Check if player health is zero or below
         if (playerHealth <= 0) {
@@ -944,7 +946,7 @@ bullets.forEach((bullet, bulletIndex) => {
           if (score >= highscore) {
             //highscore = score
 
-              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false && constantPowerups === false && oneShot === false) {
                   database.set({
                     score: score
                   });
@@ -983,7 +985,7 @@ bullets.forEach((bullet, bulletIndex) => {
           if (score >= highscore) {
             //highscore = score
 
-              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+              if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false && constantPowerups === false && oneShot === false) {
                   database.set({
                     score: score
                   });
@@ -1172,7 +1174,7 @@ function gameOverScreen() {
   gameOverText.textContent = "Game Over";
 
   if (score > highscore) { //change to score > highscore
-      if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false) {
+      if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false && constantPowerups === false && oneShot === false) {
         gameOverScoreText.textContent = "Final Score: " + score + " - New Highest Score!";
         gameOverNameInput.style.display = 'block';
     
