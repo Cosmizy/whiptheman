@@ -627,15 +627,15 @@ database.once('value')
   ];
 
   const starImages = [
-    { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_sun.png", size: 150, speed: 1, health: 100000},
+    { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_sun.png", size: 150, speed: 1, health: 100000, type:"Sun"},
   ];
 
 const planetImages = [
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_earth.png", size: 100, speed: 7, health: 200},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_venus.png", size: 100, speed: 6, health: 200},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_mars.png", size: 50, speed: 8, health: 100},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_neptune.png", size: 200, speed: 3, health: 300},
-  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:2, health: 500},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_earth.png", size: 100, speed: 7, health: 200, type: "Earth"},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_venus.png", size: 100, speed: 6, health: 200, type: "Venus"},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_mars.png", size: 50, speed: 8, health: 100, type: "Mars"},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_neptune.png", size: 200, speed: 3, health: 300, type: "Neptune"},
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:2, health: 500, type: "Jupiter"},
 ];
 
 const upgradeImages = [
@@ -736,6 +736,7 @@ const player = {
   const bullets = [];
   const enemies = [];
   const stars = [];
+  const particles = [];
   const logs = [];
   const keys = {};
   let frameCounter = 0;
@@ -875,6 +876,8 @@ function checkCollisions() {
           enemies.splice(enemyIndex, 1);
           enemy.dead = true;
 
+          spawnParticlesAtEnemy(enemy);
+
           score += 5;
             
           updateHUD();
@@ -917,6 +920,7 @@ function checkCollisions() {
             
           enemies.splice(enemyIndex, 1);
           enemy.dead = true;
+          spawnParticlesAtEnemy(enemy);
 
           if (enemy.name === "Planet") {
             score += 5
@@ -1110,6 +1114,8 @@ bullets.forEach((bullet, bulletIndex) => {
                 playerArmorHealth -= enemy.damage;
                 score += 1;
                 updateHUD();
+
+                spawnParticlesAtEnemy(enemy);
                 
             }
         }
@@ -1141,6 +1147,97 @@ bullets.forEach((bullet, bulletIndex) => {
   });
 }
 
+// Particle system
+
+function spawnParticlesAtEnemy(enemy) {
+    
+    if (enemy.name === "Asteroid") {
+        spawnParticles(enemy.x, enemy.y, "#65737e");
+    } else if (enemy.name === "Planet") {
+        if (enemy.planetType === "Earth") {
+            spawnParticles(enemy.x, enemy.y, "#474c94");
+        } else if (enemy.planetType === "Venus") {
+            spawnParticles(enemy.x, enemy.y, "#eb3f26");
+        } else if (enemy.planetType === "Mars") {
+            spawnParticles(enemy.x, enemy.y, "#d67754");
+        } else if (enemy.planetType === "Neptune") {
+            spawnParticles(enemy.x, enemy.y, "#546eb3");
+        } else if (enemy.planetType === "Jupiter") {
+            spawnParticles(enemy.x, enemy.y, "#998a4b");
+        }
+    } else if (enemy.name === "Star") {
+        if (enemy.starType === "Sun") {
+            spawnParticles(enemy.x, enemy.y, "#fc9601");
+        }
+    } else if (enemy.name === "UFO") {
+        spawnParticles(enemy.x, enemy.y, "#c0c0c0");
+    } else if (enemy.name === "Fuel Can") {
+        spawnParticles(enemy.x, enemy.y, "#ff860c");
+    } else if (enemy.name === "PowerUp") {
+        spawnParticles(enemy.x, enemy.y, "#9400a8");
+    }
+}
+
+function spawnParticles(x, y, color) {
+    for (let i = 0; i < 10; i++) {
+        // Your own logic to spawn individual particles here
+        createParticle(x, y, color);
+    }
+}
+
+function createParticle(x, y, color) {
+    particles.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 4,  // random horizontal velocity
+        vy: (Math.random() - 0.5) * 4,  // random vertical velocity
+        life: 120,                       // lasts 60 frames
+        color: color,
+        shape: createIrregularShape()
+    });
+}
+
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 1;
+
+        if (p.life <= 0) {
+            particles.splice(i, 1); // remove dead particle
+        }
+    }
+}
+
+function drawParticles(ctx) {
+    for (let p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        let first = true;
+        for (let point of p.shape) {
+            if (first) {
+                ctx.moveTo(p.x + point.x, p.y + point.y);
+                first = false;
+            } else {
+                ctx.lineTo(p.x + point.x, p.y + point.y);
+            }
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+function createIrregularShape(radius = 2, points = 6) {
+    let shape = [];
+    for (let i = 0; i < points; i++) {
+        let angle = (Math.PI * 2 / points) * i;
+        let r = radius + Math.random() * radius; // randomize radius for irregularity
+        shape.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
+    }
+    return shape;
+}
+    
 
   function shootBullet(xPos,yPos,objHeight,objWidth,bSpeed,bDirection,xOffset, bDamage) {
     if (bDirection === 1) {
@@ -1288,7 +1385,9 @@ function updateHUD() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     updatePlayerHitbox();
-      
+
+    updateParticles();
+    drawParticles(ctx);
     drawStars();
     updateHUD()
     updatePlayer();
@@ -1408,6 +1507,7 @@ class Planet {
     this.isGas = false;
     this.isPowerUp = false;
     this.dead = false;
+    this.planetType = planetData.type;
   }
 
   draw() {
@@ -1474,6 +1574,7 @@ class Star {
     this.isGas = false;
     this.isPowerUp = false;
     this.dead = false;
+    this.starType = starData.type;
   }
 
   draw() {
@@ -2142,13 +2243,13 @@ function startGame(selectedDifficulty) {
     }, powerUpSpawnRate);
 
     setInterval(() => {
-        if (Math.random() < 1) { // 10% chance
+        if (Math.random() < upgradeSpawnChance) { // 10% chance
             if (playerUpgraded === false) {
                 const upgrade = new Upgrade();
                 enemies.push(upgrade);
             }
         }
-    }, 1000);
+    }, upgradeSpawnRate);
 
         if (constantPowerups === false) {
 
