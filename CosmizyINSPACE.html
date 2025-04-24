@@ -610,6 +610,7 @@ database.once('value')
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_default_2.png",
     "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_default_3.png",
   ];
+  const armorImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_shield.png";
   const brokenImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_broken.png";
   const noFuelImageSrc = "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/spaceship_nofuel.png";
 
@@ -637,6 +638,10 @@ const planetImages = [
   { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_jupiter.png", size: 300, speed:2, health: 500},
 ];
 
+const upgradeImages = [
+  { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/upgrade_armor.png", size: 30, speed: 7.5, health: 50, upgrade: "Armor"},
+];
+
 const musicTracks = [
   { name: "default_1", src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/default_track_1.wav"},
   { name: "boss_1", src: ""},
@@ -659,6 +664,8 @@ const musicTracks = [
   let playerMaxHealth = 100;
   let playerAmmo = 50;
   let playerMaxAmmo = 100;
+  let playerUpgraded = false;
+  let playerArmorHealth = 100;
 //Fuel settings
   let fuelSpawnRate = 15000;
   let fuelCanHealth = 1;
@@ -804,8 +811,12 @@ function playMusic(trackName) {
   function cyclePlayerImage() {
     if (frameCounter % 10 === 0) {
       if (outOfFuel === false) {
-          currentPlayerImageIndex = (currentPlayerImageIndex + 1) % playerImages.length;
-          playerImage.src = playerImages[currentPlayerImageIndex];
+          if (playerUpgraded === false) {
+              currentPlayerImageIndex = (currentPlayerImageIndex + 1) % playerImages.length;
+              playerImage.src = playerImages[currentPlayerImageIndex];
+          } else {
+            playerImage.src = armorImageSrc;
+          }
      } else {
         playerImage.src = noFuelImageSrc;
      }
@@ -972,7 +983,7 @@ bullets.forEach((bullet, bulletIndex) => {
     }
   });
 
-  enemies.forEach(enemy => {
+  enemies.forEach((enemy, enemyIndex) => {
     if (enemy.name === "Planet") {
 
         const dx = player.hitbox.x + player.hitbox.width / 2 - (enemy.x + enemy.size / 2); // Horizontal distance between centers
@@ -1040,8 +1051,6 @@ bullets.forEach((bullet, bulletIndex) => {
 
           if (enemy.isPowerUp === true) {
 
-              
-
               if (enemy.rewardType === 1) {
                   
                 if (playerHealth < playerMaxHealth) {
@@ -1068,19 +1077,46 @@ bullets.forEach((bullet, bulletIndex) => {
                     }
                 }
               }
-              
+          }
+
+          if (enemy.isUpgrade === true) {
+              if (enemy.upgradeType === "Armor") {
+                  if (playerUpgraded === false) {
+                      
+                      playerUpgraded = true;
+                      playerUpgradeType = "Armor";
+                      playerArmorHealth = 100;
+                      playerImage.src = armorImageSrc;
+                  }
+              }
           }
             
         // Reduce health of the player
 
         if (infiniteHealth === false) {
-            if (oneShot === false) {
-                playerHealth -= enemy.damage;
-            } else {
-                if (enemy.damage > 0) {
-                    playerHealth = 0;
+            if (playerUpgraded === false) {
+                if (oneShot === false) {
+                    playerHealth -= enemy.damage;
+                } else {
+                    if (enemy.damage > 0) {
+                        playerHealth = 0;
+                    }
                 }
+            } else {
+                
+                enemy.takeDamage(enemy.health);
+                enemies.splice(enemyIndex, 1);
+                enemy.dead = true;
+                playerArmorHealth -= enemy.damage;
+                score += 1;
+                updateHUD();
+                
             }
+        }
+
+        if (playerArmorHealth <= 0) {
+            playerUpgraded = false;
+            playerUpgradeType = "None";
         }
     
         enemy.damagedPlayer = true;
@@ -1196,7 +1232,7 @@ function gameOverScreen() {
   const gameOverNameInput = document.getElementById("nameInput");
   gameOverText.textContent = "Game Over";
 
-  if (score > highscore) { //change to score > highscore
+  if (score >= highscore) { //change to score > highscore
       if (infiniteFuel === false && infiniteAmmo === false && infiniteHealth === false && constantPowerups === false && oneShot === false) {
         gameOverScoreText.textContent = "Final Score: " + score + " - New Highest Score!";
         gameOverNameInput.style.display = 'block';
@@ -1206,7 +1242,7 @@ function gameOverScreen() {
             highscoreName = gameOverNameInput.value.trim();
             gameOverNameInput.disabled = true; // Optional
             //gameOverNameInput.style.display = 'none';
-            alert("Name saved: " + highscoreName);
+            //alert("Name saved: " + highscoreName);
     
             nameDatabase.set({
                 highscoreName: highscoreName
@@ -1671,7 +1707,77 @@ class PowerUp {
     this.draw();
   }
 }
-    
+
+
+
+class Upgrade {
+  constructor() {
+    const upgradeData = upgradeImages[Math.floor(Math.random() * upgradeImages.length)];
+    this.name = "Upgrade";
+    this.size = upgradeData.size;
+    this.imageSize = this.size * 1; // Image size
+    this.image = new Image();
+    this.image.src = upgradeData.src;
+    this.x = canvas.width;
+    this.y = Math.random() * (canvas.height - this.imageSize);
+    this.speed = upgradeData.speed;
+    this.rotation = 0; // Initial rotation angle
+    this.rotationSpeed = (Math.random() - 0.5) * 0.25 / (this.size / 20); // Random rotation speed
+    this.health = upgradeData.health;
+    this.maxHealth = this.health;
+    this.isDamaged = false;
+    this.damagedPlayer = false;
+    this.damage = 0;
+    this.isGas = false;
+    this.isPowerUp = false;
+    this.isUpgrade = true;
+    this.upgradeType = upgradeData.upgrade;
+    this.dead = false;
+  }
+
+  draw() {
+    ctx.save(); // Save the current canvas state
+    ctx.translate(this.x + this.size / 2, this.y + this.size / 2); // Move origin to asteroid center
+    ctx.rotate(this.rotation); // Rotate canvas around the asteroid center
+      
+    ctx.drawImage(
+      this.image,
+      -this.size / 2, // Draw image centered on the asteroid
+      -this.size / 2,
+      this.size,
+      this.size
+    );
+    ctx.restore(); // Restore canvas state to prevent rotation from affecting other drawings
+
+    if (this.isDamaged) {
+      ctx.fillStyle = "red";
+      ctx.fillRect(this.x, this.y - 10, this.size, 5);
+      ctx.fillStyle = "green";
+      ctx.fillRect(this.x, this.y - 10, (this.health / this.maxHealth) * this.size, 5);
+    }
+
+    // Draw hitbox (optional for debugging)
+    //ctx.strokeStyle = "red";
+    //ctx.lineWidth = 2;
+    //ctx.strokeRect(this.x, this.y, this.size, this.size);
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    this.isDamaged = true;
+  }
+
+  update() {
+    this.x -= this.speed; // Move asteroid left
+    this.rotation += this.rotationSpeed; // Increment rotation angle
+    if (this.x + this.size < 0) {
+      const index = enemies.indexOf(this);
+      if (index > -1) enemies.splice(index, 1);
+    }
+    this.draw();
+  }
+}
+
     
 
 class FuelCan {
@@ -1774,6 +1880,7 @@ function startGame(selectedDifficulty) {
     
     if (selectedDifficulty === "easy") {
       powerUpSpawnChance = 1.0;
+      upgradeSpawnChance = 0.5;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
       asteroidHealth = 25;
@@ -1790,12 +1897,14 @@ function startGame(selectedDifficulty) {
     if (constantSpawn === false) {
         fuelSpawnRate = 4000;
         powerUpSpawnRate = 20000;
+        upgradeSpawnRate = 7500;
         asteroidSpawnRate = 2000;
         planetSpawnRate = 30000;
         UFOSpawnRate = 5500;
       } else {
         fuelSpawnRate = 3000;
         powerUpSpawnRate = 20000;
+        upgradeSpawnRate = 7500;
         UFOSpawnRate = 2000;
         asteroidSpawnRate = 500;
         planetSpawnRate = 3000;
@@ -1807,6 +1916,8 @@ function startGame(selectedDifficulty) {
       fuelSpawnRate = 5000;
       powerUpSpawnRate = 30000;
       powerUpSpawnChance = 1.0;
+      upgradeSpawnRate = 10000;
+      upgradeSpawnChance = 0.1;
       fuelCanHealth = 1;
       fuelCanMaxHealth = 1;
       //asteroidHealth = 50;
@@ -1843,6 +1954,8 @@ function startGame(selectedDifficulty) {
       fuelSpawnRate = 5000;
       powerUpSpawnRate = 30000;
       powerUpSpawnChance = 0.75;
+      upgradeSpawnRate = 10000;
+      upgradeSpawnChance = 0.08;
       fuelCanHealth = 100;
       fuelCanMaxHealth = 100;
       //asteroidHealth = 100;
@@ -1864,7 +1977,7 @@ function startGame(selectedDifficulty) {
         powerUpSpawnRate = 30000;
         asteroidSpawnRate = 600;
         planetSpawnRate = 15000;
-        UFOSpawnRate = 300;
+        UFOSpawnRate = 3000;
       } else {
         fuelSpawnRate = 3000;
         powerUpSpawnRate = 10000;
@@ -1879,6 +1992,8 @@ function startGame(selectedDifficulty) {
       fuelSpawnRate = 6000;
       powerUpSpawnRate = 15000;
       powerUpSpawnChance = 0.25;
+      upgradeSpawnRate = 10000;
+      upgradeSpawnChance = 0.05;
       fuelCanHealth = 150;
       fuelCanMaxHealth = 150;
       //asteroidHealth = 150;
@@ -2025,6 +2140,15 @@ function startGame(selectedDifficulty) {
             enemies.push(powerUp);
         }
     }, powerUpSpawnRate);
+
+    setInterval(() => {
+        if (Math.random() < 1) { // 10% chance
+            if (playerUpgraded === false) {
+                const upgrade = new Upgrade();
+                enemies.push(upgrade);
+            }
+        }
+    }, 1000);
 
         if (constantPowerups === false) {
 
