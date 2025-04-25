@@ -251,6 +251,20 @@
                 window.location.href = url;
             });
         });
+
+        const legs = document.querySelectorAll('.left-leg, .right-leg'); 
+        
+        legs.forEach(leg => {
+            leg.addEventListener('click', function() {
+                // Retrieve the data-title attribute value
+                
+                // Construct the URL
+                const url = window.location.href + '/' + "goon";
+                
+                // Navigate to the constructed URL
+                window.location.href = url;
+            });
+        });
     </script>
     
 </body>
