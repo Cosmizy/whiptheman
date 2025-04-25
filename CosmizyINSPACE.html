@@ -627,7 +627,7 @@ database.once('value')
   ];
 
   const starImages = [
-    { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_sun.png", size: 150, speed: 1, health: 100000, type:"Sun"},
+    { src: "https://raw.githubusercontent.com/Cosmizy/whiptheman/refs/heads/main/planet_sun.png", size: 500, speed: 1, health: 100000, type:"Sun"},
   ];
 
 const planetImages = [
@@ -1187,14 +1187,14 @@ function spawnParticlesAtEnemy(enemy) {
         }
     } else if (enemy.name === "Star") {
         if (enemy.starType === "Sun") {
-            spawnParticles(enemyCenterX, enemyCenterY, "#fc9601", enemyDeathParticleSize, "IR", enemy.size);
+            spawnParticles(enemyCenterX, enemyCenterY, "#fc9601", enemyDeathParticleSize, "IR", 20);
         }
     } else if (enemy.name === "UFO") {
-        spawnParticles(enemyCenterX, enemyCenterY, "#c0c0c0", enemyDeathParticleSize, "IR", enemy.size);
+        spawnParticles(enemyCenterX, enemyCenterY, "#c0c0c0", enemyDeathParticleSize, "IR", 8);
     } else if (enemy.name === "Fuel Can") {
-        spawnParticles(enemyCenterX, enemyCenterY, "#ff860c", enemyDeathParticleSize, "CR", enemy.size);
+        spawnParticles(enemyCenterX, enemyCenterY, "#ff860c", enemyDeathParticleSize, "CR", 12);
     } else if (enemy.name === "PowerUp") {
-        spawnParticles(enemyCenterX, enemyCenterY, "#9400a8", enemyDeathParticleSize, "IR", enemy.size);
+        spawnParticles(enemyCenterX, enemyCenterY, "#9400a8", enemyDeathParticleSize, "IR", 12);
     }
 
 }
