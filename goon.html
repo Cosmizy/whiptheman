@@ -369,6 +369,20 @@
 }
 
 
+#flashOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0) 10%, white 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 9999; /* Make sure it appears above everything */
+}
+
+
 
       
   </style>
@@ -392,6 +406,8 @@
     <button class="buy-item" data-price="25">Buy</button>
   </div>
 </div>
+
+<div id="flashOverlay"></div>
     
   <!-- Add meter progress bar -->
   <div class="meter-container">
@@ -594,6 +610,12 @@ function smoothReset() {
             loads += 1
 
             saveUserData();
+
+            const flash = document.getElementById('flashOverlay');
+            flash.style.opacity = '1';
+            setTimeout(() => {
+                flash.style.opacity = '0';
+            }, 300); // flash stays visible for 100ms
 
             const center = getFigureCenter();
             
