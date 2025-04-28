@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Detailed HTML Bedroom</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .room {
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        #f2e9e4,
+        #f2e9e4 20px,
+        #e6dad5 20px,
+        #e6dad5 40px
+      );
+      position: relative;
+    }
+
+    .floor {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 25%;
+      background: #b48a78;
+    }
+
+    .rug {
+      position: absolute;
+      bottom: 15px;
+      left: 30%;
+      width: 40%;
+      height: 20%;
+      background: radial-gradient(circle, red 40%, red 100%);
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    .figure {
+      position: absolute;
+      width: 200px;
+      height: 300px;
+      /*transition: top 0.5s ease-in-out; */
+      z-index: 5;
+    }
+
+    #movableFigure {
+      left: 50%;
+      bottom: 10%;
+      transform: translateX(-50%);
+    }
+
+    #movableFigure2 {
+      left: 40%;
+      transform: translateX(-50%);
+    }
+
+    .head, .body, .left-arm, .right-arm, .left-leg, .right-leg {
+      position: absolute;
+      background-color: black;
+    }
+
+    .head {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .body {
+      width: 20px;
+      height: 120px;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .left-arm, .right-arm {
+      width: 20px;
+      height: 100px;
+      top: 40px;
+    }
+
+    .left-arm {
+      left: 41%;
+      top: 50px;
+      transform-origin: 100% 10%;
+      transform: rotate(30deg);
+    }
+
+    .right-arm {
+      left: 49%;
+      top: 50px;
+      transform-origin: 0% 10%;
+      transform: rotate(-30deg);
+    }
+
+    .left-leg, .right-leg {
+      width: 20px;
+      height: 120px;
+      top: 120px;
+    }
+
+    .left-leg {
+      left: 45%;
+      top: 140px;
+      transform-origin: 50% 0;
+      transform: rotate(-15deg);
+    }
+
+    .right-leg {
+      left: 45%;
+      top: 140px;
+      transform-origin: 50% 0;
+      transform: rotate(15deg);
+    }
+
+    .bed {
+      position: absolute;
+      bottom: 25%;
+      left: 5%;
+      width: 30%;
+      height: 10%;
+      background: #5a3e2b;
+    }
+
+    .bed-leg {
+      position: absolute;
+      bottom: -20%;
+      width: 40px;
+      height: 40px;
+      background: #5a3e2b;
+      z-index: 3;
+    }
+
+    .bed-leg-left {
+      left: -40px;
+      height: 174px;
+      bottom: -40px;
+    }
+
+    .bed-leg-right {
+      right: 0%;
+      bottom: -40px;
+    }
+
+    .pillow {
+      width: 5%;
+      height: 5%;
+      background: white;
+      position: absolute;
+      bottom: 35%;
+      left: 5%;
+    }
+
+    .blanket {
+      width: 30%;
+      height: 5%;
+      background: #4a90e2;
+      position: absolute;
+      bottom: 30%;
+      left: 5%;
+    }
+
+    .bed:hover {
+      filter: brightness(1.2);
+    }
+
+    .table:hover,
+    .table:hover * {
+      filter: brightness(1.2);
+    }
+
+    .table {
+      position: absolute;
+      bottom: 25%;
+      right: 10%;
+      width: 12%;
+      height: 15%;
+      background: #7b5d42;
+    }
+
+    .table-leg {
+      position: absolute;
+      bottom: -20%;
+      width: 15%;
+      height: 20%;
+      background: #5a3e2b;
+    }
+
+    .leg-left {
+      left: 10%;
+    }
+
+    .leg-right {
+      right: 10%;
+    }
+
+.computer {
+  position: absolute;
+  bottom: 110%; /* Sits directly on top of the desk */
+  left: 25%;
+  width: 50%;
+  height: 70%;
+  background: #222;
+}
+
+.computer-screen {
+  position: relative;
+  width: 90%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 90%;
+  background: #111;
+  font-family: sans-serif;
+  font-size: 25px;
+  color: #fff;
+  display: flex;
+  justify-content: center; /* horizontal */
+  align-items: center;     /* vertical */
+  text-align: center;
+  cursor: default;
+}
+
+.computer-base {
+  position: relative;
+  width: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 13%;
+  top: 11%;
+  background: #222;
+}
+
+
+
+    .window {
+      position: absolute;
+      top: 10%;
+      right: 10%;
+      width: 15%;
+      height: 25%;
+      background: #87cefa;
+      border: 8px solid white;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .window-pane {
+      width: 50%;
+      height: 50%;
+      border: 5px solid white;
+      box-sizing: border-box;
+    }
+
+    .whiteboard {
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 15%;
+      height: 25%;
+      background: #363737;
+      display: flex;
+      flex-wrap: wrap;
+      cursor: default;
+    }
+
+    .board {
+      position: relative;
+      left: 5%;
+      top: 5%;
+      width: 90%;
+      height: 90%;
+      background: #fff;
+    }
+
+.status-box {
+  width: 100%;
+  margin: 0px auto;
+  padding: 0px;
+  background-color: #fff;
+  font-family: sans-serif;
+  font-size: 35px;
+  text-align: center;
+}
+
+
+    /* Meter styles */
+    .meter-container {
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 10px;
+      background: #ddd;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+    }
+
+    .meter {
+      height: 100%;
+      width: 0%;
+      background-color: #fff;
+      border-radius: 5px;
+    }
+
+#shop {
+  display: none;
+  position: fixed; /* Stay in place even when scrolling */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Exactly center */
+  background: #fff; /* Dark background */
+  color: black;
+  padding: 20px 30px;
+  z-index: 9999; /* Always on top */
+  text-align: center;
+  min-width: 250px;
+}
+
+#shop .urlBar {
+  position: absolute; /* Stay in place even when scrolling */
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%); /* Exactly center */
+  background: mediumblue; /* Dark background */
+  color: white;
+
+  text-align: center;
+  width: 100%;
+  height: 12%;
+}
+
+#shop .item {
+  margin: 10px 0;
+}
+
+#shop .buy-item {
+  margin-top: 5px;
+}
+
+#shop button.close-shop {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: black;
+  color: white;
+  border: none;
+  padding: 1px 5px;
+  cursor: pointer;
+  z-index: 9999; /* Always on top */
+}
+
+
+
+      
+  </style>
+</head>
+<body>
+
+<canvas id="particleCanvas" width="1920" height="1080" style="position:absolute;top:0;left:0;z-index:4;pointer-events:none;"></canvas>
+
+<div id="shop">
+  <button class="close-shop">X</button>
+  <div class="urlBar" id="shopUrlBar">worldwideweb.shop.com</div>
+  <h2>Shop</h2>
+
+  <div class="item">
+    <p>Random Anime Poster - Cost: $10</p>
+    <button class="buy-item" data-price="10">Buy</button>
+  </div>
+
+  <div class="item">
+    <p>Random Anime Femboy Poster - Cost: $25</p>
+    <button class="buy-item" data-price="25">Buy</button>
+  </div>
+</div>
+    
+  <!-- Add meter progress bar -->
+  <div class="meter-container">
+    <div class="meter" id="meter"></div>
+  </div>
+
+  <div class="figure" id="movableFigure">
+    <div class="head"></div>
+    <div class="body"></div>
+    <div class="left-arm"></div>
+    <div class="right-arm"></div>
+    <div class="left-leg"></div>
+    <div class="right-leg"></div>
+  </div>
+    
+  <div class="rug"id="rug"></div>
+
+  <div class="room">
+      
+    <div class="floor"></div>
+
+    <div class="bed-wrapper">
+      <div class="bed"id="bed">
+        <div class="bed-leg bed-leg-left"></div>
+        <div class="bed-leg bed-leg-right"></div>
+      </div>
+      <div class="pillow"></div>
+      <div class="blanket"></div>
+    </div>
+
+    <div class="table"id="table">
+      <div class="table-leg leg-left"></div>
+      <div class="table-leg leg-right"></div>
+      <div class="computer">
+        <div class="computer-screen">SHOP</div>
+        <div class="computer-base"></div>
+      </div>
+
+    </div>
+
+    <div class="window">
+      <div class="window-pane"></div>
+      <div class="window-pane"></div>
+      <div class="window-pane"></div>
+      <div class="window-pane"></div>
+    </div>
+
+    <div class="whiteboard">
+      <div class="board">
+        <div class="status-box" id="loadBox">Loads: 0</div>
+        <div class="status-box" id="moneyBox">Money: $0</div>
+      </div>
+
+    </div>
+      
+  </div>
+
+
+
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
+
+<script>
+
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function getFigureCenter() {
+    const rect = figure.getBoundingClientRect();
+    return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+    };
+}
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAeZqD_3I0l24bzMUc1uqTBhpw395kqX8E",
+    authDomain: "goon-d9583.firebaseapp.com",
+    databaseURL: "https://goon-d9583-default-rtdb.firebaseio.com",
+    projectId: "goon-d9583",
+    storageBucket: "goon-d9583.firebasestorage.app",
+    messagingSenderId: "700208556584",
+    appId: "1:700208556584:web:5678e35e0b4a2570ef631d"
+  };
+
+    firebase.initializeApp(firebaseConfig);
+
+    // Reference to the Firebase database
+    let currentUID = null;
+
+  firebase.auth().signInAnonymously().catch(function(error) {
+    console.error("Auth error:", error);
+  });
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      currentUID = user.uid;
+      loadUserData();
+    }
+  });
+
+    
+
+  const figure = document.getElementById('movableFigure');
+  const rug = document.getElementById('rug');  
+  const bed = document.getElementById('bed');  
+  const table = document.getElementById('table');  
+  const rightArm = figure.querySelector('.right-arm');
+  const meter = document.getElementById('meter');
+
+  let rotate = false;
+  let invert = false;
+  let rotation = 0;
+  let meterFill = 0;
+  let canClick = true;
+  let loads = 0;
+  let money = 0;
+  let moneyChance = 0.5;
+  let moneyAmount = 1;
+
+  function updateRotation() {
+    if (!rotate) return;
+
+    if (!invert) {
+      rotation += 3;
+    } else {
+      rotation -= 3;
+    }
+
+    if (rotation >= -40) {
+      invert = true;
+    }
+
+    if (rotation < -30) {
+      rotate = false;
+      invert = false;
+      return; // Stop the animation when done
+    }
+
+    rightArm.style.transform = `rotate(${rotation}deg)`;
+
+    requestAnimationFrame(updateRotation);
+  }
+
+function loadUserData() {
+  console.log("Loading user data for:", currentUID); // <-- add this
+
+  const userRef = firebase.database().ref("users/" + currentUID);
+  userRef.once("value", function(snapshot) {
+    const data = snapshot.val();
+    console.log("Firebase snapshot:", data); // <-- and this
+
+    if (data) {
+      loads = data.loads || 0;
+      money = data.money || 0;
+    } else {
+      firebase.database().ref("users/" + currentUID).set({ loads: 0, money: 0 });
+    }
+    updateUI(); // make sure this exists
+  });
+}
+
+
+
+function saveUserData() {
+  if (!currentUID) return;
+  firebase.database().ref("users/" + currentUID).set({
+    loads: loads,
+    money: money
+  });
+    
+}
+
+function smoothReset() {
+    if (meterFill > 0) {
+        meterFill -= 1; // Decrease the meter fill gradually
+        animationFrame = requestAnimationFrame(smoothReset); // Continue animating
+    } else {
+        cancelAnimationFrame(animationFrame); // Stop animation when it reaches 0
+        canClick = true; // Allow clicking again once the meter reaches 0
+    }
+}
+
+  figure.addEventListener('click', () => {
+    if (canClick === true) {
+        // Rotate the figure's arm
+        
+        rotate = true;
+        rotation = 0;
+        updateRotation();
+    
+        // Fill the meter by 1/30 on each click
+        meterFill += 3.34; // (100% / 30 = 3.33%)
+        if (meterFill > 100) { // Prevent going over 100%
+            meterFill = 100;
+            canClick = false;
+            setTimeout(smoothReset, 1000);
+            loads += 1
+
+            saveUserData();
+
+            const center = getFigureCenter();
+            
+            for (let i = 0; i < moneyAmount; i++) {
+                if (Math.random() < moneyChance) {
+                    money += 1;
+
+                    saveUserData();
+
+                    particles.push({
+                        x: center.x,
+                        y: center.y,
+                        vx: Math.random() * 5 + 2,   // Push to the right
+                        vy: Math.random() * -2,      // Slight upward start
+                        life: 120,
+                        type: "money"
+                    });
+                    
+                }
+            }
+            
+            for (let i = 0; i < 30; i++) {
+                particles.push({
+                    x: center.x,
+                    y: center.y,
+                    vx: Math.random() * 5 + 2,   // Push to the right
+                    vy: Math.random() * -2,      // Slight upward start
+                    life: 120,
+                    type: "load"
+                });
+            }
+            
+        }
+        
+    }
+  });
+
+rug.addEventListener('click', () => {
+    figure.style.transform = "translate(-50%, -50%) rotate(0deg)";
+    figure.style.left = "50%";
+    figure.style.top = "67%";
+});
+
+bed.addEventListener('click', () => {
+    figure.style.left = "17%";
+    figure.style.top = "62%";
+    figure.style.transform = "translate(-50%, -50%) rotate(-75deg)";
+});
+
+table.addEventListener('click', () => {
+    const shop = document.getElementById('shop');
+    shop.style.display = shop.style.display === 'none' ? 'block' : 'none';  // Toggle visibility
+});
+
+document.querySelectorAll('.buy-item').forEach(button => {
+    button.addEventListener('click', () => {
+        const itemPrice = parseInt(button.getAttribute('data-price'));
+        
+        if (money >= itemPrice) {
+            money -= itemPrice;  // Deduct money when item is bought
+            //put poster up
+            //play sound effect
+        } else {
+            //play sound effect
+        }
+    });
+});
+
+document.querySelector('.close-shop').addEventListener('click', () => {
+    document.getElementById('shop').style.display = 'none';
+});
+
+
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.vy += 0.3; // gravity
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+}
+
+
+function drawParticles() {
+    // First draw load particles
+    particles.filter(p => p.type !== "money").forEach(p => {
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    // Then draw money particles (on top)
+    particles.filter(p => p.type === "money").forEach(p => {
+        ctx.fillStyle = 'green';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+
+function gameLoop() {
+    meter.style.width = `${meterFill}%`;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('loadBox').textContent = `Loads: ${loads}`;
+    document.getElementById('moneyBox').textContent = `Money: $${money}`;
+    updateParticles();
+    drawParticles();
+    
+    
+
+    requestAnimationFrame(gameLoop);
+}
+
+    
+  requestAnimationFrame(gameLoop);
+</script>
+    
+</body>
+</html>
