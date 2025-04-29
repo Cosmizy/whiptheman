@@ -567,6 +567,19 @@
     'https://i.postimg.cc/GtH40f2f/poster-anime7.png'
   ];
 
+  const animeFemboyPosterImages = [
+    'https://i.postimg.cc/L5Hgkshr/poster-femboy1.png',
+    'https://i.postimg.cc/SRBFFn8P/poster-femboy2.png',
+    'https://i.postimg.cc/7P2qX4SR/poster-femboy3.png',
+    'https://i.postimg.cc/dVSfzkYj/poster-femboy4.png',
+    'https://i.postimg.cc/y8WQX1Zg/poster-femboy5.png',
+    'https://i.postimg.cc/7ZC9JKFS/poster-femboy6.png',
+    'https://i.postimg.cc/x85QHfbp/poster-anime7.png',
+    'https://i.postimg.cc/8z9SLnjG/poster-femboy8.png',
+    'https://i.postimg.cc/wjsPYxjK/poster-femboy9.png',
+    'https://i.postimg.cc/yxtPL99D/poster-femboy10.png'
+  ];
+
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -822,7 +835,21 @@ document.querySelectorAll('.buy-item').forEach(button => {
               moneyChance = 0.7;
               clicksPerLoad = 20;
               posterActive = true;
-              
+              posterHealth = 100;
+            }
+
+            if (itemType === "anime-femboy") {
+              const randomImage = animeFemboyPosterImages[Math.floor(Math.random() * animeFemboyPosterImages.length)];
+
+              if (familyFriendlyToggle === false) {
+                posterImg.style.backgroundImage = `url('${randomImage}')`;
+              } else {
+                posterImg.style.backgroundImage = `url(https://tr.rbxcdn.com/180DAY-8ec8b7ea7250d6f47a87b1f69123bbcd/420/420/Hat/Png/noFilter)`;
+              }
+              moneyChance = 1;
+              clicksPerLoad = 20;
+              posterActive = true;
+              posterHealth = 125;
             }
             
             //play sound effect (buying sound)
