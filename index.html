@@ -265,6 +265,20 @@
                 window.location.href = url;
             });
         });
+
+        const crowns = document.querySelectorAll('.crown'); 
+        
+        crowns.forEach(crown => {
+            crowns.addEventListener('click', function() {
+                // Retrieve the data-title attribute value
+                
+                // Construct the URL
+                const url = window.location.href + '/' + "whiptheman";
+                
+                // Navigate to the constructed URL
+                window.location.href = url;
+            });
+        });
     </script>
     
 </body>
