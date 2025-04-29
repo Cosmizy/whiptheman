@@ -654,6 +654,8 @@ function getFigureCenter() {
   let clicksPerLoad = 30;
   let posterActive = false;
   let posterHealth = 100;
+  let barResetSpeed = 1;
+  let defaultBarResetSpeed = 1;
 
   function updateRotation() {
     if (!rotate) return;
@@ -715,7 +717,7 @@ function saveUserData() {
 
 function smoothReset() {
     if (meterFill > 0) {
-        meterFill -= 1; // Decrease the meter fill gradually
+        meterFill -= barResetSpeed; // Decrease the meter fill gradually
         animationFrame = requestAnimationFrame(smoothReset); // Continue animating
     } else {
         cancelAnimationFrame(animationFrame); // Stop animation when it reaches 0
@@ -732,20 +734,21 @@ function smoothReset() {
         updateRotation();
     
         // Fill the meter by 1/30 on each click
-        meterFill += 3.34; // (100% / 30 = 3.33%)
+        meterFill += 100 / clicksPerLoad;
         if (meterFill > 100) { // Prevent going over 100%
             meterFill = 100;
             canClick = false;
             setTimeout(smoothReset, 1000);
             loads += 1;
 
-            posterHealth -= 25;
+            posterHealth -= 6.67;
         
             if (posterHealth <= 0) {
                 posterImg.style.backgroundImage = '';
                 posterActive = false;
                 moneyChance = defaultMoneyChance;
                 moneyAmount = defaultMoneyAmount;
+                barResetSpeed = defaultBarResetSpeed;
             }
 
             saveUserData();
@@ -779,7 +782,7 @@ function smoothReset() {
             }
 
             if (familyFriendlyToggle === false) {
-                for (let i = 0; i < clicksPerLoad; i++) {
+                for (let i = 0; i < 30; i++) {
                     particles.push({
                         x: center.x,
                         y: center.y,
@@ -799,12 +802,14 @@ rug.addEventListener('click', () => {
     figure.style.transform = "translate(-50%, -50%) rotate(0deg)";
     figure.style.left = "50%";
     figure.style.top = "67%";
+    barResetSpeed = defualtBarResetSpeed;
 });
 
 bed.addEventListener('click', () => {
     figure.style.left = "17%";
     figure.style.top = "62%";
     figure.style.transform = "translate(-50%, -50%) rotate(-75deg)";
+    barResetSpeed = 2;
 });
 
 table.addEventListener('click', () => {
