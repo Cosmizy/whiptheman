@@ -289,6 +289,30 @@
       background: #fff;
     }
 
+    .poster {
+      position: absolute;
+      top: 10%;
+      left: 40%;
+      width: 10%;
+      height: 25%;
+      background: #363737;
+      display: flex;
+      flex-wrap: wrap;
+      cursor: default;
+    }
+
+    .posterImg {
+      position: relative;
+      left: 5%;
+      top: 5%;
+      width: 90%;
+      height: 90%;
+      background: #fff;
+      /*background-image: url('https://github.com/Cosmizy/whiptheman/blob/main/IMG_20240909_140122.jpg?raw=true');*/
+      background-size: cover;
+      background-position: center;
+    }
+
 .status-box {
   width: 100%;
   margin: 0px auto;
@@ -382,7 +406,55 @@
     z-index: 9999; /* Make sure it appears above everything */
 }
 
+  .switchContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
 
+  /* Switch styling */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
 
       
   </style>
@@ -398,13 +470,20 @@
 
   <div class="item">
     <p>Random Anime Poster - Cost: $10</p>
-    <button class="buy-item" data-price="10">Buy</button>
+    <button class="buy-item" data-price="10" data-type="anime">Buy</button>
   </div>
 
   <div class="item">
     <p>Random Anime Femboy Poster - Cost: $25</p>
-    <button class="buy-item" data-price="25">Buy</button>
+    <button class="buy-item" data-price="25" data-type="anime-femboy">Buy</button>
   </div>
+</div>
+
+<div class="switchContainer">
+  <label class="switch">
+    <input type="checkbox" id="familyFriendlySwitch" checked>
+    <span class="slider"></span>
+  </label>
 </div>
 
 <div id="flashOverlay"></div>
@@ -455,6 +534,11 @@
       <div class="window-pane"></div>
     </div>
 
+    <div class="poster">
+      <div class="posterImg" id="posterImg"></div>
+    </div>
+
+
     <div class="whiteboard">
       <div class="board">
         <div class="status-box" id="loadBox">Loads: 0</div>
@@ -472,6 +556,16 @@
   <script src="https://www.gstatic.com/firebasejs/11.1.0/firebase-database-compat.js"></script>
 
 <script>
+
+  const animePosterImages = [
+    'https://i.postimg.cc/X7VfP1NV/poster-anime1.png',
+    'https://i.postimg.cc/XqFCPhXg/poster-anime2.png',
+    'https://i.postimg.cc/wTXWy4FJ/poster-anime3.png',
+    'https://i.postimg.cc/MGCRYqpG/poster-anime4.png',
+    'https://i.postimg.cc/QtS8dJwr/poster-anime5.png',
+    'https://i.postimg.cc/CKGDJ9BH/poster-anime6.png',
+    'https://i.postimg.cc/GtH40f2f/poster-anime7.png'
+  ];
 
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
@@ -519,7 +613,19 @@ function getFigureCenter() {
   const table = document.getElementById('table');  
   const rightArm = figure.querySelector('.right-arm');
   const meter = document.getElementById('meter');
+  const posterImg = document.getElementById('posterImg');
 
+  let familyFriendlyToggle = true;
+
+  const ffSwitch = document.getElementById('familyFriendlySwitch');
+
+  ffSwitch.addEventListener('change', function() {
+      familyFriendlyToggle = ffSwitch.checked;
+  });
+
+
+  
+    
   let rotate = false;
   let invert = false;
   let rotation = 0;
@@ -527,8 +633,14 @@ function getFigureCenter() {
   let canClick = true;
   let loads = 0;
   let money = 0;
+  let defaultMoneyChance = 0.5;
+  let defaultMoneyAmount = 1;
+  let defaultClicksPerLoad = 30;
   let moneyChance = 0.5;
   let moneyAmount = 1;
+  let clicksPerLoad = 30;
+  let posterActive = false;
+  let posterHealth = 100;
 
   function updateRotation() {
     if (!rotate) return;
@@ -538,18 +650,23 @@ function getFigureCenter() {
     } else {
       rotation -= 3;
     }
-
-    if (rotation >= -40) {
-      invert = true;
+    if (familyFriendlyToggle === false) {
+        if (rotation >= -40) {
+          invert = true;
+        }
     }
 
-    if (rotation < -30) {
-      rotate = false;
-      invert = false;
-      return; // Stop the animation when done
+    if (familyFriendlyToggle === false) {
+        if (rotation < -30) {
+          rotate = false;
+          invert = false;
+          return; // Stop the animation when done
+        }
     }
 
-    rightArm.style.transform = `rotate(${rotation}deg)`;
+    if (familyFriendlyToggle === false) {
+        rightArm.style.transform = `rotate(${rotation}deg)`;
+    }
 
     requestAnimationFrame(updateRotation);
   }
@@ -607,15 +724,26 @@ function smoothReset() {
             meterFill = 100;
             canClick = false;
             setTimeout(smoothReset, 1000);
-            loads += 1
+            loads += 1;
+
+            posterHealth -= 25;
+        
+            if (posterHealth <= 0) {
+                posterImg.style.backgroundImage = '';
+                posterActive = false;
+                moneyChance = defaultMoneyChance;
+                moneyAmount = defaultMoneyAmount;
+            }
 
             saveUserData();
 
-            const flash = document.getElementById('flashOverlay');
-            flash.style.opacity = '1';
-            setTimeout(() => {
-                flash.style.opacity = '0';
-            }, 300); // flash stays visible for 100ms
+            if (familyFriendlyToggle === false) {
+                const flash = document.getElementById('flashOverlay');
+                flash.style.opacity = '1';
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                }, 300); // flash stays visible for 100ms
+            }
 
             const center = getFigureCenter();
             
@@ -636,18 +764,19 @@ function smoothReset() {
                     
                 }
             }
-            
-            for (let i = 0; i < 30; i++) {
-                particles.push({
-                    x: center.x,
-                    y: center.y,
-                    vx: Math.random() * 5 + 2,   // Push to the right
-                    vy: Math.random() * -2,      // Slight upward start
-                    life: 120,
-                    type: "load"
-                });
+
+            if (familyFriendlyToggle === false) {
+                for (let i = 0; i < clicksPerLoad; i++) {
+                    particles.push({
+                        x: center.x,
+                        y: center.y,
+                        vx: Math.random() * 5 + 2,   // Push to the right
+                        vy: Math.random() * -2,      // Slight upward start
+                        life: 120,
+                        type: "load"
+                    });
+                }
             }
-            
         }
         
     }
@@ -673,13 +802,32 @@ table.addEventListener('click', () => {
 document.querySelectorAll('.buy-item').forEach(button => {
     button.addEventListener('click', () => {
         const itemPrice = parseInt(button.getAttribute('data-price'));
+        const itemType = button.getAttribute('data-type');
         
         if (money >= itemPrice) {
+            
             money -= itemPrice;  // Deduct money when item is bought
-            //put poster up
-            //play sound effect
+
+            saveUserData();
+            
+            if (itemType === "anime") {
+              
+              const randomImage = animePosterImages[Math.floor(Math.random() * animePosterImages.length)];
+
+              if (familyFriendlyToggle === false) {
+                posterImg.style.backgroundImage = `url('${randomImage}')`;
+              } else {
+                posterImg.style.backgroundImage = `url(https://tr.rbxcdn.com/180DAY-8ec8b7ea7250d6f47a87b1f69123bbcd/420/420/Hat/Png/noFilter)`;
+              }
+              moneyChance = 0.7;
+              clicksPerLoad = 20;
+              posterActive = true;
+              
+            }
+            
+            //play sound effect (buying sound)
         } else {
-            //play sound effect
+            //play sound effect (cant afford)
         }
     });
 });
