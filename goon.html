@@ -290,6 +290,34 @@
       background: #fff;
     }
 
+    .leaderboard {
+      position: absolute;
+      top: 10%;
+      left: 26.75%;
+      width: 11.5%;
+      height: 25%;
+      background: #363737;
+      display: flex;
+      flex-wrap: wrap;
+      cursor: default;
+    }
+
+    .leaderboard-display {
+      position: relative;
+      left: 5%;
+      top: 5%;
+      width: 90%;
+      height: 90%;
+      background: #fff;
+      background-size: cover;
+      background-position: center;
+      font-family: sans-serif;
+      font-size: 17px;
+      color: black;
+    }
+
+
+
     .poster {
       position: absolute;
       top: 10%;
@@ -478,6 +506,16 @@
     <p>Random Anime Femboy Poster - Cost: $25</p>
     <button class="buy-item" data-price="25" data-type="anime-femboy">Buy</button>
   </div>
+
+  <div class="item">
+    <p>5s Honey Packet - Cost: $50</p>
+    <button class="buy-item" data-price="50" data-type="honeypacket-5">Buy</button>
+  </div>
+
+  <div class="item">
+    <p>10s Honey Packet - Cost: $75</p>
+    <button class="buy-item" data-price="75" data-type="honeypacket-10">Buy</button>
+  </div>
 </div>
 
 <div class="switchContainer">
@@ -545,7 +583,10 @@
         <div class="status-box" id="loadBox">Loads: 0</div>
         <div class="status-box" id="moneyBox">Money: $0</div>
       </div>
+    </div>
 
+    <div class="leaderboard">
+      <div class="leaderboard-display" id="leaderboard-display">test</div>
     </div>
       
   </div>
@@ -628,6 +669,7 @@ function getFigureCenter() {
   const rightArm = figure.querySelector('.right-arm');
   const meter = document.getElementById('meter');
   const posterImg = document.getElementById('posterImg');
+  const leaderboard = document.getElementById("leaderboard-display");
 
   let familyFriendlyToggle = true;
 
@@ -687,7 +729,50 @@ function getFigureCenter() {
     requestAnimationFrame(updateRotation);
   }
 
+function displayLeaderboard() {
+  const leaderboardRef = firebase.database().ref("users");
+
+  leaderboardRef.once("value", function(snapshot) {
+    const users = snapshot.val();
+
+    if (!users) {
+      leaderboard.innerHTML = "<p>No users found.</p>";
+      return;
+    }
+
+    // Convert users object to an array and sort by loads descending
+    const sortedUsers = Object.entries(users)
+      .map(([uid, data]) => ({
+        uid,
+        name: data.name || 'unknown',
+        loads: data.loads || 0
+      }))
+      .sort((a, b) => b.loads - a.loads)
+      .slice(0, 7);
+
+
+    // Generate HTML
+    let html = "<div class='leaderboard-list'>";
+    html += 'Global Leaderboard'
+    sortedUsers.forEach(user => {
+      const displayName = user.name || user.uid.substring(0, 6); // Fallback if name not set
+
+      html += `
+        <div class="leaderboard-entry">
+          <span class="leaderboard-uid">${displayName}</span>
+          <span class="leaderboard-score">Loads: ${user.loads}</span>
+        </div>`;
+    });
+    html += "</div>";
+    
+    leaderboard.innerHTML = html;
+  });
+}
+
+
+
 function loadUserData() {
+  displayLeaderboard();
   console.log("Loading user data for:", currentUID); // <-- add this
 
   const userRef = firebase.database().ref("users/" + currentUID);
@@ -698,10 +783,11 @@ function loadUserData() {
     if (data) {
       loads = data.loads || 0;
       money = data.money || 0;
+      name = data.name || 'unknown';
     } else {
       firebase.database().ref("users/" + currentUID).set({ loads: 0, money: 0 });
     }
-    updateUI(); // make sure this exists
+    displayLeaderboard();
   });
 }
 
@@ -711,10 +797,13 @@ function saveUserData() {
   if (!currentUID) return;
   firebase.database().ref("users/" + currentUID).set({
     loads: loads,
-    money: money
+    money: money,
+    name: name
+  }).then(() => {
+    displayLeaderboard(); // <-- optional: refresh leaderboard after save
   });
-    
 }
+
 
 function smoothReset() {
     if (meterFill > 0) {
@@ -739,7 +828,12 @@ function smoothReset() {
         if (meterFill > 100) { // Prevent going over 100%
             meterFill = 100;
             canClick = false;
-            setTimeout(smoothReset, 1000);
+            if (barResetSpeed >= 50) {
+              smoothReset();
+            } else {
+              setTimeout(smoothReset, 1000);
+            }
+            
             loads += 1;
 
             posterHealth -= 6.67;
@@ -856,6 +950,25 @@ document.querySelectorAll('.buy-item').forEach(button => {
               clicksPerLoad = 20;
               posterActive = true;
               posterHealth = 125;
+            }
+
+            if (itemType === "honeypacket-5") {
+              clicksPerLoad = 1;
+              barResetSpeed = 100;
+              setTimeout(() => {
+                  clicksPerLoad = defaultClicksPerLoad;
+                  barResetSpeed = defaultBarResetSpeed;
+              }, 5000); // 5000 milliseconds = 5 seconds
+            }
+
+            if (itemType === "honeypacket-10") {
+              clicksPerLoad = 1;
+              barResetSpeed = 100;
+                
+              setTimeout(() => {
+                  clicksPerLoad = defaultClicksPerLoad;
+                  arResetSpeed = defaultBarResetSpeed;
+              }, 10000); // 5000 milliseconds = 5 seconds
             }
             
             //play sound effect (buying sound)
