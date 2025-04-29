@@ -955,19 +955,24 @@ document.querySelectorAll('.buy-item').forEach(button => {
             if (itemType === "honeypacket-5") {
               clicksPerLoad = 1;
               barResetSpeed = 100;
+              rightArm.style.border = "2px solid red";
+
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   barResetSpeed = defaultBarResetSpeed;
+                  rightArm.style.border = "0px solid white";
               }, 5000); // 5000 milliseconds = 5 seconds
             }
 
             if (itemType === "honeypacket-10") {
               clicksPerLoad = 1;
               barResetSpeed = 100;
+              rightArm.style.border = "2px solid red";
                 
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   arResetSpeed = defaultBarResetSpeed;
+                  rightArm.style.border = "0px solid white";
               }, 10000); // 5000 milliseconds = 5 seconds
             }
             
