@@ -815,6 +815,12 @@ function smoothReset() {
     }
 }
 
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'Space') {
+    figure.click(); // triggers the click event
+  }
+});
+
   figure.addEventListener('click', () => {
     if (canClick === true) {
         // Rotate the figure's arm
