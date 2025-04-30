@@ -842,8 +842,8 @@ function smoothReset() {
                 posterImg.style.backgroundImage = '';
                 posterActive = false;
                 moneyChance = defaultMoneyChance;
+                clicksPerLoad = defaultClicksPerLoad;
                 moneyAmount = defaultMoneyAmount;
-                barResetSpeed = defaultBarResetSpeed;
             }
 
             saveUserData();
@@ -871,7 +871,7 @@ function smoothReset() {
                         vy: Math.random() * -2,      // Slight upward start
                         life: 120,
                         type: "money",
-                        gravity: 0.2
+                        gravity: 0.15
                     });
                     
                 }
@@ -899,14 +899,18 @@ rug.addEventListener('click', () => {
     figure.style.transform = "translate(-50%, -50%) rotate(0deg)";
     figure.style.left = "50%";
     figure.style.top = "67%";
-    barResetSpeed = defualtBarResetSpeed;
+    if (barResetSpeed === 2) {
+      barResetSpeed = defualtBarResetSpeed;
+    }
 });
 
 bed.addEventListener('click', () => {
     figure.style.left = "17%";
     figure.style.top = "62%";
     figure.style.transform = "translate(-50%, -50%) rotate(-75deg)";
-    barResetSpeed = 2;
+    if (barResetSpeed = 1) {
+      barResetSpeed = 2;
+    }
 });
 
 table.addEventListener('click', () => {
@@ -937,7 +941,7 @@ document.querySelectorAll('.buy-item').forEach(button => {
               moneyChance = 0.7;
               clicksPerLoad = 20;
               posterActive = true;
-              posterHealth = 100;
+              posterHealth = 200;
             }
 
             if (itemType === "anime-femboy") {
@@ -948,20 +952,23 @@ document.querySelectorAll('.buy-item').forEach(button => {
               } else {
                 posterImg.style.backgroundImage = `url(https://tr.rbxcdn.com/180DAY-8ec8b7ea7250d6f47a87b1f69123bbcd/420/420/Hat/Png/noFilter)`;
               }
-              moneyChance = 1;
+              moneyChance = 0.7;
               clicksPerLoad = 20;
               posterActive = true;
-              posterHealth = 125;
+              posterHealth = 250;
+              moneyAmount += 2;
             }
 
             if (itemType === "honeypacket-5") {
               clicksPerLoad = 1;
               barResetSpeed = 100;
+              moneyAmount += 5;
               rightArm.style.border = "2px solid red";
 
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   barResetSpeed = defaultBarResetSpeed;
+                  moneyAmount += defaultMoneyAmount;
                   rightArm.style.border = "0px solid white";
               }, 5000); // 5000 milliseconds = 5 seconds
             }
@@ -969,11 +976,13 @@ document.querySelectorAll('.buy-item').forEach(button => {
             if (itemType === "honeypacket-10") {
               clicksPerLoad = 1;
               barResetSpeed = 100;
+              moneyAmount += 5;
               rightArm.style.border = "2px solid red";
                 
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   arResetSpeed = defaultBarResetSpeed;
+                  moneyAmount += defaultMoneyAmount;
                   rightArm.style.border = "0px solid white";
               }, 10000); // 5000 milliseconds = 5 seconds
             }
