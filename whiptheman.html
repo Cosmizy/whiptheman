@@ -243,8 +243,10 @@
 
     .ground-text {
       position: absolute;
-      top: 680px;
-      transform: translateX(-50%); /* Center the text horizontally */
+      bottom: 0px;
+      width: 100%;
+      height: 100%;
+      left: 39%;
       transform: translateY(0%);
       color: white; /* Set the text color to white */
       font-size: 40px;
@@ -497,9 +499,11 @@
 <div class="highscore-text" id="highscore-text">highscore: 0</div>
   <div class="coin-text" id="coin-text">coins: 0</div>
   <div class="whip-text" id="whip-text">whips: 0</div>
-<div class="ground-text" onclick="bloodOn()">WHIP THAT MAN!</div>
 
-  <div class="ground"></div>
+
+  <div class="ground" id="ground">
+    <div class="ground-text" id="ground-text" onclick="bloodOn()">WHIP THAT MAN!</div>
+  </div>
 
   <div class="figure" id="movableFigure">
     <div class="head"></div>
