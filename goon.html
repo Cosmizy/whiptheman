@@ -248,7 +248,35 @@
   background: #222;
 }
 
+    .flashlight {
+      width: 1%;
+      height: 5%;
+      background: black;
+      position: absolute;
+      bottom: 40%;
+      right: 20%;
+      display: none;
+    }
 
+    .flashlight-top {
+      width: 150%;
+      height: 25%;
+      background: black;
+      position: absolute;
+      top: -25%;
+      right: -25%;
+    }
+
+.flashlight-light {
+  position: absolute;
+  top: -300%;
+  right: -276%;
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-top: 100px solid rgba(255, 255, 190, 0.5); /* red, 50% transparent */
+}
 
     .window {
       position: absolute;
@@ -508,13 +536,23 @@
   </div>
 
   <div class="item">
-    <p>5s Honey Packet - Cost: $50</p>
-    <button class="buy-item" data-price="50" data-type="honeypacket-5">Buy</button>
+    <p>60s Monster Energy - Cost: $25</p>
+    <button class="buy-item" data-price="25" data-type="monster">Buy</button>
   </div>
 
   <div class="item">
-    <p>10s Honey Packet - Cost: $75</p>
-    <button class="buy-item" data-price="75" data-type="honeypacket-10">Buy</button>
+    <p>5s Honey Packet - Cost: $75</p>
+    <button class="buy-item" data-price="75" data-type="honeypacket-5">Buy</button>
+  </div>
+
+  <div class="item">
+    <p>10s Honey Packet - Cost: $100</p>
+    <button class="buy-item" data-price="100" data-type="honeypacket-10">Buy</button>
+  </div>
+
+  <div class="item">
+    <p>Flashlight - Cost: $150</p>
+    <button class="buy-item" data-price="0" data-type="flashlight">Buy</button>
   </div>
 </div>
 
@@ -563,8 +601,12 @@
         <div class="computer-screen">SHOP</div>
         <div class="computer-base"></div>
       </div>
-
     </div>
+
+      <div class="flashlight"id="flashlight">
+        <div class="flashlight-light"></div>
+        <div class="flashlight-top"></div>
+      </div>
 
     <div class="window">
       <div class="window-pane"></div>
@@ -698,8 +740,10 @@ function getFigureCenter() {
   const bed = document.getElementById('bed');  
   const table = document.getElementById('table');  
   const rightArm = figure.querySelector('.right-arm');
+  const head = figure.querySelector('.head');
   const meter = document.getElementById('meter');
   const posterImg = document.getElementById('posterImg');
+  const flashlight = document.getElementById('flashlight');
   const leaderboard = document.getElementById("leaderboard-display");
 
   let familyFriendlyToggle = true;
@@ -728,6 +772,7 @@ function getFigureCenter() {
   let clicksPerLoad = 30;
   let posterActive = false;
   let posterHealth = 100;
+  let flashlightHealth = 500;
   let barResetSpeed = 1;
   let defaultBarResetSpeed = 1;
 
@@ -784,7 +829,7 @@ function displayLeaderboard() {
 
     // Generate HTML
     let html = "<div class='leaderboard-list'>";
-    html += 'Global Leaderboard'
+    html += 'Global Goonboard'
     sortedUsers.forEach(user => {
       const displayName = user.name || user.uid.substring(0, 6); // Fallback if name not set
 
@@ -874,6 +919,7 @@ document.addEventListener('keydown', (event) => {
             loads += 1;
 
             posterHealth -= 6.67;
+            flashlightHealth -= 5;
         
             if (posterHealth <= 0) {
                 posterImg.style.backgroundImage = '';
@@ -883,6 +929,15 @@ document.addEventListener('keydown', (event) => {
                     clicksPerLoad = defaultClicksPerLoad;
                 }
                 moneyAmount = defaultMoneyAmount;
+            }
+
+            if (flashlightHealth <= 0) {
+                flashlight.style.display = 'none';
+                if (clicksPerLoad > 1) {
+                    clicksPerLoad += 3;
+                }
+                moneyAmount -= 2;
+                moneyChance -= 0.2;
             }
 
             saveUserData();
@@ -998,6 +1053,16 @@ document.querySelectorAll('.buy-item').forEach(button => {
               moneyAmount += 2;
             }
 
+            if (itemType === "monster") {
+              barResetSpeed = 100;
+              head.style.border = "2px solid lime";
+
+              setTimeout(() => {
+                  barResetSpeed = defaultBarResetSpeed;
+                  head.style.border = "0px solid white";
+              }, 60000); // 5000 milliseconds = 5 seconds
+            }
+
             if (itemType === "honeypacket-5") {
               clicksPerLoad = 1;
               barResetSpeed = 100;
@@ -1008,7 +1073,7 @@ document.querySelectorAll('.buy-item').forEach(button => {
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   barResetSpeed = defaultBarResetSpeed;
-                  moneyAmount += defaultMoneyAmount;
+                  moneyAmount = defaultMoneyAmount;
                   rightArm.style.border = "0px solid white";
               }, 5000); // 5000 milliseconds = 5 seconds
             }
@@ -1023,9 +1088,24 @@ document.querySelectorAll('.buy-item').forEach(button => {
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   barResetSpeed = defaultBarResetSpeed;
-                  moneyAmount += defaultMoneyAmount;
+                  moneyAmount = defaultMoneyAmount;
                   rightArm.style.border = "0px solid white";
               }, 10000); // 5000 milliseconds = 5 seconds
+            }
+
+            if (itemType === "flashlight") {
+
+              if (clicksPerLoad > 4) {
+                clicksPerLoad -= 3;
+              }
+              flashlightHealth = 500;
+              flashlight.style.display = 'block';
+              moneyChance += 0.2;
+              moneyAmount += 2;
+              setTimeout(() => {
+
+                  
+              }, 60000); // 5000 milliseconds = 5 seconds
             }
             
             //play sound effect (buying sound)
