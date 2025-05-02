@@ -940,20 +940,26 @@ document.addEventListener('keydown', (event) => {
 
             posterHealth -= 6.67;
             flashlightHealth -= 5;
-        
+            
             if (posterHealth <= 0) {
+                
                 posterImg.style.backgroundImage = '';
                 if (animeFemboyPosterActive === true) {
                     if (moneyAmount - 1 >= 1) {
                         moneyAmount -= 1;
+                        moneyChance -= 0.2;
+                        clicksPerLoad += 10;
+                        animeFemboyPosterActive = false;
                     }
                 } else if (animePosterActive === true) {
-                    
+                    moneyChance -= 0.2;
+                    clicksPerLoad += 10;
+                    animePosterActive = false;
                 }
 
-                moneyChance -= 0.2;
                 
-                clicksPerLoad += 10;
+                
+                
 
             }
 
