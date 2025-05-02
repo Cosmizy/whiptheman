@@ -624,6 +624,7 @@
       <div class="board">
         <div class="status-box" id="loadBox">Loads: 0</div>
         <div class="status-box" id="moneyBox">Money: $0</div>
+        <div class="status-box" id="playtimeBox">Playtime: 0</div>
       </div>
     </div>
 
@@ -764,13 +765,15 @@ function getFigureCenter() {
   let canClick = true;
   let loads = 0;
   let money = 0;
+  let playtime = 0;
   let defaultMoneyChance = 0.5;
   let defaultMoneyAmount = 1;
   let defaultClicksPerLoad = 30;
   let moneyChance = 0.5;
   let moneyAmount = 1;
   let clicksPerLoad = 30;
-  let posterActive = false;
+  let animePosterActive = false;
+  let animeFemboyPosterActive = false;
   let posterHealth = 100;
   let flashlightHealth = 500;
   let barResetSpeed = 1;
@@ -859,6 +862,7 @@ function loadUserData() {
     if (data) {
       loads = data.loads || 0;
       money = data.money || 0;
+      playtime = data.playtime || 0;
       name = data.name || 'unknown';
     } else {
       firebase.database().ref("users/" + currentUID).set({ loads: 0, money: 0 });
@@ -874,6 +878,7 @@ function saveUserData() {
   firebase.database().ref("users/" + currentUID).set({
     loads: loads,
     money: money,
+    playtime: playtime,
     name: name
   }).then(() => {
     displayLeaderboard(); // <-- optional: refresh leaderboard after save
@@ -923,20 +928,26 @@ document.addEventListener('keydown', (event) => {
         
             if (posterHealth <= 0) {
                 posterImg.style.backgroundImage = '';
-                posterActive = false;
-                moneyChance = defaultMoneyChance;
-                if (clicksPerLoad > 1) {
-                    clicksPerLoad = defaultClicksPerLoad;
+                if (animeFemboyPosterActive === true) {
+                    if (moneyAmount - 1 >= 1) {
+                        moneyAmount -= 1;
+                    }
+                } else if (animePosterActive === true) {
+                    
                 }
-                moneyAmount = defaultMoneyAmount;
+
+                moneyChance -= 0.2;
+                
+                clicksPerLoad += 10;
+
             }
 
             if (flashlightHealth <= 0) {
                 flashlight.style.display = 'none';
-                if (clicksPerLoad > 1) {
-                    clicksPerLoad += 3;
-                }
-                moneyAmount -= 2;
+                
+                clicksPerLoad += 10;
+                
+                moneyAmount = moneyAmount / 2;
                 moneyChance -= 0.2;
             }
 
@@ -1032,9 +1043,11 @@ document.querySelectorAll('.buy-item').forEach(button => {
               } else {
                 posterImg.style.backgroundImage = `url(https://tr.rbxcdn.com/180DAY-8ec8b7ea7250d6f47a87b1f69123bbcd/420/420/Hat/Png/noFilter)`;
               }
-              moneyChance = 0.7;
-              clicksPerLoad = 20;
-              posterActive = true;
+              moneyChance += 0.2;
+              if (clicksPerLoad > 10) {
+                clicksPerLoad -= 10;
+              }
+              animePosterActive = true;
               posterHealth = 200;
             }
 
@@ -1046,9 +1059,11 @@ document.querySelectorAll('.buy-item').forEach(button => {
               } else {
                 posterImg.style.backgroundImage = `url(https://tr.rbxcdn.com/180DAY-8ec8b7ea7250d6f47a87b1f69123bbcd/420/420/Hat/Png/noFilter)`;
               }
-              moneyChance = 0.7;
-              clicksPerLoad = 20;
-              posterActive = true;
+              moneyChance += 0.2;
+              if (clicksPerLoad > 10) {
+                clicksPerLoad -= 10;
+              }
+              animeFemboyPosterActive = true;
               posterHealth = 250;
               moneyAmount += 2;
             }
@@ -1088,24 +1103,21 @@ document.querySelectorAll('.buy-item').forEach(button => {
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   barResetSpeed = defaultBarResetSpeed;
-                  moneyAmount = defaultMoneyAmount;
+                  moneyAmount -= 2;
+                  moneyChance += 0.2;
                   rightArm.style.border = "0px solid white";
               }, 10000); // 5000 milliseconds = 5 seconds
             }
 
             if (itemType === "flashlight") {
 
-              if (clicksPerLoad > 4) {
-                clicksPerLoad -= 3;
+              if (clicksPerLoad > 10) {
+                clicksPerLoad -= 10;
               }
               flashlightHealth = 500;
               flashlight.style.display = 'block';
               moneyChance += 0.2;
-              moneyAmount += 2;
-              setTimeout(() => {
-
-                  
-              }, 60000); // 5000 milliseconds = 5 seconds
+              moneyAmount = moneyAmount * 2;
             }
             
             //play sound effect (buying sound)
@@ -1153,13 +1165,21 @@ function drawParticles() {
     });
 }
 
+  const playtimeInterval = setInterval(() => {
+    playtime++;
+  }, 1000);
 
+  setInterval(() => {
+    saveUserData();
+  }, 10000);
+    
 function gameLoop() {
     meter.style.width = `${meterFill}%`;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     document.getElementById('loadBox').textContent = `Loads: ${loads}`;
     document.getElementById('moneyBox').textContent = `Money: $${money}`;
+    document.getElementById('playtimeBox').textContent = `Playtime: ${playtime}`;
     updateParticles();
     drawParticles();
     
