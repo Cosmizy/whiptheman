@@ -376,7 +376,7 @@
   padding: 0px;
   background-color: #fff;
   font-family: sans-serif;
-  font-size: 35px;
+  font-size: 30px;
   text-align: center;
 }
 
@@ -746,8 +746,10 @@ function getFigureCenter() {
   const posterImg = document.getElementById('posterImg');
   const flashlight = document.getElementById('flashlight');
   const leaderboard = document.getElementById("leaderboard-display");
+  const leaderboardModes = ['loads', 'money', 'playtime'];
 
   let familyFriendlyToggle = true;
+  let currentLeaderboardMode = 'loads'; // starting mode
 
   const ffSwitch = document.getElementById('familyFriendlySwitch');
 
@@ -821,25 +823,32 @@ function displayLeaderboard() {
 
     // Convert users object to an array and sort by loads descending
     const sortedUsers = Object.entries(users)
-      .map(([uid, data]) => ({
-        uid,
-        name: data.name || 'unknown',
-        loads: data.loads || 0
-      }))
-      .sort((a, b) => b.loads - a.loads)
-      .slice(0, 7);
+    .map(([uid, data]) => ({
+      uid,
+      name: data.name || 'unknown',
+      stat: data[currentLeaderboardMode] || 0
+    }))
+      .sort((a, b) => b.stat - a.stat)
+      .slice(0, 5);
 
 
     // Generate HTML
     let html = "<div class='leaderboard-list'>";
-    html += 'Global Goonboard'
+    if (currentLeaderboardMode === 'loads') {
+        html += 'Global Goonboard'
+    } else if (currentLeaderboardMode === 'money') {
+        html += 'Global Moneyboard'
+    } else if (currentLeaderboardMode === 'playtime') {
+        html += 'Global Timeboard'
+    }
+    
     sortedUsers.forEach(user => {
-      const displayName = user.name || user.uid.substring(0, 6); // Fallback if name not set
-
+      const displayName = user.name || user.uid.substring(0, 6);
+        
       html += `
         <div class="leaderboard-entry">
           <span class="leaderboard-uid">${displayName}</span>
-          <span class="leaderboard-score">Loads: ${user.loads}</span>
+          <span class="leaderboard-score">${currentLeaderboardMode}: ${user.stat}</span>
         </div>`;
     });
     html += "</div>";
@@ -848,7 +857,13 @@ function displayLeaderboard() {
   });
 }
 
+function cycleLeaderboardMode() {
+  const currentIndex = leaderboardModes.indexOf(currentLeaderboardMode);
+  currentLeaderboardMode = leaderboardModes[(currentIndex + 1) % leaderboardModes.length];
+  displayLeaderboard();
+}
 
+leaderboard.addEventListener("click", cycleLeaderboardMode);
 
 function loadUserData() {
   displayLeaderboard();
@@ -1088,7 +1103,8 @@ document.querySelectorAll('.buy-item').forEach(button => {
               setTimeout(() => {
                   clicksPerLoad = defaultClicksPerLoad;
                   barResetSpeed = defaultBarResetSpeed;
-                  moneyAmount = defaultMoneyAmount;
+                  moneyAmount -= 2;
+                  moneyChance += 0.2;
                   rightArm.style.border = "0px solid white";
               }, 5000); // 5000 milliseconds = 5 seconds
             }
