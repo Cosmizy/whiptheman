@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Country Game</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          display: flex;
+
+          background-color: #646565; /* Optional: background behind the image */
+          position: relative;
+          
+        }
+        img {
+          pointer-events: none; /* Prevents direct mouse interaction with images */
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: auto;
+          
+          loading: lazy;
+        }
+
+
+
+        canvas {
+          display: none; /* Hidden canvas for pixel checking */
+        }
+    </style>
+</head>
+<body>
+
+  <canvas id="checker-canvas"></canvas>
+
+<div id="prompt" style="
+  position: fixed;
+  top: 20px;
+  width: 100%;
+  text-align: center;
+  font-size: 2em;
+  color: white;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+">
+  Loading...
+</div>
+
+<div id="country-name" style="
+  position: fixed;
+  top: 70px;
+  width: 100%;
+  text-align: center;
+  font-size: 1.5em;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+"></div>
+
+<div id="score" style="
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 1.2em;
+  color: white;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+"></div>
+
+<img src="https://github.com/Cosmizy/worldmap/blob/main/worldmapocean.png?raw=true" loading="eager">
+
+<img src="https://i.postimg.cc/PrSLftC0/country-newzealand.png">
+<img src="https://i.postimg.cc/KcgQgHP9/country-antarctica.png">
+<img src="https://i.postimg.cc/sx8tKQnt/country-australia.png">
+<img src="https://i.postimg.cc/ncyyDm9m/country-denmark.png">
+<img src="https://i.postimg.cc/sxtN5Fxz/country-canada.png">
+<img src="https://i.postimg.cc/RhnPSPRD/country-unitedstates.png">
+<img src="https://i.postimg.cc/GhFWv2FS/country-unitedkingdom.png">
+<img src="https://i.postimg.cc/PJmRb3w8/country-france.png">
+<img src="https://i.postimg.cc/3JFqdqhs/country-russia.png">
+<img src="https://i.postimg.cc/SRpZK6vQ/country-japan.png">
+<img src="https://i.postimg.cc/7hVNYpzX/country-china.png">
+<img src="https://i.postimg.cc/445vtRKQ/country-northkorea.png">
+<img src="https://i.postimg.cc/3JNGv4Q3/country-southkorea.png">
+<img src="https://i.postimg.cc/2jcbrkbM/country-taiwan.png">
+<img src="https://i.postimg.cc/4yDXyST7/country-philippines.png">
+<img src="https://i.postimg.cc/xdp8YgqH/country-samoa.png">
+<img src="https://i.postimg.cc/0jY96C5V/country-fiji.png">
+<img src="https://i.postimg.cc/R0g6h4pW/country-vanuatu.png">
+<img src="https://i.postimg.cc/x1RP2kHH/country-solomonislands.png">
+<img src="https://i.postimg.cc/g0j3bgGF/country-papuanewguinea.png">
+<img src="https://i.postimg.cc/7YXCPSsx/country-timorleste.png">
+<img src="https://i.postimg.cc/gJPcH0SS/country-indonesia.png">
+<img src="https://i.postimg.cc/MTW2GfrS/country-brunei.png">
+<img src="https://i.postimg.cc/Y92Z7Kh2/country-malaysia.png">
+<img src="https://i.postimg.cc/9Xs2d0DG/country-india.png">
+<img src="https://i.postimg.cc/xCWZzk68/country-thailand.png">
+<img src="https://i.postimg.cc/bNqTFHS8/country-cambodia.png">
+<img src="https://i.postimg.cc/2yr4Mr6T/country-vietnam.png">
+<img src="https://i.postimg.cc/k46JCbVg/country-laos.png">
+<img src="https://i.postimg.cc/3rtBV0Xv/country-myanmar.png">
+<img src="https://i.postimg.cc/C59fY0MW/country-bangladesh.png">
+<img src="https://i.postimg.cc/QtQXVrq2/country-bhutan.png">
+<img src="https://i.postimg.cc/mr4pBftz/country-nepal.png">
+<img src="https://i.postimg.cc/tTwM01Py/country-srilanka.png">
+<img src="https://i.postimg.cc/d3RmWDj5/country-afghanistan.png">
+<img src="https://i.postimg.cc/ZnLp82Jg/country-mongolia.png">
+<img src="https://i.postimg.cc/bNC2qQrQ/country-kazakhstan.png">
+<img src="https://i.postimg.cc/TP81PQ6W/country-pakistan.png">
+<img src="https://i.postimg.cc/tgtq4jkL/country-kyrgyzstan.png">
+<img src="https://i.postimg.cc/Wpf23Smb/country-tajikistan.png">
+<img src="https://i.postimg.cc/9MgjDF7N/country-uzbekistan.png">
+<img src="https://i.postimg.cc/SsvwyTBB/country-turkmenistan.png">
+<img src="https://i.postimg.cc/VLnLVnMf/country-georgia.png">
+<img src="https://i.postimg.cc/0ySmZz5D/country-armenia.png">
+<img src="https://i.postimg.cc/c4ptKd7H/country-azerbaijan.png">
+<img src="https://i.postimg.cc/Hk0nVXsZ/country-iran.png">
+<img src="https://i.postimg.cc/c4y8CsBJ/country-israel.png">
+<img src="https://i.postimg.cc/V60dsTSM/country-lebanon.png">
+<img src="https://i.postimg.cc/Vsjk7XXY/country-jordan.png">
+<img src="https://i.postimg.cc/1X9h7VZt/country-syria.png">
+<img src="https://i.postimg.cc/HnKzcF3g/country-iraq.png">
+<img src="https://i.postimg.cc/9F7tg8JD/country-kuwait.png">
+<img src="https://i.postimg.cc/Sx4T6bkS/country-qatar.png">
+<img src="https://i.postimg.cc/VvyBzXNf/country-unitedarabemirates.png">
+<img src="https://i.postimg.cc/QtgVW7bx/country-oman.png">
+<img src="https://i.postimg.cc/Ss4xqsh0/country-yemen.png">
+<img src="https://i.postimg.cc/WbypzSvw/country-saudiarabia.png">
+<img src="https://i.postimg.cc/8P7D2W6J/country-norway.png">
+<img src="https://i.postimg.cc/v8NwtBNQ/country-ireland.png">
+<img src="https://i.postimg.cc/pdxwLnpB/country-iceland.png">
+<img src="https://i.postimg.cc/j2JgXsD5/country-finland.png">
+<img src="https://i.postimg.cc/PxDVbXpq/country-sweden.png">
+<img src="https://i.postimg.cc/pdwqLwGM/country-estonia.png">
+<img src="https://i.postimg.cc/Sxjr7SHp/country-latvia.png">
+<img src="https://i.postimg.cc/wTrJzh4S/country-lithuania.png">
+<img src="https://i.postimg.cc/6qgQkh6c/country-belarus.png">
+<img src="https://i.postimg.cc/NjwsRFKK/country-ukraine.png">
+<img src="https://i.postimg.cc/0NXrGxgh/country-moldova.png">
+<img src="https://i.postimg.cc/cL4sFjcW/country-romania.png">
+<img src="https://i.postimg.cc/rpXfV6YX/country-hungary.png">
+<img src="https://i.postimg.cc/W1r7fWp9/country-slovakia.png">
+<img src="https://i.postimg.cc/Gmkkj4zV/country-poland.png">
+<img src="https://i.postimg.cc/fTdXw34y/country-czechrepublic.png">
+<img src="https://i.postimg.cc/DzvxN9j2/country-germany.png">
+<img src="https://i.postimg.cc/pLxChNtD/country-netherlands.png">
+<img src="https://i.postimg.cc/qB3x1BJs/country-belgium.png">
+<img src="https://i.postimg.cc/zBRK2prz/country-luxembourg.png">
+<img src="https://i.postimg.cc/1RvsYSvz/country-cyprus.png">
+<img src="https://i.postimg.cc/ZK1k15pJ/country-turkey.png">
+<img src="https://i.postimg.cc/T1FSMtyt/country-greece.png">
+<img src="https://i.postimg.cc/wx1gPPZc/country-northmacedonia.png">
+<img src="https://i.postimg.cc/L43BcCP5/country-albania.png">
+<img src="https://i.postimg.cc/xTqJ6tyW/country-bulgaria.png">
+<img src="https://i.postimg.cc/hGCh8mQS/country-kosovo.png">
+<img src="https://i.postimg.cc/yx0VG3x3/country-montenegro.png">
+<img src="https://i.postimg.cc/9FVVMMz1/country-serbia.png">
+<img src="https://i.postimg.cc/qq4YkNQ3/country-bosniaandherzegovina.png">
+<img src="https://i.postimg.cc/dVb5s7VV/country-croatia.png">
+<img src="https://i.postimg.cc/fyPx8F3R/country-slovenia.png">
+<img src="https://i.postimg.cc/Jz5QLpvP/country-austria.png">
+<img src="https://i.postimg.cc/zvTgkB10/country-switzerland.png">
+<img src="https://i.postimg.cc/Bb5jKVxz/country-italy.png">
+<img src="https://i.postimg.cc/RhPzy19F/country-spain.png">
+<img src="https://i.postimg.cc/C552Z3Th/country-portugal.png">
+<img src="https://i.postimg.cc/ydgQsFFx/country-madagascar.png">
+<img src="https://i.postimg.cc/CKydc0m2/country-uruguay.png">
+<img src="https://i.postimg.cc/28szDwhb/country-chile.png">
+<img src="https://i.postimg.cc/cHPsLM2b/country-argentina.png">
+<img src="https://i.postimg.cc/8C98Rk4F/country-paraguay.png">
+<img src="https://i.postimg.cc/YqpPmm7n/country-suriname.png">
+<img src="https://i.postimg.cc/KYF3ZFBM/country-guyana.png">
+<img src="https://i.postimg.cc/Y9PSmwG8/country-brazil.png">
+<img src="https://i.postimg.cc/1tV8BtZb/country-bolivia.png">
+<img src="https://i.postimg.cc/BvHFmTZN/country-peru.png">
+<img src="https://i.postimg.cc/ZnKyYX8D/country-ecuador.png">
+<img src="https://i.postimg.cc/0jWKzZZ5/country-colombia.png">
+<img src="https://i.postimg.cc/rFstBXFD/country-venezuela.png">
+<img src="https://i.postimg.cc/yYGSBQkv/country-trinidadandtobago.png">
+<img src="https://i.postimg.cc/26C1TgK8/country-puertorico.png">
+<img src="https://i.postimg.cc/wvF7rFC5/country-dominicanrepublic.png">
+<img src="https://i.postimg.cc/QxFH6Q05/country-haiti.png">
+<img src="https://i.postimg.cc/sDb1bMNL/country-jamaica.png">
+<img src="https://i.postimg.cc/RZfqmMrZ/country-thebahamas.png">
+<img src="https://i.postimg.cc/yNydJv8q/country-cuba.png">
+<img src="https://i.postimg.cc/V67kgvtD/country-panama.png">
+<img src="https://i.postimg.cc/BQPn5qnB/country-costarica.png">
+<img src="https://i.postimg.cc/T3r2SCmy/country-nicaragua.png">
+<img src="https://i.postimg.cc/wMCH4mjc/country-honduras.png">
+<img src="https://i.postimg.cc/fTdMtB8H/country-elsalvador.png">
+<img src="https://i.postimg.cc/NjwB1mVQ/country-belize.png">
+<img src="https://i.postimg.cc/RZQ9Gq5K/country-guatemala.png">
+<img src="https://i.postimg.cc/V6Tc5CnQ/country-mexico.png">
+<img src="https://i.postimg.cc/4nRkQRWW/country-mauritius.png">
+<img src="https://i.postimg.cc/rpwmr50K/country-angola.png">
+<img src="https://i.postimg.cc/HLvL4jX3/country-eswatini.png">
+<img src="https://i.postimg.cc/kGKXmcZh/country-lesotho.png">
+<img src="https://i.postimg.cc/J7khZrnc/country-botswana.png">
+<img src="https://i.postimg.cc/52n9bj71/country-zimbabwe.png">
+<img src="https://i.postimg.cc/yNx1dBtR/country-mozambique.png">
+<img src="https://i.postimg.cc/1tNyGB95/country-malawi.png">
+<img src="https://i.postimg.cc/fynDBdL7/country-zambia.png">
+<img src="https://i.postimg.cc/65htfyNR/country-tanzania.png">
+<img src="https://i.postimg.cc/9Q82sK0Q/country-burundi.png">
+<img src="https://i.postimg.cc/5tDV2zwc/country-rwanda.png">
+<img src="https://i.postimg.cc/hjxqzGrX/country-equatorialguinea.png">
+<img src="https://i.postimg.cc/FshQzNJK/country-gabon.png">
+<img src="https://i.postimg.cc/9QM5Pbb5/country-republicofthecongo.png">
+<img src="https://i.postimg.cc/ht5F2mZJ/country-democraticrepublicofthecongo.png">
+<img src="https://i.postimg.cc/s2Qkq2bT/country-tunisia.png">
+<img src="https://i.postimg.cc/pTKgV6W8/country-morocco.png">
+<img src="https://i.postimg.cc/BbsRjBbz/country-westernsahara.png">
+<img src="https://i.postimg.cc/G3JZZVSn/country-southafrica.png">
+<img src="https://i.postimg.cc/CLhWY7WB/country-namibia.png">
+<img src="https://i.postimg.cc/vZDkxB8G/country-kenya.png">
+<img src="https://i.postimg.cc/CxttGgdk/country-uganda.png">
+<img src="https://i.postimg.cc/nzfPWG4L/country-centralafricanrepublic.png">
+<img src="https://i.postimg.cc/d3qSsQSP/country-chad.png">
+<img src="https://i.postimg.cc/BZgVhDXq/country-somalia.png">
+<img src="https://i.postimg.cc/fTRg1L9Y/country-djibouti.png">
+<img src="https://i.postimg.cc/8zFXP0w5/country-ethiopia.png">
+<img src="https://i.postimg.cc/MGVs1fCJ/country-southsudan.png">
+<img src="https://i.postimg.cc/LXVNbK4y/country-eritrea.png">
+<img src="https://i.postimg.cc/NFJbQ6Hm/country-sudan.png">
+<img src="https://i.postimg.cc/ryQfGkPs/country-cameroon.png">
+<img src="https://i.postimg.cc/JhVx74G6/country-nigeria.png">
+<img src="https://i.postimg.cc/SsVfG6V3/country-niger.png">
+<img src="https://i.postimg.cc/q7TcVb5W/country-thegambia.png">
+<img src="https://i.postimg.cc/Jh5N13w0/country-senegal.png">
+<img src="https://i.postimg.cc/mDZQhcRw/country-guineabissau.png">
+<img src="https://i.postimg.cc/cHDf3sLN/country-guinea.png">
+<img src="https://i.postimg.cc/Wzhg6Qdq/country-sierraleone.png">
+<img src="https://i.postimg.cc/qqSnmjKb/country-ivorycoast.png">
+<img src="https://i.postimg.cc/8PvrpdMG/country-ghana.png">
+<img src="https://i.postimg.cc/KvT0gsCs/country-togo.png">
+<img src="https://i.postimg.cc/nht0KGJV/country-benin.png">
+<img src="https://i.postimg.cc/0ydZVKkY/country-burkinafaso.png">
+<img src="https://i.postimg.cc/bvygWYrK/country-mali.png">
+<img src="https://i.postimg.cc/j5CXq8zc/country-mauritania.png">
+<img src="https://i.postimg.cc/26Jx14GD/country-egypt.png">
+<img src="https://i.postimg.cc/VvCWndZb/country-libya.png">
+<img src="https://i.postimg.cc/sfQctNfD/country-algeria.png"><img src="https://i.postimg.cc/CKrG2jWq/country-liberia.png">
+
+<script>
+window.addEventListener('load', () => {
+  const countryImages = Array.from(document.querySelectorAll('img')).filter(img =>
+    img.src.includes('country-')
+  );
+
+  const display = document.getElementById('country-name');
+  const prompt = document.getElementById('prompt');
+  const scoreDisplay = document.getElementById('score');
+  const canvas = document.getElementById('checker-canvas');
+  const ctx = canvas.getContext('2d');
+
+  countryImages.forEach(img => {
+    img.crossOrigin = "anonymous";
+    const match = img.src.match(/country-([a-z0-9_-]+)\.png/i);
+    if (match && match[1]) {
+      img.id = match[1].toLowerCase();
+    }
+  });
+
+  function formatName(id) {
+    return id.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+// Set a cookie that lasts 365 days
+function setCookie(name, value, days) {
+  const date = new Date();
+  date.setTime(date.getTime() + (days*24*60*60*1000));
+  const expires = "expires=" + date.toUTCString();
+  document.cookie = `${name}=${value}; ${expires}; path=/`;
+}
+
+// Get a cookie value
+function getCookie(name) {
+  const cookies = document.cookie.split("; ");
+  for (const c of cookies) {
+    const [key, val] = c.split("=");
+    if (key === name) return val;
+  }
+  return null;
+}
+
+
+  let targetCountry = null;
+  let score = 0;
+  let highScore = parseInt(getCookie('highscore') || '0');
+
+  function updateScoreDisplay() {
+    scoreDisplay.textContent = `Score: ${score} | High Score: ${highScore}`;
+  }
+
+  function pickRandomCountry() {
+    const randomImg = countryImages[Math.floor(Math.random() * countryImages.length)];
+    targetCountry = randomImg.id;
+    prompt.textContent = `Where is ${formatName(targetCountry)}?`;
+    display.textContent = '';
+    display.style.color = 'white';
+  }
+
+  pickRandomCountry();
+  updateScoreDisplay();
+
+  document.addEventListener('click', (e) => {
+    for (let i = countryImages.length - 1; i >= 0; i--) {
+      const img = countryImages[i];
+      const rect = img.getBoundingClientRect();
+
+      if (
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+
+        const scaleX = img.naturalWidth / img.width;
+        const scaleY = img.naturalHeight / img.height;
+        const realX = Math.floor(x * scaleX);
+        const realY = Math.floor(y * scaleY);
+
+        const pixel = ctx.getImageData(realX, realY, 1, 1).data;
+        const alpha = pixel[3];
+
+        if (alpha > 0) {
+          const clickedId = img.id;
+          const formatted = formatName(clickedId);
+
+          if (clickedId === targetCountry) {
+            score++;
+            if (score > highScore) {
+              highScore = score;
+              setCookie("highscore", score, 365);
+            }
+            display.textContent = `Correct! That is ${formatted}.`;
+            display.style.color = 'lightgreen';
+          } else {
+            display.textContent = `That was ${formatted}.`;
+            display.style.color = 'red';
+            score = 0;
+          }
+
+          updateScoreDisplay();
+          setTimeout(pickRandomCountry, 1500);
+          return;
+        }
+      }
+    }
+  });
+});
+</script>
+
+
+
+</body>
+</html>
