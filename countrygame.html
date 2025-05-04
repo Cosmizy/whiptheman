@@ -251,7 +251,7 @@
 <script>
 //window.addEventListener('load', () => {
   const countryImages = Array.from(document.querySelectorAll('img')).filter(img =>
-    img.src.includes('country-')
+    img.src.includes('country_')
   );
 
   const display = document.getElementById('country-name');
@@ -262,7 +262,7 @@
 
   countryImages.forEach(img => {
     img.crossOrigin = "anonymous";
-    const match = img.src.match(/country-([a-z0-9_-]+)\.png/i);
+    const match = img.src.match(/country_([a-z0-9_-]+)\.png/i);
     if (match && match[1]) {
       img.id = match[1].toLowerCase();
     }
