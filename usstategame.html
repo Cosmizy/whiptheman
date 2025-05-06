@@ -137,9 +137,9 @@
 </div>
 
 <img src="https://github.com/Cosmizy/whiptheman/blob/main/usmapwater.png?raw=true" loading="eager">
-<img id="visibleMapImg" src="https://github.com/Cosmizy/whiptheman/blob/main/usmapland.png?raw=true" loading="eager">
+<img id="visibleMapImg" crossorigin="anonymous" src="https://github.com/Cosmizy/whiptheman/blob/main/usmapland.png?raw=true" loading="eager">
 <img src="https://github.com/Cosmizy/whiptheman/blob/main/usmapborder.png?raw=true" loading="eager">
-<img id="colorMapImg" src="https://github.com/Cosmizy/whiptheman/blob/main/statecolormap.png?raw=true" loading="eager"style="display:none; z-index: 99;">
+<img id="colorMapImg" crossorigin="anonymous" src="https://github.com/Cosmizy/whiptheman/blob/main/statecolormap.png?raw=true" loading="eager"style="display:none; z-index: 99;">
 
 <canvas id="mapCanvas" width="1000" height="600" style="display:none; z-index: 99;"></canvas>
 <canvas id="hiddenMap" width="100%" height="600" style="display:none; z-index: 99;"></canvas>
@@ -153,6 +153,9 @@ const mapCanvas = document.getElementById('mapCanvas');
 const hiddenCanvas = document.getElementById('hiddenMap');
 const ctx = mapCanvas.getContext('2d');
 const hiddenCtx = hiddenCanvas.getContext('2d');
+
+//colorMapImg.crossOrigin = "anonymous"; 
+//visibleImg.crossOrigin = "anonymous"; 
 
 const colorToState = {
   "226,161,172": "Alabama",
@@ -207,8 +210,8 @@ const colorToState = {
   "93,73,119": "Wyoming"
 };
 
-    
 
+    
   const prompt = document.getElementById('prompt');
   const scoreDisplay = document.getElementById('score');
 
