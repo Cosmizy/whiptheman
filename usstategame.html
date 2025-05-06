@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Country Game</title>
+    <link rel="icon" type="image/svg+xml" href="/countryfavicon.svg" />
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          display: flex;
+
+          background-color: #C9EBFC; /* Optional: background behind the image */
+          position: relative;
+          
+        }
+        img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: auto;
+          
+          loading: lazy;
+        }
+
+        canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: auto;
+          z-index: 99;
+          loading: lazy;
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+
+  
+
+<div id="prompt" style="
+  position: fixed;
+  top: 20px;
+  width: 100%;
+  text-align: center;
+  font-size: 2em;
+  color: white;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+">
+  Loading...
+</div>
+
+<div id="country-name" style="
+  position: fixed;
+  top: 70px;
+  width: 100%;
+  text-align: center;
+  font-size: 1.5em;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+"></div>
+
+<div id="score" style="
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 1.2em;
+  color: white;
+  z-index: 9999;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+"></div>
+
+<button id="options-button" style="
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 1em;
+  padding: 6px 12px;
+  z-index: 9999;
+  font-family: sans-serif;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  text-shadow: 1px 1px 2px black;
+  cursor: pointer;
+">
+  Options
+</button>
+
+<div id="options-menu" style="
+  visibility: hidden;
+  position: fixed;
+  top: 250px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  z-index: 10000;
+  font-family: sans-serif;
+  text-shadow: 1px 1px 2px black;
+">
+  <p style="margin: 0 0 10px 0;">Options Menu</p>
+  <button style="
+    font-size: 1em;
+    padding: 6px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+  ">
+    Europe
+  </button>
+  <br><button style="
+    font-size: 1em;
+    padding: 6px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+  ">
+    World Map
+  </button>
+</div>
+
+<img src="https://github.com/Cosmizy/whiptheman/blob/main/usmapwater.png?raw=true" loading="eager">
+<img id="visibleMapImg" src="https://github.com/Cosmizy/whiptheman/blob/main/usmapland.png?raw=true" loading="eager">
+<img src="https://github.com/Cosmizy/whiptheman/blob/main/usmapborder.png?raw=true" loading="eager">
+<img id="colorMapImg" src="https://github.com/Cosmizy/whiptheman/blob/main/statecolormap.png?raw=true" loading="eager"style="display:none; z-index: 99;">
+
+<canvas id="mapCanvas" width="1000" height="600" style="display:none; z-index: 99;"></canvas>
+<canvas id="hiddenMap" width="100%" height="600" style="display:none; z-index: 99;"></canvas>
+
+
+
+<script>
+const visibleImg = document.getElementById('visibleMapImg');
+const colorMapImg = document.getElementById('colorMapImg');
+const mapCanvas = document.getElementById('mapCanvas');
+const hiddenCanvas = document.getElementById('hiddenMap');
+const ctx = mapCanvas.getContext('2d');
+const hiddenCtx = hiddenCanvas.getContext('2d');
+
+const colorToState = {
+  "226,161,172": "Alabama",
+  "17,33,74": "Alaska",
+  "114,72,64": "Arizona",
+  "174,61,96": "Arkansas",
+  "218,189,189": "California",
+  "98,90,120": "Colorado",
+  "65,89,140": "Connecticut",
+  "122,156,152": "Delaware",
+  "216,158,164": "Florida",
+  "154,68,94": "Georgia",
+  "168,100,131": "Hawaii",
+  "21,64,109": "Idaho",
+  "238,234,229": "Illinois",
+  "12,22,88": "Indiana",
+  "167,115,144": "Iowa",
+  "24,56,100": "Kansas",
+  "20,19,106": "Kentucky",
+  "43,95,139": "Louisiana",
+  "13,48,102": "Maine",
+  "162,114,76": "Maryland",
+  "238,238,239": "Massachusetts",
+  "30,59,122": "Michigan",
+  "103,122,174": "Minnesota",
+  "111,44,65": "Mississippi",
+  "134,91,123": "Missouri",
+  "43,72,118": "Montana",
+  "32,64,126": "Nebraska",
+  "6,54,165": "Nevada",
+  "30,61,127": "New Hampshire",
+  "237,190,104": "New Jersey",
+  "252,206,2": "New Mexico",
+  "32,65,113": "New York",
+  "161,109,131": "North Carolina",
+  "25,67,106": "North Dakota",
+  "182,139,164": "Ohio",
+  "21,119,194": "Oklahoma",
+  "25,59,121": "Oregon",
+  "28,56,88": "Pennsylvania",
+  "251,246,229": "Rhode Island",
+  "28,51,83": "South Carolina",
+  "31,127,162": "South Dakota",
+  "176,22,31": "Tennessee",
+  "155,105,140": "Texas",
+  "29,55,102": "Utah",
+  "16,60,99": "Vermont",
+  "50,76,136": "Virginia",
+  "27,135,88": "Washington",
+  "169,176,183": "West Virginia",
+  "25,57,133": "Wisconsin",
+  "93,73,119": "Wyoming"
+};
+
+    
+
+  const prompt = document.getElementById('prompt');
+  const scoreDisplay = document.getElementById('score');
+
+// Set a cookie that lasts 365 days
+function setCookie(name, value, days) {
+  const date = new Date();
+  date.setTime(date.getTime() + (days*24*60*60*1000));
+  const expires = "expires=" + date.toUTCString();
+  document.cookie = `${name}=${value}; ${expires}; path=/`;
+}
+
+// Get a cookie value
+function getCookie(name) {
+  const cookies = document.cookie.split("; ");
+  for (const c of cookies) {
+    const [key, val] = c.split("=");
+    if (key === name) return val;
+  }
+  return null;
+}
+
+
+  let targetCountry = null;
+  let score = 0;
+  let highScore = parseInt(getCookie('highscore') || '0');
+
+  function updateScoreDisplay() {
+    scoreDisplay.textContent = `Score: ${score} | High Score: ${highScore}`;
+  }
+
+function pickRandomCountry() {
+  const keys = Object.values(colorToState); // Array of all state/country names
+  targetCountry = keys[Math.floor(Math.random() * keys.length)];
+  prompt.textContent = `Where is ${targetCountry}?`;
+}
+
+function resizeCanvasesToImage(img) {
+  mapCanvas.width = img.naturalWidth;
+  mapCanvas.height = img.naturalHeight;
+  hiddenCanvas.width = img.naturalWidth;
+  hiddenCanvas.height = img.naturalHeight;
+}
+
+let imagesLoaded = 0;
+function checkAllImagesLoaded() {
+  if (++imagesLoaded === 2) {
+    pickRandomCountry();
+    updateScoreDisplay();
+  }
+}
+
+visibleImg.onload = () => {
+  resizeCanvasesToImage(visibleImg);
+  ctx.drawImage(visibleImg, 0, 0, mapCanvas.width, mapCanvas.height);
+  checkAllImagesLoaded();
+};
+
+colorMapImg.onload = () => {
+  hiddenCtx.imageSmoothingEnabled = false;
+  hiddenCtx.drawImage(colorMapImg, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+  checkAllImagesLoaded();
+};
+
+
+
+document.addEventListener('click', (e) => {
+  
+  const rect = mapCanvas.getBoundingClientRect();
+    
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const pixel = hiddenCtx.getImageData(x, y, 1, 1).data;
+  const key = `${pixel[0]},${pixel[1]},${pixel[2]}`; //something wrong here
+  const state = colorToState[key];
+    
+
+  if (state) {
+    if (state === targetCountry) {
+      score++;
+      if (score > highScore) {
+        highScore = score;
+        setCookie('highscore', highScore, 365);
+      }
+      prompt.textContent = `Correct! That was ${state}.`;
+    } else {
+      score = 0;
+      prompt.textContent = `Wrong! That was ${state}. Try again.`;
+    }
+    updateScoreDisplay();
+    setTimeout(pickRandomCountry, 1000); // Wait a second before next question
+  } else {
+    prompt.textContent = `Clicked on unknown area. Try again.`;
+  }
+});
+
+
+  pickRandomCountry();
+  updateScoreDisplay();
+
+
+document.getElementById('options-button').addEventListener('click', () => {
+  const menu = document.getElementById('options-menu');
+  if (menu.style.visibility === 'hidden' || menu.style.visibility === '') {
+    menu.style.visibility = 'visible';
+  } else {
+    menu.style.visibility = 'hidden';
+  }
+});
+
+
+    
+//});
+</script>
+
+
+
+</body>
+</html>
