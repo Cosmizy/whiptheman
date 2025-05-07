@@ -25,6 +25,11 @@
           
           loading: lazy;
         }
+        
+        .green-tint {
+          background-color: lightgreen;
+          mix-blend-mode: screen;
+        }
 
 
 
@@ -113,7 +118,7 @@
     border: 1px solid white;
     border-radius: 5px;
     cursor: pointer;
-  ">
+  " class="optionchoice-button" data-title="europegame">
     Europe
   </button>
   <br><button style="
@@ -124,9 +129,12 @@
     border: 1px solid white;
     border-radius: 5px;
     cursor: pointer;
-  ">
+  " class="optionchoice-button" data-title="usstategame">
     United States
   </button>
+
+
+    
 </div>
 
 <img src="https://github.com/Cosmizy/worldmap/blob/main/worldmapocean.png?raw=true" loading="eager">
@@ -322,7 +330,7 @@ const dashType = '-';
   const scoreDisplay = document.getElementById('score');
   const canvas = document.getElementById('checker-canvas');
   const ctx = canvas.getContext('2d');
-
+    
   countryImages.forEach(img => {
     img.crossOrigin = "anonymous";
     const match = img.src.match(/country[-_]([a-z0-9_-]+)\.png/i);
@@ -334,6 +342,14 @@ const dashType = '-';
   function formatName(id) {
     return id.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
+
+  function changeCountryColor(id, correct) {
+    if (correct === true) {
+        img.style.filter = "brightness(0) saturate(100%) hue-rotate(90deg)";
+    } else {
+        img.style.filter = "brightness(0) saturate(100%) hue-rotate(90deg)";
+    }
+  } 
 
 // Set a cookie that lasts 365 days
 function setCookie(name, value, days) {
@@ -417,6 +433,7 @@ function getCookie(name) {
           const formatted = formatName(clickedId);
 
           if (clickedId === targetCountry) {
+            //changeCountryColor(clickedId, true);
             score++;
             if (score > highScore) {
               highScore = score;
@@ -425,10 +442,13 @@ function getCookie(name) {
             display.textContent = `Correct! That is ${formatted}.`;
             display.style.color = 'lightgreen';
           } else {
+            //changeCountryColor(clickedId, false);
             display.textContent = `That was ${formatted}.`;
             display.style.color = 'red';
             score = 0;
           }
+
+          
 
           updateScoreDisplay();
           setTimeout(pickRandomCountry, 1500);
@@ -447,6 +467,20 @@ document.getElementById('options-button').addEventListener('click', () => {
   }
 });
 
+const buttons = document.querySelectorAll('.optionchoice-button');
+    
+buttons.forEach(button => {
+    button.addEventListener('click', function() {
+        // Retrieve the data-title attribute value
+        const title = this.getAttribute('data-title');
+                
+        // Construct the URL
+        const url = 'cosmizy.com' + '/' + title;
+                
+        // Navigate to the constructed URL
+        window.location.href = url;
+    });
+});
 
     
 //});
