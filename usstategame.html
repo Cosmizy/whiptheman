@@ -35,8 +35,14 @@
           loading: lazy;
         }
 
-
-
+#mapCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* higher than your <img> layers */
+  pointer-events: auto;
+}
+        
 
     </style>
 </head>
@@ -58,7 +64,7 @@
   Loading...
 </div>
 
-<div id="country-name" style="
+<div id="state-name" style="
   position: fixed;
   top: 70px;
   width: 100%;
@@ -136,23 +142,26 @@
   </button>
 </div>
 
-<img src="https://github.com/Cosmizy/whiptheman/blob/main/usmapwater.png?raw=true" loading="eager">
-<img id="visibleMapImg" crossorigin="anonymous" src="https://github.com/Cosmizy/whiptheman/blob/main/usmapland.png?raw=true" loading="eager">
-<img src="https://github.com/Cosmizy/whiptheman/blob/main/usmapborder.png?raw=true" loading="eager">
-<img id="colorMapImg" crossorigin="anonymous" src="https://github.com/Cosmizy/whiptheman/blob/main/statecolormap.png?raw=true" loading="eager"style="display:none; z-index: 99;">
+<img src="https://cosmizy.com/usmapwater.png" loading="eager">
+<img id="visibleMapImg" crossorigin="anonymous" src="https://cosmizy.com/usmapland.png" loading="eager">
+<img src="https://cosmizy.com/usmapborder.png" loading="eager">
+<img id="colorMapImg" crossorigin="anonymous" src="https://cosmizy.com/statecolormap.png" loading="eager"style="display:none; z-index: 99;">
 
-<canvas id="mapCanvas" width="1000" height="600" style="display:none; z-index: 99;"></canvas>
-<canvas id="hiddenMap" width="100%" height="600" style="display:none; z-index: 99;"></canvas>
+<canvas id="mapCanvas" width="100%" height="100%" style="display:block; z-index: 99;"></canvas>
+<canvas id="hiddenMap" width="100%" height="100%" style="display:none; z-index: 99;"></canvas>
 
 
 
 <script>
+const display = document.getElementById('state-name');
 const visibleImg = document.getElementById('visibleMapImg');
 const colorMapImg = document.getElementById('colorMapImg');
 const mapCanvas = document.getElementById('mapCanvas');
 const hiddenCanvas = document.getElementById('hiddenMap');
 const ctx = mapCanvas.getContext('2d');
 const hiddenCtx = hiddenCanvas.getContext('2d');
+
+let canClick = true;
 
 //colorMapImg.crossOrigin = "anonymous"; 
 //visibleImg.crossOrigin = "anonymous"; 
@@ -246,6 +255,9 @@ function pickRandomCountry() {
   const keys = Object.values(colorToState); // Array of all state/country names
   targetCountry = keys[Math.floor(Math.random() * keys.length)];
   prompt.textContent = `Where is ${targetCountry}?`;
+  display.textContent = '';
+  display.style.color = 'white';
+  canClick = true;
 }
 
 function resizeCanvasesToImage(img) {
@@ -279,33 +291,45 @@ colorMapImg.onload = () => {
 
 document.addEventListener('click', (e) => {
   
-  const rect = mapCanvas.getBoundingClientRect();
+    const rect = mapCanvas.getBoundingClientRect();
     
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+    const scaleX = mapCanvas.width / rect.width;
+    const scaleY = mapCanvas.height / rect.height;
+    
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+  //ctx.fillStyle = 'red';
+  //ctx.fillRect(x - 25, y - 25, 50, 50); // center it at the click
 
   const pixel = hiddenCtx.getImageData(x, y, 1, 1).data;
   const key = `${pixel[0]},${pixel[1]},${pixel[2]}`; //something wrong here
   const state = colorToState[key];
     
-
+if (canClick === true) {
   if (state) {
+    canClick = false;
     if (state === targetCountry) {
+      
       score++;
+      
       if (score > highScore) {
         highScore = score;
         setCookie('highscore', highScore, 365);
       }
-      prompt.textContent = `Correct! That was ${state}.`;
+      display.textContent = `Correct! That is ${state}.`;
+      display.style.color = 'lightgreen';
     } else {
       score = 0;
-      prompt.textContent = `Wrong! That was ${state}. Try again.`;
+      display.textContent = `That was ${state}.`;
+      display.style.color = 'red';
     }
     updateScoreDisplay();
     setTimeout(pickRandomCountry, 1000); // Wait a second before next question
   } else {
     prompt.textContent = `Clicked on unknown area. Try again.`;
   }
+}
 });
 
 
