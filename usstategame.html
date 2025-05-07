@@ -126,7 +126,7 @@
     border: 1px solid white;
     border-radius: 5px;
     cursor: pointer;
-  ">
+  " class="optionchoice-button" data-title="europegame">
     Europe
   </button>
   <br><button style="
@@ -137,8 +137,8 @@
     border: 1px solid white;
     border-radius: 5px;
     cursor: pointer;
-  ">
-    World Map
+  " class="optionchoice-button" data-title="countrygame">
+    World
   </button>
 </div>
 
@@ -344,6 +344,21 @@ document.getElementById('options-button').addEventListener('click', () => {
   } else {
     menu.style.visibility = 'hidden';
   }
+});
+
+const buttons = document.querySelectorAll('.optionchoice-button');
+    
+buttons.forEach(button => {
+    button.addEventListener('click', function() {
+        // Retrieve the data-title attribute value
+        const title = this.getAttribute('data-title');
+                
+        // Construct the URL
+        const url = 'cosmizy.com' + '/' + title;
+                
+        // Navigate to the constructed URL
+        window.location.href = url;
+    });
 });
 
 
