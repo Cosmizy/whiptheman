@@ -1147,6 +1147,30 @@
         });*/
 
 
+        function getClosestProvince(provinces, attackerCells) {
+            let minDistance = Infinity;
+            let closestIndex = -1;
+
+            for (let p = 0; p < provinces.length; p++) {
+                const province = provinces[p];
+                if (province.length === 0) continue;
+
+                for (const cell of province) {
+                    for (const attackerCell of attackerCells) {
+                        const dx = cell.x - attackerCell.x;
+                        const dy = cell.y - attackerCell.y;
+                        const distSq = dx * dx + dy * dy;
+
+                        if (distSq < minDistance) {
+                            minDistance = distSq;
+                            closestIndex = p;
+                        }
+                    }
+                }
+            }
+
+            return closestIndex;
+        }
 
 
         document.getElementById('nextTurnButton').addEventListener('click', function () {
@@ -1183,12 +1207,12 @@
                     if (attackStrength > defenseStrength) {
                         let takenCells = [];
                         const targetProvinces = target.provinces;
-                        for (let p = 0; p < targetProvinces.length; p++) {
-                            if (targetProvinces[p].length > 0) {
-                                takenCells = target.provinces.splice(p, 1)[0];
-                                break;
-                            }
+                        const attackerCells = countryCells[war.attackerIndex];
+                        const closestIndex = getClosestProvince(targetProvinces, attackerCells);
+                        if (closestIndex !== -1) {
+                            takenCells = target.provinces.splice(closestIndex, 1)[0];
                         }
+
 
                         if (takenCells.length > 0) {
                             const capital = target.capital;
@@ -1257,29 +1281,109 @@
                             countryCells[war.targetIndex] = [];
                         }
                     } else {
-                        if (war.turns >= 7) {
-                            events.push({
-                                type: "peace",
-                                attackerName: attacker.name,
-                                attackerColor: attacker.symbol.color,
-                                targetName: target.name,
-                                targetColor: target.symbol.color
-                            });
+                        // attacker is not stronger than defender
+                        if (Math.random() >= 0.20) {
+                            if (war.turns >= 7) {
+                                events.push({
+                                    type: "peace",
+                                    attackerName: attacker.name,
+                                    attackerColor: attacker.symbol.color,
+                                    targetName: target.name,
+                                    targetColor: target.symbol.color
+                                });
 
-                            // Remove the war since it's ended with peace
-                            wars.splice(w, 1);
-                            //w--; // Adjust the loop index because we removed an item
+                                // Remove the war since it's ended with peace
+                                wars.splice(w, 1);
+                                //w--; // Adjust the loop index because we removed an item
 
-                            //continue; // Skip to the next war
+                                //continue; // Skip to the next war
+                            } else {
+                                // Continue resolving the war normally
+                                events.push({
+                                    type: "failedAttack",
+                                    attackerName: attacker.name,
+                                    attackerColor: attacker.symbol.color,
+                                    targetName: target.name,
+                                    targetColor: target.symbol.color
+                                });
+                            }
                         } else {
-                            // Continue resolving the war normally
-                            events.push({
-                                type: "failedAttack",
-                                attackerName: attacker.name,
-                                attackerColor: attacker.symbol.color,
-                                targetName: target.name,
-                                targetColor: target.symbol.color
-                            });
+                            //attack succeeds anyway
+                            let takenCells = [];
+                            const attackerCells = countryCells[war.attackerIndex];
+                            const closestIndex = getClosestProvince(targetProvinces, attackerCells);
+                            if (closestIndex !== -1) {
+                                takenCells = target.provinces.splice(closestIndex, 1)[0];
+                            }
+
+
+                            if (takenCells.length > 0) {
+                                const capital = target.capital;
+                                const capitalTaken = takenCells.some(cell => cell.x === capital.x && cell.y === capital.y);
+
+                                if (capitalTaken) {
+                                    events.push({
+                                        type: "capitalCaptured",
+                                        attackerName: attacker.name,
+                                        attackerColor: attacker.symbol.color,
+                                        targetName: target.name,
+                                        targetColor: target.symbol.color
+                                    });
+
+                                    const remainingCells = target.countryCells || [];
+                                    remainingCells.forEach(cell => {
+                                        countries[cell.y][cell.x] = war.attackerIndex;
+                                        countryCells[war.attackerIndex].push(cell);
+                                    });
+
+                                    attacker.troops += target.troops || 0;
+                                    attacker.population += Math.floor(target.population || 0);
+
+                                    countryDetails[war.targetIndex] = null;
+                                    countryCells[war.targetIndex] = [];
+                                    wars.splice(w, 1); // End war
+
+                                    countryDetails[war.targetIndex] = null;
+                                    countryCells[war.targetIndex] = [];
+
+                                    //target.size = getCountrySize(target);
+                                    //attacker.size = getCountrySize(attacker);
+                                } else {
+                                    takenCells.forEach(cell => {
+                                        countries[cell.y][cell.x] = war.attackerIndex;
+                                        countryCells[war.attackerIndex].push(cell);
+                                    });
+
+                                    target.countryCells = target.countryCells?.filter(cell =>
+                                        !takenCells.some(t => t.x === cell.x && t.y === cell.y)
+                                    );
+
+                                    //target.size = getCountrySize(target);
+                                    //attacker.size = getCountrySize(attacker);
+
+                                    events.push({
+                                        type: "provinceTaken",
+                                        attackerName: attacker.name,
+                                        attackerColor: attacker.symbol.color,
+                                        targetName: target.name,
+                                        targetColor: target.symbol.color
+                                    });
+                                }
+                            } else {
+                                // No provinces left to take
+                                events.push({
+                                    type: "defeat",
+                                    attackerName: attacker.name,
+                                    attackerColor: attacker.symbol.color,
+                                    targetName: target.name,
+                                    targetColor: target.symbol.color
+                                });
+                                wars.splice(w, 1); // End war
+
+                                countryDetails[war.targetIndex] = null;
+                                countryCells[war.targetIndex] = [];
+                            }
+
                         }
                     }
 
