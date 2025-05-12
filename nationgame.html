@@ -763,45 +763,72 @@
                 ctx.fillRect(px, py + cellSize, cellSize, cellSize); // Bottom
             });
         }
+       
 
         function assignProvincesToCountry(countryId, countryCells) {
-            const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-            const provinces = [];
-            const provinceMap = Array.from({ length: rows }, () => Array(cols).fill(-1)); // Initialize province map
+            const size = getCountrySize(countryId);
+            const pixelsPerProvince = 4000;
+            const provinceCount = Math.max(1, Math.round(size / pixelsPerProvince));
 
-            function floodFill(x, y, provinceId) {
-                const stack = [{ x, y }];
-                const provinceCells = [];
-
-                while (stack.length > 0) {
-                    const { x, y } = stack.pop();
-                    if (visited[y][x] || countries[y][x] !== countryId) continue;
-
-                    visited[y][x] = true;
-                    provinceCells.push({ x, y });
-                    provinceMap[y][x] = provinceId;  // Assign the current province ID to this cell
-
-                    const neighbors = [
-                        { x: x - 1, y }, { x: x + 1, y },
-                        { x, y: y - 1 }, { x, y: y + 1 }
-                    ];
-
-                    for (let { x: nx, y: ny } of neighbors) {
-                        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !visited[ny][nx]) {
-                            stack.push({ x: nx, y: ny });
-                        }
-                    }
-                }
-
-                if (provinceCells.length > 0) {
-                    provinces.push(provinceCells);
-                }
+            // Step 1: Find bounding box
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const { x, y } of countryCells) {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
             }
 
-            // Loop through all country cells and flood fill them
-            for (const { x, y } of countryCells) {
-                if (!visited[y][x]) {
-                    floodFill(x, y, provinces.length);  // Assign province ID to the flood fill
+            // Step 2: Pick random seeds within the bounding box (with some spread)
+            const seeds = [];
+            const margin = 10;  // Leave some room to prevent overlap at edges
+            for (let i = 0; i < provinceCount; i++) {
+                const seedX = Math.floor(Math.random() * (maxX - minX - margin)) + minX + margin;
+                const seedY = Math.floor(Math.random() * (maxY - minY - margin)) + minY + margin;
+                seeds.push({ x: seedX, y: seedY });
+            }
+
+            // Step 3: Assign each cell to the nearest seed (adjusting for randomness)
+            const provinces = Array.from({ length: provinceCount }, () => []);
+            const visited = new Set();
+
+            function assignToProvince(cell) {
+                let closestIndex = 0;
+                let closestDist = Infinity;
+                for (let i = 0; i < seeds.length; i++) {
+                    const dx = cell.x - seeds[i].x;
+                    const dy = cell.y - seeds[i].y;
+                    const dist = dx * dx + dy * dy; // no sqrt needed
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closestIndex = i;
+                    }
+                }
+                provinces[closestIndex].push(cell);
+            }
+
+            // Step 4: Spread the provinces, ensuring contiguity and evenness
+            const frontier = [...countryCells];
+            while (frontier.length > 0) {
+                const randomIndex = Math.floor(Math.random() * frontier.length);
+                const cell = frontier.splice(randomIndex, 1)[0];
+
+                // If it's not already assigned, assign it
+                if (!visited.has(`${cell.x},${cell.y}`)) {
+                    assignToProvince(cell);
+                    visited.add(`${cell.x},${cell.y}`);
+
+                    // Add neighbors to the frontier (to keep the province growing)
+                    const neighbors = [
+                        { x: cell.x - 1, y: cell.y }, { x: cell.x + 1, y: cell.y },
+                        { x: cell.x, y: cell.y - 1 }, { x: cell.x, y: cell.y + 1 }
+                    ];
+
+                    for (let { x, y } of neighbors) {
+                        if (x >= minX && x <= maxX && y >= minY && y <= maxY && !visited.has(`${x},${y}`)) {
+                            frontier.push({ x, y });
+                        }
+                    }
                 }
             }
 
@@ -1266,7 +1293,7 @@
                                     targetColor: target.symbol.color
                                 });
                             }
-                        } else {
+                        /*} else {
                             // No provinces left to take
                             events.push({
                                 type: "defeat",
@@ -1274,11 +1301,18 @@
                                 attackerColor: attacker.symbol.color,
                                 targetName: target.name,
                                 targetColor: target.symbol.color
-                            });
+                            });*/
                             wars.splice(w, 1); // End war
+                            if (countryDetails[war.targetIndex]) {
+                                countryDetails[war.targetIndex] = null;
+                            }
+                            if (countryCells[war.targetIndex] != []) {
+                                countryCells[war.targetIndex] != [];
+                            }
 
-                            countryDetails[war.targetIndex] = null;
+
                             countryCells[war.targetIndex] = [];
+
                         }
                     } else {
                         // attacker is not stronger than defender
@@ -1310,6 +1344,7 @@
                         } else {
                             //attack succeeds anyway
                             let takenCells = [];
+                            const targetProvinces = target.provinces;
                             const attackerCells = countryCells[war.attackerIndex];
                             const closestIndex = getClosestProvince(targetProvinces, attackerCells);
                             if (closestIndex !== -1) {
@@ -1371,13 +1406,14 @@
                                 }
                             } else {
                                 // No provinces left to take
+                                /*
                                 events.push({
                                     type: "defeat",
                                     attackerName: attacker.name,
                                     attackerColor: attacker.symbol.color,
                                     targetName: target.name,
                                     targetColor: target.symbol.color
-                                });
+                                });*/
                                 wars.splice(w, 1); // End war
 
                                 countryDetails[war.targetIndex] = null;
