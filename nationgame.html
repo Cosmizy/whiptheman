@@ -829,6 +829,8 @@
             // Get the country details (name, slogan, etc.)
             const country = countryDetails[countryIndex];
 
+            const countrySize = getCountrySize(country);
+
             if (!country) {
                 console.error("Country is undefined or null");
                 return;
@@ -1150,8 +1152,6 @@
         document.getElementById('nextTurnButton').addEventListener('click', function () {
             const events = [];
 
-
-
             for (let w = wars.length - 1; w >= 0; w--) {
                 const war = wars[w];
                 const attacker = countryDetails[war.attackerIndex];
@@ -1219,8 +1219,8 @@
                                 countryDetails[war.targetIndex] = null;
                                 countryCells[war.targetIndex] = [];
 
-                                target.size = getCountrySize(target);
-                                attacker.size = getCountrySize(attacker);
+                                //target.size = getCountrySize(target);
+                                //attacker.size = getCountrySize(attacker);
                             } else {
                                 takenCells.forEach(cell => {
                                     countries[cell.y][cell.x] = war.attackerIndex;
@@ -1231,8 +1231,8 @@
                                     !takenCells.some(t => t.x === cell.x && t.y === cell.y)
                                 );
 
-                                target.size = getCountrySize(target);
-                                attacker.size = getCountrySize(attacker);
+                                //target.size = getCountrySize(target);
+                                //attacker.size = getCountrySize(attacker);
 
                                 events.push({
                                     type: "provinceTaken",
@@ -1313,6 +1313,9 @@
                 if (!attacker) continue;
 
                 
+                const size = getCountrySize(i);
+                countryDetails[i].size = size;
+                
 
                 // Get a target country index (not self)
                 let targetIndex;
@@ -1327,8 +1330,6 @@
                 if (Math.random() < 0.8) {
                     doRandomAction = false;
                 }
-
-
 
                 // If not at war or in addition to war, attempt another action
                 const actionRoll = Math.random();
