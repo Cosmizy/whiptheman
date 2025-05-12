@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Nation Game</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+        }
+    </style>
+
+    <div id="countryCard" style="display: none; position: absolute; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd; max-width: 300px;">
+        <button style="display: block; position: relative; top: 5px; right: 5px; background: none; border: none; font-weight: bold; cursor: pointer;">x</button>
+        <!-- Country details will be populated here -->
+    </div>
+
+    <div id="currentEvents" style="position: absolute; top: 10px; left: 10px; padding: 10px; background-color: #f9f9f9; border: 1px solid #ddd; max-width: 300px;">
+        <strong>Current Events</strong>
+        <ul id="eventsList">
+            <li>Country1 has established an alliance with Country2.</li>
+            <li>Country3 has declared war on Country2</li>
+        </ul>
+    </div>
+
+    <button id="nextTurnButton" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background-color: #f9f9f9; border: 1px solid #ddd; font-size: 16px; cursor: pointer; ">
+        Next Turn
+    </button>
+
+
+
+</head>
+<body>
+    <canvas id="map"></canvas>
+    <script src='http://joeiddon.github.io/perlin/perlin.js'></script>
+    <script>
+        const canvas = document.getElementById('map');
+        const ctx = canvas.getContext('2d');
+
+        const cellSize = 3; // Adjust cell size as needed
+        const rows = Math.floor(window.innerHeight / cellSize);
+        const cols = Math.floor(window.innerWidth / cellSize);; // Set columns equal to rows for a square grid
+
+        const perlinFrequency = 4; // Lower frequency for larger continents
+        const perlinAmplitude = 0.3; // Adjust amplitude for more natural-looking terrain
+
+        canvas.width = cols * cellSize;
+        canvas.height = rows * cellSize;
+
+
+        const landColor = '#FDFBE5';
+        const waterColor = '#C9EBFC';
+        const borderColor = '#646565';
+
+        const heightmap = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+        const countries = Array.from({ length: rows }, () => Array(cols).fill(-1));
+        const countryColors = [];
+        const numCountries = 20;
+        let countryCapitols = [];
+        const countryCells = Array.from({ length: numCountries }, () => []);
+        //let provinces = Array.from({ length: 10 }, () => []);
+        const countryProvinces = {};
+        const provinceMap = Array.from({ length: rows }, () => Array(cols).fill(-1)); // Initialize province map with -1 (no province)
+
+        let wars = []; // Global variable outside the button listener
+
+
+        let worldTension = 0;
+
+        const countryNames = [
+            'Novaon', 'Zephor', 'Chronvia', 'Arkaos', 'Drakdom', 'Lunania', 'Zephos', 'Novaium', 'Tylia', 'Vayvia',
+            'Eldant', 'Zephara', 'Solara', 'Oceara', 'Vayara', 'Vesperen', 'Amorara', 'Zephium', 'Celon', 'Aquaara',
+            'Amoren', 'Solia', 'Varaant', 'Thalor', 'Vesperant', 'Tylara', 'Celara', 'Sylium', 'Celor', 'Celdom',
+            'Terraara', 'Verovia', 'Lunaara', 'Celland', 'Tyldom', 'Vesperon', 'Vesperara', 'Ocevia', 'Thalvia', 'Chronen',
+            'Amoros', 'Soldom', 'Celara', 'Solos', 'Celen', 'Aquaara', 'Novavia', 'Terrania', 'Veroant', 'Zaraia',
+            'Lunaara', 'Novaor', 'Thalvia', 'Lyraon', 'Lyraos', 'Celant', 'Vesperdom', 'Zephon', 'Varaara', 'Sylara',
+            'Celara', 'Lunadom', 'Varaant', 'Veroor', 'Novaara', 'Zephvia', 'Torvia', 'Arkaia', 'Torant', 'Drakant',
+            'Zephara', 'Lyraant', 'Aquaia', 'Amorvia', 'Tornia', 'Veroara', 'Chronara', 'Torara', 'Vespernia', 'Lyraon',
+            'Chronos', 'Lyravia', 'Zaraos', 'Sylen', 'Amornia', 'Lunaen', 'Amorara', 'Terraen', 'Sylara', 'Lioravia',
+            'Eldvia', 'Thalara', 'Oceland', 'Lioraos', 'Arkaara', 'Arkaant', 'Lunaia', 'Tylia', 'Tylia', 'Firaon',
+            'Lyraant', 'Oceor', 'Zephara', 'Veroia', 'Aquaant', 'Chronon', 'Veronia', 'Solant', 'Novaara', 'Thalnia',
+            'Zaraara', 'Arkaon', 'Lioraen', 'Lunaen', 'Toria', 'Chronara', 'Terraara', 'Novaland', 'Thalvia', 'Thalon',
+            'Vayvia', 'Amoren', 'Sylon', 'Arkaara', 'Celdom', 'Aquaos', 'Celnia', 'Novaara', 'Lioraara', 'Drakara',
+            'Celon', 'Arkavia', 'Lunaium', 'Drakvia', 'Veroen', 'Firadom', 'Varaara', 'Arkadom', 'Terraon', 'Arkadom',
+            'Oceia', 'Arkaor', 'Aquavia', 'Thalium', 'Celland', 'Sylara', 'Tylium', 'Lioraant', 'Thalara', 'Firaen',
+            'Chronor', 'Oceia', 'Thalon', 'Amorland', 'Firaland', 'Chronon', 'Arkaen', 'Vaydom', 'Zaraara', 'Amorland',
+            'Sylia', 'Celara', 'Thaldom', 'Tylara', 'Varaant', 'Vayor', 'Amorvia', 'Aquaara', 'Zephos', 'Arkaant',
+            'Toros', 'Thalvia', 'Tylara', 'Arkaant', 'Veroara', 'Drakara', 'Thalvia', 'Vesperara', 'Solvia', 'Arkaor',
+            'Novaium', 'Ocenia', 'Solara', 'Eldara', 'Solara', 'Zaraon', 'Drakon', 'Zaraland', 'Arkania', 'Chronia',
+            'Solant', 'Firania', 'Drakia', 'Varadom', 'Zephos', 'Veroor', 'Solor', 'Varaara', 'Zaraara', 'Lioraara',
+            'Rhodesia', 'California', 'Vermont', 'Agartha', 'Hyperborea', 'Chosenland', 'Whiteland', 'Blackland', 'Ranoa',
+            'Asura', 'Fittoa', 'Shirone', 'Cosmia', 'Shitzland', 'Stenchland', 'Stinkland', 'Tuckeria', 'Kionya', 'Ellievia',
+            'Hazelnia', 'Hectorland', 'Lugunica', 'Roxyville', 'Joelandia', 'Ashlock', 'Harrigandia', 'Phonkland', 'Sacrementom',
+            'Thuglandia', 'Jaydowda', 'Atlantis', 'Gotham', 'Rivendell', 'Nedkely', 'Israel', 'Utos', 'Utopia', 'Glues', 'Molinia',
+            'Earth', 'Estrella', 'Huliland', 'Gaza', 'Palestine', 'Mangoland', 'Easternara', 'Southernara', 'Hippopotomonstrosesquippedalio'
+        ];
+
+        const countryPolicies = [
+            'Peaceful',        // Focus on diplomacy, reduce military actions
+            'Aggressive',      // Increase military expansion, conquer neighboring areas
+            'Neutral',         // Avoid taking sides in conflicts, keep foreign relations stable
+            'Isolationist',    // Limit foreign trade and alliances, focus on internal growth
+            'Expansionist',    // Actively seek to expand territory
+            'Defensive',       // Prioritize defense spending and fortify borders
+            'Trade-focused',   // Increase trade relations with other countries to boost economy
+            'Diplomatic',      // Always trying to gain allies and do deals
+            'Humanitarian',    // Focus on foreign aid and global peace efforts
+            'Militaristic'     // Focus on building up a strong military force for dominance
+        ];
+
+
+        const countrySymbols = [
+            "bigx.png",
+            "canton.png",
+            "checker.png",
+            "circle.png",
+            "clover.png",
+            "club.png",
+            "crosscenter.png",
+            "crosscircleplus.png",
+            "diamond.png",
+            "fivecross.png",
+            "gear.png",
+            "germancross.png",
+            "greekcross.png",
+            "greekhollowcross.png",
+            "greeklines.png",
+            "gyronny.png",
+            "heart.png",
+            "hoist.png",
+            "hollowplus.png",
+            "hookedx.png",
+            "horizontallines.png",
+            "largex.png",
+            "leftdiagonal.png",
+            "moon.png",
+            "mountain.png",
+            "mountainsun.png",
+            "nato.png",
+            "nordic.png",
+            "nordicbig.png",
+            "nordiccircle.png",
+            "northstar.png",
+            "northstarbright.png",
+            "number1.png",
+            "offsetcircle.png",
+            "pall.png",
+            "percent.png",
+            "plus.png",
+            "plusdots.png",
+            "pyramid.png",
+            "rightdiagonal.png",
+            "risingsun.png",
+            "shahada.png",
+            "shield.png",
+            "staropening.png",
+            "sun.png",
+            "sword.png",
+            "target.png",
+            "threeband.png",
+            "unionjack.png",
+            "verticallines.png",
+            "wave.png",
+            "wheelclosed.png",
+            "wheelopen.png",
+            "widediamond.png",
+            "x.png"
+        ];
+
+
+        const essentialWords = [
+            "The", "Is", "Is", "Is", "Is", "Will", "Are", "Can", "We", "You", "I", "It", "And", "And", "And", "And", "And", "And",
+            "Or", "For", "But", "In", "On", "With", "By", "At", "Of", "To",
+            "From", "As", "Be", "Have", "Has", "Had", "Do", "Does", "Did", "Not",
+            "No", "Yes", "All", "Some", "Every", "Any", "This", "That", "These", "Those",
+            "Each", "Either", "Neither", "Next", "Now", "When", "Where", "How", "Why", "One",
+            "Two", "Three", "Four", "Five", "More", "Most", "Less", "Much", "Many", "Little"
+        ];
+
+        const countryWords = [
+            "Freedom", "Unity", "Strength", "Hope", "Peace", "Progress", "Prosperity", "Equality", "Justice", "Success",
+            "Love", "Honor", "Respect", "Growth", "Dream", "Power", "Culture", "Bravery", "Opportunity", "Future",
+            "Liberty", "Safety", "Together", "Pride", "Change", "Honesty", "Innovation", "Prosper", "Heritage", "Peaceful",
+            "United", "Strong", "Beautiful", "Diverse", "Rich", "Secure", "Powerful", "Bright", "Vibrant", "Kindness",
+            "Wisdom", "Courage", "Hopeful", "Generosity", "Independence", "Family", "Victory", "Hardworking", "Proud", "Togetherness",
+            "Loyalty", "Legacy", "Dreams", "Honor", "Stability", "Vigilance", "Responsibility", "Nobility", "Determination", "Endurance",
+            "Fish", "Mountain", "Cloud", "Ocean", "Sun", "Dream", "Sky", "Tree", "Rain", "Star", "Stone", "Fire", "Lake", "Road", "Forest",
+            "Wind", "Song", "Bird", "Light", "Wave", "Innovation", "Eagle", "Nation", "Strengthen", "Unite", "Sail", "Pioneer", "Solidarity",
+            "Harvest", "Growth", "Hopefulness", "Pursuit", "Progressive", "Shine", "Victory", "Commitment", "Alliance", "Flourish", "Aspiration",
+            "Stability", "Revolution", "Horizon", "Advance", "Ambition", "Conquer", "Light", "Challenge", "Inspire", "Leadership", "Spirit",
+            "Unity", "Roots", "Courageous", "Path", "Unity", "Boundless", "Victory", "Legacy", "Noble", "Strengthened", "Rising", "Global",
+            "Grit", "Powerful", "Sustain", "Brilliance", "Vivid", "Serenity", "Nationhood", "Alliance", "Excellence", "Secure", "Inspired",
+            "Prideful", "Evergreen", "Undivided", "Boundless", "Honor", "True", "Prosperous", "Innovative", "Empowered", "Focus", "Solid",
+            "Brave", "Majestic", "Glory", "Summit", "Valor", "Destiny", "Awaken", "Champion", "Guardian", "Brighten", "Steadfast", "Patriot",
+            "Tranquil", "Majesty", "Strengthening", "Endless", "Conqueror", "Brilliance", "Hopeful", "Prideful", "Braveheart", "Wealth", "Growth",
+            "Resilient", "Courageous", "Fortitude", "Change", "Empowerment", "Globalize", "Shining", "Beacon", "Freedom", "Secure", "Heroic",
+            "Champion", "Endurance", "Valiant", "Open", "Royal", "Radiance", "Enduring", "Elevation", "Righteous", "Unyielding", "Inspired",
+            "Strategic", "Expanding", "Majesty", "Fierce", "Protector", "Balanced", "Noble", "Empower", "Succeed", "Rising", "Defend", "Glorious",
+            "Determined", "Impressive", "Elevate", "Nationhood", "Solid", "Vision", "Divine", "Enlightened", "Loyal", "Dignity", "True", "Hope",
+            "Collaborative", "Courage", "Adversity", "Reign", "Secure", "Magnificent", "Harmonic", "Resilient", "Defender", "Sustainable", "Mighty",
+            "Progression", "Bright", "Elevated", "Boundless", "Prospect", "Unity", "Steadfastness", "Strength", "Gracious", "Inspiring", "Honorable",
+            "Ocean", "Tree", "Moon", "Sky", "River", "Mountain", "Valley", "Sea", "Lake", "Island", "Canyon", "Desert", "Jungle", "Plain", "Prairie",
+            "Cave", "Field", "Forest", "Meadow", "Cliff", "Swamp", "Waterfall", "Stream", "Beach", "Coast", "Tundra", "Glacier", "Grove", "Hill",
+            "Creek", "Lagoon", "Swamp", "Breeze", "Sunset", "Snow", "Thunder", "Storm", "Flame", "Lightning", "Frost", "Mist", "Ice", "Cloud", "Fog",
+            "Rain", "Dust", "Ash", "Dawn", "Dusk"
+        ];
+
+
+
+
+        const countryDetails = []; // Array to store names and slogans
+        const assignedNames = new Set(); // Set to track assigned names
+
+        const predefinedCountryColors = [
+            "#006400", // Dark Green (Some flags)
+            "#800000", // Maroon (Some flags)
+            "#B8860B", // Dark Goldenrod (Some flags)
+            "#2F4F4F", // Dark Slate Gray (Some flags)
+            "#4682B4", // Steel Blue (Some flags)
+            "#8B0000", // Dark Red (Some flags)
+            "#6A5ACD", // Slate Blue (Some flags)
+            "#FF8C00", // Dark Orange (Some flags)
+            "#9ACD32", // Yellow Green (Some flags)
+            "#DC143C", // Crimson (Some flags)
+            "#F4A300", // Orange (Some flags)
+            "#7FFF00", // Chartreuse (Some flags)
+            "#ADFF2F", // Green Yellow (Some flags)
+            "#00FA9A", // Medium Spring Green (Some flags)
+            "#C71585", // Medium Violet Red (Some flags)
+            "#8A2BE2", // Blue Violet (Some flags)
+            "#5F9EA0", // Cadet Blue (Some flags)
+            "#FFD700", // Gold (Some flags)
+            "#F0E68C", // Khaki (Some flags)
+            "#B0C4DE", // Light Steel Blue (Some flags)
+            "#9B30FF", // Purple (Some flags)
+            "#4B0082", // Indigo (Some flags)
+            "#483D8B", // Dark Slate Blue (Some flags)
+            "#7B68EE", // Medium Slate Blue (Some flags)
+            "#00CED1", // Dark Turquoise (Some flags)
+            "#191970", // Midnight Blue (Some flags)
+            "#00BFFF", // Deep Sky Blue (Some flags)
+            "#8FBC8F", // Dark Sea Green (Some flags)
+            "#B22222", // Firebrick (Some flags)
+            "#FF6347", // Tomato Red (Some flags)
+            "#6B8E23", // Olive Drab (Some flags)
+            "#008B8B", // Dark Cyan (Some flags)
+            "#CD5C5C", // Indian Red (Some flags)
+            "#3CB371", // Medium Sea Green (Some flags)
+            "#4682B4", // Steel Blue (Some flags)
+            "#6495ED", // Cornflower Blue (Some flags)
+            "#556B2F"  // Dark Olive Green (Some flags)
+        ];
+
+
+
+
+        
+
+
+
+
+        // Shuffle the list once
+        const shuffledColors = predefinedCountryColors.sort(() => Math.random() - 0.5);
+        let colorIndex = 0;
+
+        // Initialize Perlin noise with a seed value
+        perlin.seed(Math.random());
+
+
+        // Generate the world with Perlin noise for smoother land formation
+        function generateWorld() {
+            // Apply Perlin Noise with multiple octaves for more complex terrain
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const nx = x / cols, ny = y / rows;
+                    let value = 0;
+
+                    // Sum multiple layers of Perlin noise (octaves)
+                    let amplitude = perlinAmplitude;
+                    let frequency = perlinFrequency;
+                    for (let octave = 0; octave < 5; octave++) {
+                        value += perlin.get(nx * frequency, ny * frequency) * amplitude;
+                        amplitude *= 0.5;
+                        frequency *= 2;
+                    }
+
+                    // Normalize the value to be between 0 and 1
+                    heightmap[y][x] = (value + 1) / 2;  // Perlin noise ranges from -1 to 1, so this scales it between 0 and 1
+                }
+            }
+
+            // Smooth the heightmap for more organic shapes
+            smoothHeightmap();
+            drawMap();
+
+
+        }
+
+        // Apply smoothing to the heightmap for more organic formations
+        function smoothHeightmap() {
+            const newHeightmap = JSON.parse(JSON.stringify(heightmap)); // Deep clone
+            for (let y = 1; y < rows - 1; y++) {
+                for (let x = 1; x < cols - 1; x++) {
+                    const neighbors = [
+                        heightmap[y - 1][x - 1], heightmap[y - 1][x], heightmap[y - 1][x + 1],
+                        heightmap[y][x - 1], heightmap[y][x], heightmap[y][x + 1],
+                        heightmap[y + 1][x - 1], heightmap[y + 1][x], heightmap[y + 1][x + 1]
+                    ];
+                    newHeightmap[y][x] = neighbors.reduce((sum, h) => sum + h, 0) / neighbors.length;
+                }
+            }
+            for (let y = 1; y < rows - 1; y++) {
+                for (let x = 1; x < cols - 1; x++) {
+                    heightmap[y][x] = newHeightmap[y][x];
+                }
+            }
+        }
+
+        function assignCountries() {
+            const seeds = [];
+
+            if (countryNames.length < numCountries) {
+                console.warn(`Not enough unique names! There are only ${countryNames.length} names but ${numCountries} countries.`);
+                // Optionally, generate additional names or handle this case differently
+                while (countryNames.length < numCountries) {
+                    countryNames.push(`Country ${countryNames.length + 1}`); // Generate placeholder names if needed
+                }
+            }
+
+            // Randomly select seed points on land
+            while (seeds.length < numCountries) {
+                const x = Math.floor(Math.random() * cols);
+                const y = Math.floor(Math.random() * rows);
+                if (heightmap[y][x] >= 0.5 && isFarEnough(x, y, seeds)) {
+                    seeds.push({ x, y });
+                    countryColors.push(shuffledColors[colorIndex++]);
+                }
+            }
+
+            // Assign each land cell to the closest seed (Voronoi-style)
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (heightmap[y][x] < 0.5) continue; // Skip water
+
+                    let minDist = Infinity;
+                    let closest = -1;
+
+                    seeds.forEach((s, i) => {
+                        const dx = s.x - x;
+                        const dy = s.y - y;
+
+                        // Euclidean distance
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        // Apply sine-based curve to the distance
+                        const curve = Math.sin(distance / 20) * 5; // Sine curve with a period of 10 and amplitude of 5
+                        const curvedDistance = distance + curve; // Modify the distance with sine variation
+
+                        if (curvedDistance < minDist) {
+                            minDist = curvedDistance;
+                            closest = i;
+                        }
+                    });
+
+                    countries[y][x] = closest;
+                }
+            }
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const id = countries[y][x];
+                    if (id !== -1 && heightmap[y][x] >= 0.5) {
+                        countryCells[id].push({ x, y });
+                    }
+                }
+            }
+
+            /*for (let i = 0; i < numCountries; i++) {
+                const cells = countryCells[i];
+                if (!cells || cells.length === 0) continue;
+
+                // Shuffle cells to mix regions
+                const shuffled = [...cells].sort(() => Math.random() - 0.5);
+
+                // Create 10 provinces
+                
+                shuffled.forEach((cell, idx) => {
+                    provinces[idx % 10].push(cell);
+                });
+
+                // Attach provinces to countryDetails
+                if (!countryDetails[i]) countryDetails[i] = {};
+                countryDetails[i].provinces = provinces;
+            }*/
+
+            for (let i = 0; i < numCountries; i++) {
+                const cells = countryCells[i];
+                if (cells.length > 0) {
+                    // Call assignProvincesToCountry after country cells are populated
+                    provinces = assignProvincesToCountry(i, cells);
+
+                    // Assign a capital for the country
+                    countryCapitols[i] = selectCapitolCell(i, cells);
+                }
+            }
+
+            // Assign names and slogans to countries
+            for (let i = 0; i < numCountries; i++) {
+                let name;
+                // Ensure unique name
+                do {
+                    name = countryNames[Math.floor(Math.random() * countryNames.length)];
+                } while (assignedNames.has(name)); // Check if name is already assigned
+
+                // Add name to the set of assigned names
+                assignedNames.add(name);
+
+                const firstPart = Array.from({ length: 1 }, () => countryWords[Math.floor(Math.random() * countryWords.length)]).join(' ');
+                const middlePart = Array.from({ length: 1 }, () => essentialWords[Math.floor(Math.random() * essentialWords.length)]).join(' ');
+                const lastPart = Array.from({ length: 1 }, () => countryWords[Math.floor(Math.random() * countryWords.length)]).join(' ');
+
+                const randomImage = countrySymbols[Math.floor(Math.random() * countrySymbols.length)];
+                const randomColor = countryColors[i];
+                const randomTint = predefinedCountryColors[Math.floor(Math.random() * predefinedCountryColors.length)];
+                const randomPolicy = countryPolicies[Math.floor(Math.random() * countryPolicies.length)];
+
+                // Generate country stats and details
+                const policy = randomPolicy;
+                const slogan = `${firstPart} ${middlePart} ${lastPart}`;
+                const size = getCountrySize(i);
+                const capital = countryCapitols[i]; // <-- Get capital for this country
+                const sizeMultiplier = 400;
+                let populationDensity = 100 + Math.random() * 50; // base random density
+                let population = Math.floor(size * populationDensity);
+                population = Math.round(population / 1000);
+                let troopRatio = 0.05 + Math.random() * 0.1; // Between 1% and 3%
+                let troops = Math.floor(population * troopRatio);
+                let security = Math.random() * (1.5 - 0.8) + 0.8; // random between 0.8 and 1.5
+                let anger = 0.0;
+                let tension = 0.0;
+
+                if (policy === 'Militaristic') {
+                    troops *= 2;
+                    populationDensity *= 0.9; // slightly lower population, more focused on army
+                } else if (policy === 'Defensive') {
+                    troops *= 1.5;
+                    security *= 2;
+                } else if (policy === 'Peaceful') {
+                    troops *= 0.75;
+                    populationDensity *= 1.2; // peaceful countries tend to focus on domestic development
+                } else if (policy === 'Isolationist') {
+                    populationDensity *= 1.5; // isolationist countries tend to focus on domestic development
+                }
+
+                troops = Math.ceil(troops);
+                security = Math.round(security * 10) / 10
+
+                const cells = countryCells[i];
+                let provinces = [];
+                if (cells.length > 0) {
+                    provinces = assignProvincesToCountry(i, cells);
+                    countryProvinces[i] = provinces; //
+                }
+
+
+                //countryProvinces[i] = provinces;
+                
+                
+                /*const cells = countryCells[i];
+                if (!cells || cells.length === 0) continue;
+
+                // Shuffle cells to mix regions (as done earlier)
+                const shuffled = [...cells].sort(() => Math.random() - 0.5);
+
+                // Create 10 provinces for each country based on shuffled cells
+                const provinces = Array.from({ length: 10 }, () => []); // Array to store 10 provinces
+
+                shuffled.forEach((cell, idx) => {
+                    provinces[idx % 10].push(cell); // Distribute cells evenly across provinces
+                });
+                */
+                
+                // Store the country details
+                countryDetails.push({
+                    name, slogan, size, population, troops, security, policy, capital, anger, tension,
+                    symbol: {
+                        image: randomImage,
+                        color: randomColor,
+                        tint: randomTint
+                    },
+                    provinces: provinces, countryCells: cells});
+            }
+
+            countryDetails.forEach((country, index) => {
+                console.log(`Country ${index + 1}:`);
+                console.log(`Name: ${country.name}`);
+                console.log(`Slogan: ${country.slogan}`);
+            });
+        }
+
+
+
+        function isFarEnough(x, y, seeds) {
+            // Ensure the new seed is far enough from other seeds
+            const minDistance = 10;  // Change based on your needs
+            return seeds.every(seed => Math.abs(seed.x - x) > minDistance || Math.abs(seed.y - y) > minDistance);
+        }
+
+        function selectCapitolCell(countryId, cells) {
+            let bestScore = -Infinity;
+            let bestCell = null;
+
+            // Calculate the geometric center of the country
+            let centerX = 0;
+            let centerY = 0;
+            for (const cell of cells) {
+                centerX += cell.x;
+                centerY += cell.y;
+            }
+            centerX /= cells.length;
+            centerY /= cells.length;
+
+            // Introduce a random offset, but not too far from the center
+            const maxOffset = 40; // Max random offset in pixels
+            const offsetX = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+            const offsetY = Math.floor(Math.random() * (2 * maxOffset + 1)) - maxOffset;
+
+            // Shift the center by the random offset
+            const randomCenterX = centerX + offsetX;
+            const randomCenterY = centerY + offsetY;
+
+            for (const cell of cells) {
+                const { x, y } = cell;
+
+                // Skip if too close to another country's border (10 pixels)
+                let nearOtherCountry = false;
+                for (let dy = -10; dy <= 10; dy++) {
+                    for (let dx = -10; dx <= 10; dx++) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (
+                            nx >= 0 && nx < cols && ny >= 0 && ny < rows &&
+                            countries[ny][nx] !== countryId && countries[ny][nx] !== -1
+                        ) {
+                            nearOtherCountry = true;
+                            break;
+                        }
+                    }
+                    if (nearOtherCountry) break;
+                }
+
+                if (nearOtherCountry) continue;
+
+                // Check if the cell is surrounded by at least 5 pixels of land (circular region)
+                let landSurrounding = 0;
+                for (let dy = -5; dy <= 5; dy++) {
+                    for (let dx = -5; dx <= 5; dx++) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (
+                            nx >= 0 && nx < cols && ny >= 0 && ny < rows &&
+                            Math.sqrt(dx * dx + dy * dy) <= 5 // Circular area
+                        ) {
+                            if (heightmap[ny][nx] >= 0.5) { // Land cell
+                                landSurrounding++;
+                            }
+                        }
+                    }
+                }
+
+                // Check if the capital is at least 5 pixels away from water (no adjacent water)
+                let nearWater = false;
+                if (heightmap[y][x] >= 0.5) { // The capital should be land
+                    for (let dy = -5; dy <= 5; dy++) {
+                        for (let dx = -5; dx <= 5; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (
+                                nx >= 0 && nx < cols && ny >= 0 && ny < rows &&
+                                Math.sqrt(dx * dx + dy * dy) <= 5 // Circular area
+                            ) {
+                                if (heightmap[ny][nx] < 0.5) { // Nearby water
+                                    nearWater = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Only select cells that are surrounded by land, at least 5 pixels away from water, and not near another country border
+                if (landSurrounding >= 30 && !nearWater) {
+                    const distanceToCenter = Math.sqrt(Math.pow(x - randomCenterX, 2) + Math.pow(y - randomCenterY, 2));
+
+                    // Prefer cells closer to the center
+                    const centerPreference = 1000 / (distanceToCenter + 1); // Higher scores for cells closer to the center
+
+                    const score = landSurrounding + centerPreference; // Combine landSurrounding and center preference
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestCell = cell;
+                    }
+                }
+            }
+
+            // Fallback: random cell if no good one found
+            return bestCell || cells[Math.floor(Math.random() * cells.length)];
+        }
+
+
+
+
+
+
+
+        // Draw map based on the heightmap
+        function drawMap() {
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const value = heightmap[y][x];
+                    let color;
+
+                    if (value < 0.5) {
+                        color = waterColor;
+                    } else {
+                        const id = countries[y][x];
+                        color = countryColors[id];
+                    }
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+
+            for (let y = 1; y < rows - 1; y++) { //Land and ocean border
+                for (let x = 1; x < cols - 1; x++) {
+                    const h = heightmap[y][x];
+
+                    // Check if current cell is land
+                    if (h >= 0.5) {
+                        const n = heightmap[y - 1][x];
+                        const s = heightmap[y + 1][x];
+                        const e = heightmap[y][x + 1];
+                        const w = heightmap[y][x - 1];
+
+                        // If a land cell is adjacent to water, mark it as a border
+                        if (
+                            (n < 0.5 || s < 0.5 || e < 0.5 || w < 0.5) &&
+                            (n > 0.5 || s > 0.5 || e > 0.5 || w > 0.5)
+                        ) {
+                            ctx.fillStyle = borderColor; // Border color
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                        }
+                    }
+                }
+            }
+
+            drawCountryBorders();
+            
+            drawCapitolStars();
+            drawProvinceBorders();
+            
+        }
+
+        function drawCountryBorders() {
+            ctx.fillStyle = borderColor;
+
+            for (let y = 1; y < rows - 1; y++) {
+                for (let x = 1; x < cols - 1; x++) {
+                    const current = countries[y][x];
+
+                    if (heightmap[y][x] < 0.5 || current === -1) continue;
+
+                    const neighbors = [
+                        countries[y - 1][x], countries[y + 1][x], countries[y][x - 1], countries[y][x + 1],
+                        countries[y - 1][x - 1], countries[y - 1][x + 1], countries[y + 1][x - 1], countries[y + 1][x + 1]
+                    ];
+
+                    // Check for border
+                    const borderThreshold = 0.5;
+                    const isBorder = neighbors.some(n => Math.abs(current - n) > borderThreshold);
+
+                    if (isBorder) {
+                        const borderThickness = 1; // Adjust border thickness
+                        // Only draw border if the neighboring country is different
+                        if (x > 0 && countries[y][x - 1] !== current && Math.abs(current - countries[y][x - 1]) > borderThreshold) {
+                            ctx.fillStyle = borderColor; // Border color
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize * borderThickness, cellSize * borderThickness);
+                        }
+                        if (y > 0 && countries[y - 1][x] !== current && Math.abs(current - countries[y - 1][x]) > borderThreshold) {
+                            ctx.fillStyle = borderColor; // Border color
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize * borderThickness, cellSize * borderThickness);
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawProvinceBorders() {
+            ctx.fillStyle = borderColor;
+
+            for (let y = 1; y < rows - 1; y++) {
+                for (let x = 1; x < cols - 1; x++) {
+                    const currentProvince = provinceMap[y][x];
+                    
+                    if (currentProvince === -1 || heightmap[y][x] < 0.5) continue;
+                    
+
+                    const neighbors = [
+                        provinceMap[y - 1][x], provinceMap[y + 1][x], provinceMap[y][x - 1], provinceMap[y][x + 1],
+                        provinceMap[y - 1][x - 1], provinceMap[y - 1][x + 1], provinceMap[y + 1][x - 1], provinceMap[y + 1][x + 1]
+                    ];
+
+                    // Check for borders by comparing neighboring provinces
+                    const isBorder = neighbors.some(n => n !== currentProvince && n !== -1);
+
+                    if (isBorder) {
+                        const borderThickness = 1; // Adjust border thickness
+                        // Only draw border if the neighboring province is different
+                        if (x > 0 && provinceMap[y][x - 1] !== currentProvince && provinceMap[y][x - 1] !== -1) {
+                            ctx.fillStyle = borderColor; // Border color
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize * borderThickness, cellSize * borderThickness);
+                        }
+                        if (y > 0 && provinceMap[y - 1][x] !== currentProvince && provinceMap[y - 1][x] !== -1) {
+                            ctx.fillStyle = borderColor; // Border color
+                            ctx.fillRect(x * cellSize, y * cellSize, cellSize * borderThickness, cellSize * borderThickness);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+        function drawCapitolStars() {
+            ctx.fillStyle = "white"; // Or any standout color
+
+            countryCapitols.forEach(capitol => {
+                if (!capitol) return;
+                console.log(`Capitol success!`);
+                const { x, y } = capitol;
+                const px = x * cellSize;
+                const py = y * cellSize;
+
+
+                // Pixelated star (cross shape)
+                ctx.fillRect(px, py - cellSize, cellSize, cellSize); // Top
+                ctx.fillRect(px - cellSize, py, cellSize, cellSize); // Left
+                ctx.fillRect(px, py, cellSize, cellSize);            // Center
+                ctx.fillRect(px + cellSize, py, cellSize, cellSize); // Right
+                ctx.fillRect(px, py + cellSize, cellSize, cellSize); // Bottom
+            });
+        }
+
+        function assignProvincesToCountry(countryId, countryCells) {
+            const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+            const provinces = [];
+            const provinceMap = Array.from({ length: rows }, () => Array(cols).fill(-1)); // Initialize province map
+
+            function floodFill(x, y, provinceId) {
+                const stack = [{ x, y }];
+                const provinceCells = [];
+
+                while (stack.length > 0) {
+                    const { x, y } = stack.pop();
+                    if (visited[y][x] || countries[y][x] !== countryId) continue;
+
+                    visited[y][x] = true;
+                    provinceCells.push({ x, y });
+                    provinceMap[y][x] = provinceId;  // Assign the current province ID to this cell
+
+                    const neighbors = [
+                        { x: x - 1, y }, { x: x + 1, y },
+                        { x, y: y - 1 }, { x, y: y + 1 }
+                    ];
+
+                    for (let { x: nx, y: ny } of neighbors) {
+                        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !visited[ny][nx]) {
+                            stack.push({ x: nx, y: ny });
+                        }
+                    }
+                }
+
+                if (provinceCells.length > 0) {
+                    provinces.push(provinceCells);
+                }
+            }
+
+            // Loop through all country cells and flood fill them
+            for (const { x, y } of countryCells) {
+                if (!visited[y][x]) {
+                    floodFill(x, y, provinces.length);  // Assign province ID to the flood fill
+                }
+            }
+
+            return provinces;
+        }
+
+
+
+        canvas.addEventListener('click', function (e) {
+            const mouseX = e.offsetX;
+            const mouseY = e.offsetY;
+
+            // Get the clicked country based on the mouse position
+            const x = Math.floor(mouseX / cellSize);
+            const y = Math.floor(mouseY / cellSize);
+            const countryIndex = countries[y][x];
+
+            // Ensure the clicked location is land (not water)
+            if (countryIndex !== -1) {
+                showCountryDetails(countryIndex);
+            }
+        });
+        
+        function showCountryDetails(countryIndex) {
+            // Get the country details (name, slogan, etc.)
+            const country = countryDetails[countryIndex];
+
+            if (!country) {
+                console.error("Country is undefined or null");
+                return;
+            }
+
+            if (!country.symbol || !country.symbol.image) {
+                console.error("Missing symbol for country:", country);
+                return;
+            }
+
+            let symbolColor = '#FFFFFF';
+            let symbolTint = '#FFFFFF';
+
+            // Create a start card and populate it with the country's details
+            const countryCard = document.getElementById('countryCard');
+            let imagePath = `pixelflags/symbols/${country.symbol.image}`;
+            if (country.name === 'Israel') {
+                imagePath = `pixelflags/backgrounds/israel.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Blackland') {
+                imagePath = `pixelflags/backgrounds/black.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Whiteland') {
+                imagePath = `pixelflags/backgrounds/white.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Gaza') {
+                imagePath = `pixelflags/backgrounds/gaza.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Palestine') {
+                imagePath = `pixelflags/backgrounds/palestine.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Rhodesia') {
+                imagePath = `pixelflags/backgrounds/rhodesia.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Roxyville') {
+                imagePath = `pixelflags/backgrounds/roxy.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Estrella') {
+                imagePath = `pixelflags/backgrounds/star.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'Vermont') {
+                imagePath = `pixelflags/backgrounds/vermont.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else if (country.name === 'California') {
+                imagePath = `pixelflags/backgrounds/california.png`;
+                symbolColor = '#FFFFFF';
+                symbolTint = '#FFFFFF';
+            } else {
+                symbolColor = country.symbol.color;
+                symbolTint = country.symbol.tint;
+            }
+
+
+            
+            const containerHeight = 33;
+            const containerWidth = 51;
+
+            if (symbolTint === '#FFFFFF') {
+                countryCard.innerHTML = `
+    <div style="display: flex; align-items: center;">
+        <h2 style="margin-right: 10px;">${country.name}</h2>
+            <div style="width: ${containerWidth}px; height: ${containerHeight}px; background-color: ${symbolColor}; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                <img src="${imagePath}" alt="Symbol" 
+                    style="width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain;">
+            </div>
+    </div>
+    <p style="margin-top: -10px;"><strong>${country.slogan}</strong></p>
+    
+    <p><strong>Size:</strong> ${country.size} pixels</p>
+    <p><strong>Population:</strong> ${country.population}</p>
+    <p><strong>Troops:</strong> ${country.troops}</p>
+    <p><strong>Security:</strong> ${country.security}</p>
+    <p><strong>Policy:</strong> ${country.policy}</p>
+    <button onclick="document.getElementById('countryCard').style.display='none'" 
+        style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-weight: bold; cursor: pointer;">&times;</button>
+`;
+            } else {
+                countryCard.innerHTML = `
+    <div style="display: flex; align-items: center;">
+        <h2 style="margin-right: 10px;">${country.name}</h2>
+            <div style="width: ${containerWidth}px; height: ${containerHeight}px; background-color: ${symbolColor}; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                <img src="${imagePath}" alt="Symbol" 
+                    style="width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain; filter: sepia(1) saturate(10000%) hue-rotate(${hexToHue(symbolTint)}deg);">
+            </div>
+    </div>
+    <p style="margin-top: -10px;"><strong>${country.slogan}</strong></p>
+    
+    <p><strong>Size:</strong> ${country.size} pixels</p>
+    <p><strong>Population:</strong> ${country.population}</p>
+    <p><strong>Troops:</strong> ${country.troops}</p>
+    <p><strong>Security:</strong> ${country.security}</p>
+    <p><strong>Policy:</strong> ${country.policy}</p>
+    <button onclick="document.getElementById('countryCard').style.display='none'" 
+        style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-weight: bold; cursor: pointer;">&times;</button>
+`;
+            }
+
+
+
+            // Show the card (you could use a modal, or display the card in a specific section)
+            countryCard.style.display = 'block';
+        }
+
+        // Function to get the size of the country in pixels (based on its area)
+        function getCountrySize(countryIndex) {
+            let size = 0;
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (countries[y][x] === countryIndex) {
+                        size++;
+                    }
+                }
+            }
+            return size * cellSize * cellSize; // Size in pixels
+        }
+
+        function hexToHue(hex) {
+            // Remove '#' if present
+            hex = hex.replace(/^#/, '');
+
+            // Parse R, G, B values
+            const r = parseInt(hex.substring(0, 2), 16) / 255;
+            const g = parseInt(hex.substring(2, 4), 16) / 255;
+            const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h;
+
+            if (max === min) {
+                h = 0;
+            } else if (max === r) {
+                h = (60 * ((g - b) / (max - min)) + 360) % 360;
+            } else if (max === g) {
+                h = (60 * ((b - r) / (max - min)) + 120) % 360;
+            } else {
+                h = (60 * ((r - g) / (max - min)) + 240) % 360;
+            }
+
+            return h;
+        }
+
+        /*document.getElementById('nextTurnButton').addEventListener('click', function () {
+            const events = [];
+
+            for (let i = 0; i < numCountries; i++) {
+                const country = countryDetails[i];
+                if (!country) continue;
+
+                switch (country.policy) {
+                    case 'Militaristic':
+                        country.troops += Math.floor(5 + Math.random() * 10); // fast troop gain
+                        break;
+                    case 'Defensive':
+                        country.security = Math.min(2, country.security + 0.01); // increase defense slowly
+                        break;
+                    case 'Aggressive':
+                        country.anger += 0.05;
+                        break;
+                    case 'Peaceful':
+                    case 'Humanitarian':
+                        country.anger = Math.max(0, country.anger - 0.05);
+                        country.tension = Math.max(0, country.tension - 0.03);
+                        break;
+                    case 'Diplomatic':
+                        country.tension = Math.max(0, country.tension - 0.05);
+                        break;
+                    case 'Expansionist':
+                        country.anger += 0.02;
+                        break;
+                    case 'Trade-focused':
+                        // You could increase population or economy stats here
+                        break;
+                    case 'Isolationist':
+                        country.anger += 0.01;
+                        break;
+                }
+            }
+
+            // === Process Existing Wars ===
+            for (let w = wars.length - 1; w >= 0; w--) {
+                const { attackerIndex, targetIndex } = wars[w];
+                const attacker = countryDetails[attackerIndex];
+                const target = countryDetails[targetIndex];
+
+                if (!attacker || !target) {
+                    wars.splice(w, 1); // One side gone
+                    continue;
+                }
+
+                attacker.anger += 0.01;
+                target.anger += 0.01;
+
+                const attackStrength = attacker.troops / target.security;
+                const defenseStrength = target.troops * target.security;
+
+                const attackerLoss = Math.floor(Math.random() * 0.2 * attacker.troops * target.security);
+                const targetLoss = Math.floor(Math.random() * 0.2 * target.troops / target.security);
+
+                attacker.troops = Math.max(0, attacker.troops - attackerLoss);
+                target.troops = Math.max(0, target.troops - targetLoss);
+
+                let result;
+
+                if (attackStrength > defenseStrength) {
+                    // Attacker wins
+
+                    let takenCells = [];
+
+                    result = `${attacker.name} has invaded and taken land from ${target.name}!`;
+
+                    // Territory gain: take over one province from the target
+                    const targetProvinces = target.provinces || [];
+
+
+                    // Find the first non-empty province
+                    for (let p = 0; p < targetProvinces.length; p++) {
+                        if (targetProvinces[p].length > 0) {
+                            takenCells = targetProvinces.splice(p, 1)[0]; // Take the entire province (first non-empty one)
+                            break; // Stop once we take one province
+                        }
+                    }
+                    const capital = target.capital;
+                    const capitalTaken = takenCells.some(cell => cell.x === capital.x && cell.y === capital.y);
+                    if (capitalTaken) {
+
+                        result = `${attacker.name} has captured the capital of ${target.name} and fully annexed the country!`;
+
+                        // Transfer all provinces
+                        const remainingCells = target.countryCells || [];
+                        remainingCells.forEach(cell => {
+                            countries[cell.y][cell.x] = i; // Assign to attacker
+                            countryCells[i].push(cell);
+                        });
+
+                        // Merge troop counts and population
+                        attacker.troops += target.troops || 0; // Optional loss on merge
+                        attacker.population += Math.floor(target.population || 0); // Optional: target.population should exist
+
+                        // Delete the target country
+                        countryDetails[targetIndex] = null;
+                        countryCells[targetIndex] = [];
+                    }
+
+
+                    // Reassign each cell in the taken province to the attacker
+                    takenCells.forEach(cell => {
+                        countries[cell.y][cell.x] = i; // Assign the cell to the attacking country
+                        countryCells[i].push(cell); // Add the cell to the attacker's country list
+                    });
+
+                    // Optionally clean up target's countryCells
+                    target.countryCells = target.countryCells?.filter(c => !takenCells.includes(c));
+                } else {
+                    
+                }
+
+                worldTension += 0.01;
+                events.push(result);
+            }
+
+            // === Check New War Declarations ===
+            for (let i = 0; i < numCountries; i++) {
+                const attacker = countryDetails[i];
+                if (!attacker) continue;
+
+ 
+
+                let targetIndex;
+                do {
+                    targetIndex = Math.floor(Math.random() * numCountries);
+                } while (targetIndex === i || !countryDetails[targetIndex]);
+
+                const target = countryDetails[targetIndex];
+
+                // Potential military spending
+                if (Math.random() < 0.2) {
+                    const gainedTroops = Math.floor(attacker.population * 0.01);
+                    attacker.troops += gainedTroops;
+                    //events.push(`${attacker.name} increased military spending and gained ${gainedTroops} troops.`);
+                }
+
+                // Skip if already at war
+                const alreadyAtWar = wars.some(w => (w.attackerIndex === i && w.targetIndex === targetIndex) || (w.attackerIndex === targetIndex && w.targetIndex === i));
+                if (alreadyAtWar) continue;
+
+                // Declare war based on anger/tension
+                if ((attacker.anger > 0.5 || target.tension > 0.6) && Math.random() < 0.5) {
+                    wars.push({ attackerIndex: i, targetIndex: targetIndex, turnsAtWar: 1 });
+                    worldTension += 0.1;
+                    events.push(`${attacker.name} has declared war on ${target.name}!`);
+                }
+            }
+
+            // === Update UI ===
+            const eventsList = document.getElementById('eventsList');
+            eventsList.innerHTML = '';
+            events.forEach(event => {
+                const li = document.createElement('li');
+                li.textContent = event;
+                eventsList.appendChild(li);
+            });
+
+            drawMap();
+            drawCapitolStars();
+        });*/
+
+
+
+
+        document.getElementById('nextTurnButton').addEventListener('click', function () {
+            const events = [];
+
+
+
+            for (let w = wars.length - 1; w >= 0; w--) {
+                const war = wars[w];
+                const attacker = countryDetails[war.attackerIndex];
+                const target = countryDetails[war.targetIndex];
+
+                if (!attacker || !target) {
+                    wars.splice(w, 1);
+                    continue;
+                }
+
+                war.turns++;
+
+                const attackStrength = attacker.troops / target.security;
+                const defenseStrength = target.troops * target.security;
+
+                const baseAttackerLoss = 0.2;
+                const baseTargetLoss = 0.2;
+
+                const securityFactor = Math.sqrt(target.security);
+                const attackerLoss = Math.floor(Math.random() * baseAttackerLoss * attacker.troops * securityFactor);
+                const targetLoss = Math.floor(Math.random() * baseTargetLoss * target.troops / securityFactor);
+
+                attacker.troops = Math.max(0, attacker.troops - attackerLoss);
+                target.troops = Math.max(0, target.troops - targetLoss);
+
+                let result;
+
+                if (Math.random() >= 0.20) {
+                    if (attackStrength > defenseStrength) {
+                        let takenCells = [];
+                        const targetProvinces = target.provinces;
+                        for (let p = 0; p < targetProvinces.length; p++) {
+                            if (targetProvinces[p].length > 0) {
+                                takenCells = target.provinces.splice(p, 1)[0];
+                                break;
+                            }
+                        }
+
+                        if (takenCells.length > 0) {
+                            const capital = target.capital;
+                            const capitalTaken = takenCells.some(cell => cell.x === capital.x && cell.y === capital.y);
+
+                            if (capitalTaken) {
+                                events.push({
+                                    type: "capitalCaptured",
+                                    attackerName: attacker.name,
+                                    attackerColor: attacker.symbol.color,
+                                    targetName: target.name,
+                                    targetColor: target.symbol.color
+                                });
+
+                                const remainingCells = target.countryCells || [];
+                                remainingCells.forEach(cell => {
+                                    countries[cell.y][cell.x] = war.attackerIndex;
+                                    countryCells[war.attackerIndex].push(cell);
+                                });
+
+                                attacker.troops += target.troops || 0;
+                                attacker.population += Math.floor(target.population || 0);
+
+                                countryDetails[war.targetIndex] = null;
+                                countryCells[war.targetIndex] = [];
+                                wars.splice(w, 1); // End war
+
+                                countryDetails[war.targetIndex] = null;
+                                countryCells[war.targetIndex] = [];
+
+                                target.size = getCountrySize(target);
+                                attacker.size = getCountrySize(attacker);
+                            } else {
+                                takenCells.forEach(cell => {
+                                    countries[cell.y][cell.x] = war.attackerIndex;
+                                    countryCells[war.attackerIndex].push(cell);
+                                });
+
+                                target.countryCells = target.countryCells?.filter(cell =>
+                                    !takenCells.some(t => t.x === cell.x && t.y === cell.y)
+                                );
+
+                                target.size = getCountrySize(target);
+                                attacker.size = getCountrySize(attacker);
+
+                                events.push({
+                                    type: "provinceTaken",
+                                    attackerName: attacker.name,
+                                    attackerColor: attacker.symbol.color,
+                                    targetName: target.name,
+                                    targetColor: target.symbol.color
+                                });
+                            }
+                        } else {
+                            // No provinces left to take
+                            events.push({
+                                type: "defeat",
+                                attackerName: attacker.name,
+                                attackerColor: attacker.symbol.color,
+                                targetName: target.name,
+                                targetColor: target.symbol.color
+                            });
+                            wars.splice(w, 1); // End war
+
+                            countryDetails[war.targetIndex] = null;
+                            countryCells[war.targetIndex] = [];
+                        }
+                    } else {
+                        if (war.turns >= 7) {
+                            events.push({
+                                type: "peace",
+                                attackerName: attacker.name,
+                                attackerColor: attacker.symbol.color,
+                                targetName: target.name,
+                                targetColor: target.symbol.color
+                            });
+
+                            // Remove the war since it's ended with peace
+                            wars.splice(w, 1);
+                            //w--; // Adjust the loop index because we removed an item
+
+                            //continue; // Skip to the next war
+                        } else {
+                            // Continue resolving the war normally
+                            events.push({
+                                type: "failedAttack",
+                                attackerName: attacker.name,
+                                attackerColor: attacker.symbol.color,
+                                targetName: target.name,
+                                targetColor: target.symbol.color
+                            });
+                        }
+                    }
+
+                    //events.push(result);
+                } else {
+                    // Military Buildup
+                    let addedTroops;
+                    if (attacker.policy === "Defensive") {
+                        addedTroops = Math.floor(attacker.population * 0.02);
+                        attacker.troops += addedTroops;
+                    } else if (attacker.policy === "Militaristic") {
+                        addedTroops = Math.floor(attacker.population * 0.035);
+                        attacker.troops += addedTroops;
+                    } else {
+                        addedTroops = Math.floor(attacker.population * 0.01);
+                        attacker.troops += addedTroops;
+                    }
+
+                    events.push({
+                        type: "militaryBuildup",
+                        attackerName: attacker.name,
+                        attackerColor: attacker.symbol.color,
+                        amount: addedTroops
+                    });
+                }
+            }
+
+
+            for (let i = 0; i < numCountries; i++) {
+                const attacker = countryDetails[i];
+                if (!attacker) continue;
+
+                
+
+                // Get a target country index (not self)
+                let targetIndex;
+                do {
+                    targetIndex = Math.floor(Math.random() * numCountries);
+                } while (targetIndex === i || !countryDetails[targetIndex]);
+                
+                const target = countryDetails[targetIndex];
+                const willDeclareWar = attacker.anger > 0.5 || target.tension > 0.4;
+                let doRandomAction = true;
+
+                if (Math.random() < 0.8) {
+                    doRandomAction = false;
+                }
+
+
+
+                // If not at war or in addition to war, attempt another action
+                const actionRoll = Math.random();
+                if (doRandomAction === true) {
+                    if (actionRoll < 0.2) { 
+                        // Military Buildup
+                        let addedTroops;
+                        if (attacker.policy === "Defensive") {
+                            addedTroops = Math.floor(attacker.population * 0.02);
+                            attacker.troops += addedTroops;
+                        } else {
+                            addedTroops = Math.floor(attacker.population * 0.01);
+                            attacker.troops += addedTroops;
+                        }
+
+                        events.push({
+                            type: "militaryBuildup",
+                            attackerName: attacker.name,
+                            attackerColor: attacker.symbol.color,
+                            amount: addedTroops
+                        });
+
+                    }
+                    else if (actionRoll < 0.35) {
+                        // Denounce
+                        if (target.tension >= 0.3) {
+                            attacker.anger += 0.2;
+                            worldTension += 0.05;
+                            attacker.tension += 0.1;
+                            target.tension = Math.max(0, target.tension + 0.1);
+                            target.anger = Math.max(0, target.anger + 0.2);
+
+                            events.push({
+                                type: "denounce",
+                                attackerName: attacker.name,
+                                attackerColor: attacker.symbol.color,
+                                targetName: target.name,
+                                targetColor: target.symbol.color
+                            });
+                        } else if (Math.random() <= 0.10) {
+                            attacker.anger += 0.2;
+                            worldTension += 0.05;
+                            attacker.tension += 0.1;
+                            target.tension = Math.max(0, target.tension + 0.1);
+                            target.anger = Math.max(0, target.anger + 0.2);
+
+                            events.push({
+                                type: "denounce",
+                                attackerName: attacker.name,
+                                attackerColor: attacker.symbol.color,
+                                targetName: target.name,
+                                targetColor: target.symbol.color
+                            });
+                        }
+                    }
+                    else if (actionRoll < 0.5) {
+                        // Diplomatic Outreach
+                        target.tension = Math.max(0, target.tension - 0.2);
+                        attacker.anger = Math.max(0, attacker.anger - 0.2);
+                        events.push({
+                            type: "diplomacy",
+                            attackerName: attacker.name,
+                            attackerColor: attacker.symbol.color,
+                            targetName: target.name,
+                            targetColor: target.symbol.color
+                        });
+
+                    }
+                    else if (actionRoll < 0.65) {
+                        // Population Growth
+                        const growth = Math.floor(attacker.population * 0.03);
+                        attacker.population += growth;
+                        events.push({
+                            type: "populationGrowth",
+                            attackerName: attacker.name,
+                            attackerColor: attacker.symbol.color,
+                            amount: growth
+                        });
+
+                    }
+                    else if (actionRoll < 0.8) {
+                        // Fortify defenses
+                        if (attacker.policy === "Defensive") {
+                            attacker.security = Math.min(2, attacker.security + 0.05);
+                        } else {
+                            attacker.security = Math.min(2, attacker.security + 0.025);
+                        }
+                        events.push({
+                            type: "fortify",
+                            attackerName: attacker.name,
+                            attackerColor: attacker.symbol.color
+                        });
+
+                    }
+                    else {
+                        // Internal Unrest
+                        const troopLoss = Math.floor(attacker.troops * 0.1);
+                        attacker.troops = Math.max(0, attacker.troops - troopLoss);
+                        attacker.anger += 0.2;
+                        worldTension += 0.05;
+                        events.push({
+                            type: "unrest",
+                            attackerName: attacker.name,
+                            attackerColor: attacker.symbol.color,
+                            amount: troopLoss
+                        });
+
+                    }
+                }
+
+
+
+                // War decision based on policy (e.g., "aggressive" = more likely to declare war)
+                if (willDeclareWar && (
+                    attacker.policy === "Aggressive" && Math.random() < 0.6 ||
+                    attacker.policy === "Neutral" && Math.random() < 0.3 ||
+                    attacker.policy === "Defensive" && Math.random() < 0.2 ||
+                    attacker.policy === "Peaceful" && Math.random() < 0.05
+                )) {
+
+                    wars.push({
+                        attackerIndex: i,
+                        targetIndex,
+                        turns: 0
+                    });
+
+                    wars.push({
+                        attackerIndex: targetIndex,
+                        targetIndex: i,
+                        turns: 0
+                    });
+
+                    events.push({
+                        type: "war",
+                        attackerName: attacker.name,
+                        attackerColor: attacker.symbol.color,
+                        targetName: target.name,
+                        targetColor: target.symbol.color
+                    });
+
+                    console.log(`${attacker.name} has declared war on ${target.name}!`);
+                    target.anger *= 2;
+                    attacker.tension += 0.5;
+
+                    /*const attackStrength = attacker.troops / target.security;
+                    const defenseStrength = target.troops * target.security;
+
+                    const baseAttackerLoss = 0.2; // 20% max
+                    const baseTargetLoss = 0.2;
+
+                    const securityFactor = Math.sqrt(target.security);
+                    const attackerLoss = Math.floor(Math.random() * baseAttackerLoss * attacker.troops * securityFactor);
+                    const targetLoss = Math.floor(Math.random() * baseTargetLoss * target.troops / securityFactor);
+
+
+
+
+                    attacker.troops = Math.max(0, attacker.troops - attackerLoss);
+                    target.troops = Math.max(0, target.troops - targetLoss);
+
+                    let result;
+                    if (attackStrength > defenseStrength) {
+                            // Attacker wins
+
+                            let takenCells = [];
+
+                            result = `${attacker.name} has invaded and taken land from ${target.name}!`;
+
+                            // Territory gain: take over one province from the target
+                            const targetProvinces = target.provinces || [];
+                            
+
+                            // Find the first non-empty province
+                            for (let p = 0; p < targetProvinces.length; p++) {
+                                if (targetProvinces[p].length > 0) {
+                                    takenCells = targetProvinces.splice(p, 1)[0]; // Take the entire province (first non-empty one)
+                                    break; // Stop once we take one province
+                                }
+                        }
+                        const capital = target.capital;
+                        const capitalTaken = takenCells.some(cell => cell.x === capital.x && cell.y === capital.y);
+                            if (capitalTaken) {
+                                
+                                result = `${attacker.name} has captured the capital of ${target.name} and fully annexed the country!`;
+
+                                // Transfer all provinces
+                                const remainingCells = target.countryCells || [];
+                                remainingCells.forEach(cell => {
+                                    countries[cell.y][cell.x] = i; // Assign to attacker
+                                    countryCells[i].push(cell);
+                                });
+
+                                // Merge troop counts and population
+                                attacker.troops += target.troops || 0; // Optional loss on merge
+                                attacker.population += Math.floor(target.population || 0); // Optional: target.population should exist
+
+                                // Delete the target country
+                                countryDetails[targetIndex] = null;
+                                countryCells[targetIndex] = [];
+                            }
+                        
+
+                        // Reassign each cell in the taken province to the attacker
+                        takenCells.forEach(cell => {
+                            countries[cell.y][cell.x] = i; // Assign the cell to the attacking country
+                            countryCells[i].push(cell); // Add the cell to the attacker's country list
+                        });
+
+                        // Optionally clean up target's countryCells
+                        target.countryCells = target.countryCells?.filter(c => !takenCells.includes(c));
+
+                    } else {
+                        result = `${attacker.name} attempted to invade ${target.name} but failed.`;
+                    }
+
+                    events.push(result);
+                    */
+                }
+            }
+
+            // Update the "Current Events" section
+            const eventsList = document.getElementById('eventsList');
+            eventsList.innerHTML = '';
+            events.forEach(event => {
+                const li = document.createElement('li');
+
+                switch (event.type) {
+                    case "war":
+                        li.innerHTML = `<strong><strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> has declared war on <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span>!`;
+                        break;
+                    case "capitalCaptured":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> has captured the capital of <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span>!`;
+                        break;
+                    case "provinceTaken":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> won a battle and took a province from <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span>.`;
+                        break;
+                    case "defeat":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> has defeated <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span>.`;
+                        break;
+                    case "peace":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> and <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span> have agreed to a peace deal.`;
+                        break;
+                    case "failedAttack":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> attacked <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span> but failed to take any land.`;
+                        break;
+                    case "militaryBuildup":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> increased military spending and gained ${event.amount} troops.`;
+                        break;
+                    case "denounce":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> denounced <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span>.`;
+                        break;
+                    case "diplomacy":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> sent diplomats to <strong><span style="color:${event.targetColor}">${event.targetName}</strong></span>.`;
+                        break;
+                    case "populationGrowth":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span>'s population has grown by ${event.amount}.`;
+                        break;
+                    case "fortify":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> improved its defenses.`;
+                        break;
+                    case "unrest":
+                        li.innerHTML = `<strong><span style="color:${event.attackerColor}">${event.attackerName}</strong></span> experienced internal unrest, losing ${event.amount} troops.`;
+                        break;
+                    default:
+                        li.textContent = typeof event === "string" ? event : JSON.stringify(event);
+                        break;
+                }
+
+                eventsList.appendChild(li);
+            });
+
+
+            // Redraw map
+            drawMap(); // assuming you already have this function
+            drawCapitolStars(); // keep the capitals visible
+        });
+
+
+        generateWorld();
+        assignCountries();
+        drawMap(); 
+        
+
+        
+    </script>
+</body>
+</html>
