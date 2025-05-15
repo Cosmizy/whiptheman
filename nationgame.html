@@ -935,7 +935,7 @@
     </div>
     <p style="margin-top: -10px;"><strong>${country.slogan}</strong></p>
     
-    <p><strong>Size:</strong> ${country.size} pixels</p>
+    <p><strong>Size:</strong> ${country.size}</p>
     <p><strong>Population:</strong> ${country.population}</p>
     <p><strong>Troops:</strong> ${country.troops}</p>
     <p><strong>Security:</strong> ${country.security}</p>
@@ -954,7 +954,7 @@
     </div>
     <p style="margin-top: -10px;"><strong>${country.slogan}</strong></p>
     
-    <p><strong>Size:</strong> ${country.size} pixels</p>
+    <p><strong>Size:</strong> ${country.size}</p>
     <p><strong>Population:</strong> ${country.population}</p>
     <p><strong>Troops:</strong> ${country.troops}</p>
     <p><strong>Security:</strong> ${country.security}</p>
@@ -980,7 +980,7 @@
                     }
                 }
             }
-            return size * cellSize * cellSize; // Size in pixels
+            return size;  // Just the count of cells
         }
 
         function hexToHue(hex) {
