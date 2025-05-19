@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Country Game – Multi‑Player Claim</title>
+  <style>
+    html, body { margin:0; padding:0; width:100%; height:100%; }
+    body { font-family:sans-serif; }
+    canvas { display:block; width:100vw; height:100vh; }
+    .sidebar {
+      position:absolute; top:1rem; left:1rem;
+      background:rgba(255,255,255,0.9);
+      border-radius:4px; z-index:10; width:200px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.2);
+    }
+    .menu-item {
+      padding:.5rem; cursor:pointer; border-bottom:1px solid #ccc;
+      user-select:none;
+    }
+    .submenu { display:none; background:#f9f9f9; }
+    .submenu.active { display:block; }
+    .submenu-item {
+      padding:.5rem 1rem; cursor:pointer; border-bottom:1px solid #eee;
+    }
+    .submenu-item:hover { background:#eee; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="sidebar">
+    <div id="actionsMenu" class="menu-item">Actions</div>
+    <div id="actionsSubmenu" class="submenu">
+      <div id="player1Submenu" class="submenu">
+        <div class="submenu-item" data-player="P1">Claim Country P1</div>
+      </div>
+      <div id="player2Submenu" class="submenu">
+        <div class="submenu-item" data-player="P2">Claim Country P2</div>
+      </div>
+      <div id="player3Submenu" class="submenu">
+        <div class="submenu-item" data-player="P3">Claim Country P3</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const actionsMenu    = document.getElementById('actionsMenu');
+  const actionsSubmenu = document.getElementById('actionsSubmenu');
+  let currentPlayer = null; // 'P1', 'P2', or 'P3'
+  const colorMap = {
+    P1: [49, 112, 213],  // blue
+    P2: [213, 49, 49],   // red
+    P3: [61, 213, 49],   // green
+  };
+
+  actionsMenu.addEventListener('click', () => {
+    actionsSubmenu.classList.toggle('active');
+  });
+
+  actionsSubmenu.querySelectorAll('.submenu-item').forEach(item => {
+    item.addEventListener('click', () => {
+      currentPlayer = item.dataset.player;
+      actionsSubmenu.querySelectorAll('.submenu-item').forEach(i => {
+        i.textContent = i.textContent.replace(' ✓', '');
+      });
+      item.textContent = item.textContent + ' ✓';
+    });
+  });
+
+  // Canvas setup
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Hidden canvas for color map (hit detection)
+  const hitCanvas = document.createElement('canvas');
+  const hitCtx = hitCanvas.getContext('2d');
+
+  // Images
+  const colorMapImg = new Image();
+  colorMapImg.crossOrigin = 'anonymous';
+  colorMapImg.src = 'https://cosmizy.com/countrymapcolor.png';
+
+  const landImg = new Image();
+  landImg.crossOrigin = 'anonymous';
+  landImg.src = 'https://cosmizy.com/countrymapland.png';
+
+  const waterImg = new Image();
+  waterImg.crossOrigin = 'anonymous';
+  waterImg.src = 'https://cosmizy.com/countrymapwater.png';
+
+  const borderImg = new Image();
+  borderImg.crossOrigin = 'anonymous';
+  borderImg.src = 'https://cosmizy.com/countrymapborder.png';
+
+  let imagesLoaded = 0;
+  function onImageLoad() {
+    imagesLoaded++;
+    if(imagesLoaded === 4) {
+      setup();
+    }
+  }
+  colorMapImg.onload = onImageLoad;
+  landImg.onload = onImageLoad;
+  waterImg.onload = onImageLoad;
+  borderImg.onload = onImageLoad;
+
+  // The editable land pixels buffer we'll recolor
+  let landImageData;
+
+  function setup() {
+    // Set canvas sizes
+    canvas.width = hitCanvas.width = colorMapImg.width;
+    canvas.height = hitCanvas.height = colorMapImg.height;
+
+    // Draw color map to hidden canvas for pixel read
+    hitCtx.drawImage(colorMapImg, 0, 0);
+
+    // Draw land image to main canvas to get pixels and store them
+    ctx.drawImage(landImg, 0, 0);
+    landImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // Draw the initial scene (land + water + borders)
+    drawScene();
+  }
+
+  function drawScene() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // draw land (modified pixels)
+    ctx.putImageData(landImageData, 0, 0);
+    // draw water & borders on top
+    ctx.drawImage(waterImg, 0, 0);
+    ctx.drawImage(borderImg, 0, 0);
+  }
+
+  canvas.addEventListener('click', e => {
+    if (!currentPlayer) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+    const y = Math.floor((e.clientY - rect.top)  * (canvas.height / rect.height));
+
+    // Read color under cursor from color map (hit canvas)
+    const hitData = hitCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const idx = (y * canvas.width + x) * 4;
+    const tR = hitData[idx], tG = hitData[idx + 1], tB = hitData[idx + 2];
+
+    if (tR === 0 && tG === 0 && tB === 0) return; // black = no country
+
+    // Player color
+    const [pR, pG, pB] = colorMap[currentPlayer];
+
+    // Recolor matching country pixels in landImageData
+    const data = landImageData.data;
+    for(let i = 0; i < data.length; i += 4) {
+      // Check color in color map at pixel i
+      if(hitData[i] === tR && hitData[i+1] === tG && hitData[i+2] === tB) {
+        // Set pixel to player color (blend or solid)
+        // Here, simple solid color:
+        data[i] = pR;
+        data[i+1] = pG;
+        data[i+2] = pB;
+        // Optional: adjust alpha or keep original alpha for transparency
+        data[i+3] = 255;
+      }
+    }
+
+    drawScene();
+  });
+</script>
+</body>
+</html>
