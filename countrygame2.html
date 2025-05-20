@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
   <title>Country Game – Multi‑Player Claim</title>
   <style>
     html, body { margin:0; padding:0; width:100%; height:100%; }
@@ -23,148 +23,293 @@
       padding:.5rem 1rem; cursor:pointer; border-bottom:1px solid #eee;
     }
     .submenu-item:hover { background:#eee; }
+    .submenu {
+      display: none;
+      background: #f9f9f9;
+      margin-left: 1rem;
+    }
+    .submenu.active {
+      display: block;
+    }
+    .menu-item.player-menu {
+      cursor: pointer;
+      padding: 0.5rem;
+      border-bottom: 1px solid #ccc;
+    }
+
+  #consoleToggle {
+    position: fixed;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 30px;
+    background: #000;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+  }
+  
+  /* Console panel */
+  #consolePanel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #eee;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border-top: 3px solid #3170d5;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+  }
+  
+  /* Show console panel when active */
+  #consolePanel.active {
+    transform: translateY(0);
+  }
+  
+  /* Editable text area */
+  #consoleInput {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: #eee;
+    resize: none;
+    outline: none;
+    font-family: monospace;
+    font-size: 14px;
+  }
+          
   </style>
 </head>
 <body>
   <canvas id="canvas"></canvas>
+
+<div id="consoleToggle">&#9650;</div>
+<div id="consolePanel">
+  <textarea id="consoleInput" placeholder="Type here..."></textarea>
+</div>
+    
   <div class="sidebar">
     <div id="actionsMenu" class="menu-item">Actions</div>
-    <div id="actionsSubmenu" class="submenu">
-      <div id="player1Submenu" class="submenu">
-        <div class="submenu-item" data-player="P1">Claim Country P1</div>
-      </div>
-      <div id="player2Submenu" class="submenu">
-        <div class="submenu-item" data-player="P2">Claim Country P2</div>
-      </div>
-      <div id="player3Submenu" class="submenu">
-        <div class="submenu-item" data-player="P3">Claim Country P3</div>
-      </div>
-    </div>
+        <div id="actionsSubmenu" class="submenu">
+        
+          <div class="menu-item player-menu" data-player="P1">Player 1 Actions</div>
+          <div id="player1Submenu" class="submenu">
+            <div class="submenu-item" data-player="P1" data-action="claim">Claim Country</div>
+            <div class="submenu-item" data-player="P1" data-action="alliance">Create Alliance</div>
+          </div>
+        
+          <div class="menu-item player-menu" data-player="P2">Player 2 Actions</div>
+          <div id="player2Submenu" class="submenu">
+            <div class="submenu-item" data-player="P2" data-action="claim">Claim Country</div>
+            <div class="submenu-item" data-player="P2" data-action="alliance">Create Alliance</div>
+          </div>
+        
+          <div class="menu-item player-menu" data-player="P3">Player 3 Actions</div>
+          <div id="player3Submenu" class="submenu">
+            <div class="submenu-item" data-player="P3" data-action="claim">Claim Country</div>
+            <div class="submenu-item" data-player="P3" data-action="alliance">Create Alliance</div>
+          </div>
+
+          <div class="menu-item player-menu" data-player="P4">Player 4 Actions</div>
+          <div id="player4Submenu" class="submenu">
+            <div class="submenu-item" data-player="P4" data-action="claim">Claim Country</div>
+            <div class="submenu-item" data-player="P4" data-action="alliance">Create Alliance</div>
+          </div>
+
+          <div class="menu-item player-menu" data-player="P5">Player 5 Actions</div>
+          <div id="player5Submenu" class="submenu">
+            <div class="submenu-item" data-player="P5" data-action="claim">Claim Country</div>
+            <div class="submenu-item" data-player="P5" data-action="alliance">Create Alliance</div>
+          </div>
+            
+        </div>
+
   </div>
 
-<script>
-  const actionsMenu    = document.getElementById('actionsMenu');
-  const actionsSubmenu = document.getElementById('actionsSubmenu');
-  let currentPlayer = null; // 'P1', 'P2', or 'P3'
-  const colorMap = {
-    P1: [49, 112, 213],  // blue
-    P2: [213, 49, 49],   // red
-    P3: [61, 213, 49],   // green
-  };
+  <script>
+    // --- Sidebar toggle + player selection ---
+    const actionsMenu    = document.getElementById('actionsMenu');
+    const actionsSubmenu = document.getElementById('actionsSubmenu');
+    const hitCanvas = document.createElement('canvas');
+    const hitCtx = hitCanvas.getContext('2d');
+    let currentPlayer = null;
+    let currentAction = 'claim'; // default action
+    const colorMap = {
+      P1: [  49,   112, 213],  // blue
+      P2: [213,   49,   49],  // red
+      P3: [  61, 213,   49],  // green
+      P4: [  213, 203,   49],  // green
+      P5: [  121, 49,   213],  // green
+    };
 
-  actionsMenu.addEventListener('click', () => {
-    actionsSubmenu.classList.toggle('active');
-  });
+    actionsMenu.addEventListener('click', () => {
+      actionsSubmenu.classList.toggle('active');
+    });
 
-  actionsSubmenu.querySelectorAll('.submenu-item').forEach(item => {
-    item.addEventListener('click', () => {
-      currentPlayer = item.dataset.player;
-      actionsSubmenu.querySelectorAll('.submenu-item').forEach(i => {
+    document.querySelectorAll('.player-menu').forEach(menu => {
+      menu.addEventListener('click', () => {
+        const player = menu.dataset.player;
+        const submenu = document.getElementById('player' + player.charAt(1) + 'Submenu');
+        submenu.classList.toggle('active');
+      });
+    });
+
+document.querySelectorAll('.submenu-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const clickedPlayer = item.dataset.player;
+    const clickedAction = item.dataset.action;
+
+    if (currentPlayer === clickedPlayer && currentAction === clickedAction) {
+      currentPlayer = null;
+      currentAction = null;
+      document.querySelectorAll('.submenu-item').forEach(i => {
         i.textContent = i.textContent.replace(' ✓', '');
       });
-      item.textContent = item.textContent + ' ✓';
+      return;
+    }
+
+    currentPlayer = clickedPlayer;
+    currentAction = clickedAction;
+
+    document.querySelectorAll('.submenu-item').forEach(i => {
+      i.textContent = i.textContent.replace(' ✓', '');
     });
+    item.textContent = item.textContent + ' ✓';
+  });
+});
+
+  const toggleBtn = document.getElementById('consoleToggle');
+  const consolePanel = document.getElementById('consolePanel');
+  
+  toggleBtn.addEventListener('click', () => {
+    consolePanel.classList.toggle('active');
+    if (consolePanel.classList.contains('active')) {
+      toggleBtn.innerHTML = '&#9660;'; // down arrow
+      document.getElementById('consoleInput').focus();
+    } else {
+      toggleBtn.innerHTML = '&#9650;'; // up arrow
+    }
   });
 
-  // Canvas setup
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
 
-  // Hidden canvas for color map (hit detection)
-  const hitCanvas = document.createElement('canvas');
-  const hitCtx = hitCanvas.getContext('2d');
+    // --- Canvas setup & layers ---
+    const canvas = document.getElementById('canvas');
+    const ctx    = canvas.getContext('2d');
+    const layerSources = ['countrymapland.png', 'countrymapcolor.png','countrymapborder.png','countrymapwater.png'];
+    const layers = layerSources.map(src => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = 'https://cosmizy.com/' + src;
+      return img;
+    });
 
-  // Images
-  const colorMapImg = new Image();
-  colorMapImg.crossOrigin = 'anonymous';
-  colorMapImg.src = 'https://cosmizy.com/countrymapcolor.png';
+    let loadedCount = 0;
+    let landImageData;
 
-  const landImg = new Image();
-  landImg.crossOrigin = 'anonymous';
-  landImg.src = 'https://cosmizy.com/countrymapland.png';
+    function drawAll() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const waterImg = new Image();
-  waterImg.crossOrigin = 'anonymous';
-  waterImg.src = 'https://cosmizy.com/countrymapwater.png';
-
-  const borderImg = new Image();
-  borderImg.crossOrigin = 'anonymous';
-  borderImg.src = 'https://cosmizy.com/countrymapborder.png';
-
-  let imagesLoaded = 0;
-  function onImageLoad() {
-    imagesLoaded++;
-    if(imagesLoaded === 4) {
-      setup();
+      // Draw recolored land first
+      if (landImageData) {
+        ctx.putImageData(landImageData, 0, 0);
+      } else {
+        ctx.drawImage(layers[0], 0, 0);
+      }
+      
+      // Draw water and borders on top (layers[3] = water, layers[2] = border)
+      ctx.drawImage(layers[3], 0, 0);
+      ctx.drawImage(layers[2], 0, 0);
     }
-  }
-  colorMapImg.onload = onImageLoad;
-  landImg.onload = onImageLoad;
-  waterImg.onload = onImageLoad;
-  borderImg.onload = onImageLoad;
 
-  // The editable land pixels buffer we'll recolor
-  let landImageData;
+    function checkAll() {
+      loadedCount++;
+      if (loadedCount === layers.length) {
+        // Set canvas size to images
+        canvas.width  = hitCanvas.width  = layers[0].width;
+        canvas.height = hitCanvas.height = layers[0].height;
 
-  function setup() {
-    // Set canvas sizes
-    canvas.width = hitCanvas.width = colorMapImg.width;
-    canvas.height = hitCanvas.height = colorMapImg.height;
+        // Draw colormap to hitCanvas for pixel lookup only (no recolor here)
+        hitCtx.drawImage(layers[1], 0, 0);
 
-    // Draw color map to hidden canvas for pixel read
-    hitCtx.drawImage(colorMapImg, 0, 0);
+        // Initialize landImageData from land image (to recolor)
+        ctx.drawImage(layers[0], 0, 0);
+        landImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    // Draw land image to main canvas to get pixels and store them
-    ctx.drawImage(landImg, 0, 0);
-    landImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Draw the initial scene (land + water + borders)
-    drawScene();
-  }
-
-  function drawScene() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // draw land (modified pixels)
-    ctx.putImageData(landImageData, 0, 0);
-    // draw water & borders on top
-    ctx.drawImage(waterImg, 0, 0);
-    ctx.drawImage(borderImg, 0, 0);
-  }
-
-  canvas.addEventListener('click', e => {
-    if (!currentPlayer) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-    const y = Math.floor((e.clientY - rect.top)  * (canvas.height / rect.height));
-
-    // Read color under cursor from color map (hit canvas)
-    const hitData = hitCtx.getImageData(0, 0, canvas.width, canvas.height).data;
-    const idx = (y * canvas.width + x) * 4;
-    const tR = hitData[idx], tG = hitData[idx + 1], tB = hitData[idx + 2];
-
-    if (tR === 0 && tG === 0 && tB === 0) return; // black = no country
-
-    // Player color
-    const [pR, pG, pB] = colorMap[currentPlayer];
-
-    // Recolor matching country pixels in landImageData
-    const data = landImageData.data;
-    for(let i = 0; i < data.length; i += 4) {
-      // Check color in color map at pixel i
-      if(hitData[i] === tR && hitData[i+1] === tG && hitData[i+2] === tB) {
-        // Set pixel to player color (blend or solid)
-        // Here, simple solid color:
-        data[i] = pR;
-        data[i+1] = pG;
-        data[i+2] = pB;
-        // Optional: adjust alpha or keep original alpha for transparency
-        data[i+3] = 255;
+        drawAll();
       }
     }
 
-    drawScene();
-  });
-</script>
+    layers.forEach(img => img.onload = checkAll);
+
+    // --- Click‑to‑claim logic ---
+    canvas.addEventListener('click', e => {
+      if (!currentPlayer) return;
+    
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+      const y = Math.floor((e.clientY - rect.top)  * (canvas.height / rect.height));
+    
+      // Read country color from colormap (hitCtx)
+      const hitData = hitCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+      const idx = (y * canvas.width + x) * 4;
+      const tR = hitData[idx], tG = hitData[idx + 1], tB = hitData[idx + 2];
+    
+      if(tR === 0 && tG === 0 && tB === 0) return; // no country clicked
+    
+      const [pR, pG, pB] = colorMap[currentPlayer];
+      const data = landImageData.data;
+    
+      if (currentAction === 'claim') {
+        // Solid recolor (as before)
+        for (let i = 0; i < data.length; i += 4) {
+          if (hitData[i] === tR && hitData[i+1] === tG && hitData[i+2] === tB) {
+            data[i]   = pR;
+            data[i+1] = pG;
+            data[i+2] = pB;
+            data[i+3] = 255;
+          }
+        }
+      } else if (currentAction === 'alliance') {
+        // Diagonal stripe pattern overlay of player's color
+    
+        for (let i = 0; i < data.length; i += 4) {
+          if (hitData[i] === tR && hitData[i+1] === tG && hitData[i+2] === tB) {
+            // Get pixel coordinates:
+            const pixelIndex = i / 4;
+            const px = pixelIndex % canvas.width;
+            const py = Math.floor(pixelIndex / canvas.width);
+    
+            // Check diagonal stripe pattern:
+            if ((px + py) % 6 < 3) {
+              // Blend the player color with existing land color (simple overwrite or mix)
+              data[i]   = pR;
+              data[i+1] = pG;
+              data[i+2] = pB;
+              data[i+3] = 255;
+            }
+            // else keep original land pixel color (no change)
+          }
+        }
+      }
+    
+      drawAll();
+    });
+
+  </script>
 </body>
 </html>
