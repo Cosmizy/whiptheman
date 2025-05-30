@@ -44,8 +44,7 @@
     transform: translateX(-50%);
     width: 40px;
     height: 30px;
-    background: #000;
-    color: white;
+    background: #eee;
     font-weight: bold;
     font-size: 24px;
     line-height: 30px;
@@ -63,15 +62,15 @@
     left: 0;
     width: 100vw;
     height: 150px;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(249, 249, 249);
     color: #eee;
     font-family: monospace;
     font-size: 14px;
     padding: 0.5rem;
     box-sizing: border-box;
-    border-top: 3px solid #3170d5;
     transform: translateY(100%);
     transition: transform 0.3s ease;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
     z-index: 999;
   }
   
@@ -86,230 +85,504 @@
     height: 100%;
     background: transparent;
     border: none;
-    color: #eee;
     resize: none;
     outline: none;
     font-family: monospace;
     font-size: 14px;
   }
+
+      .popup {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+      }
+
+          .popup.hidden {
+              display: none;
+          }
+
+      .popup-content {
+          background: white;
+          padding: 20px;
+          border-radius: 10px;
+          text-align: center;
+      }
+
           
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+    <canvas id="canvas"></canvas>
 
-<div id="consoleToggle">&#9650;</div>
-<div id="consolePanel">
-  <textarea id="consoleInput" placeholder="Type here..."></textarea>
-</div>
-    
-  <div class="sidebar">
-    <div id="actionsMenu" class="menu-item">Actions</div>
+    <div id="consoleToggle">&#9650;</div>
+    <div id="consolePanel">
+        <textarea id="consoleInput" placeholder="Type here..."></textarea>
+    </div>
+    <div id="yearPopup" class="popup hidden">
+        <div class="popup-content">
+            <label for="yearInput">Enter Year:</label>
+            <input type="number" id="yearInput" value="2024" />
+            <button id="setYearBtn">Set</button>
+            <button id="cancelYearBtn">Cancel</button>
+        </div>
+    </div>
+
+
+    <div class="sidebar">
+        <div id="actionsMenu" class="menu-item">Actions</div>
         <div id="actionsSubmenu" class="submenu">
-        
-          <div class="menu-item player-menu" data-player="P1">Player 1 Actions</div>
-          <div id="player1Submenu" class="submenu">
-            <div class="submenu-item" data-player="P1" data-action="claim">Claim Country</div>
-            <div class="submenu-item" data-player="P1" data-action="alliance">Create Alliance</div>
-          </div>
-        
-          <div class="menu-item player-menu" data-player="P2">Player 2 Actions</div>
-          <div id="player2Submenu" class="submenu">
-            <div class="submenu-item" data-player="P2" data-action="claim">Claim Country</div>
-            <div class="submenu-item" data-player="P2" data-action="alliance">Create Alliance</div>
-          </div>
-        
-          <div class="menu-item player-menu" data-player="P3">Player 3 Actions</div>
-          <div id="player3Submenu" class="submenu">
-            <div class="submenu-item" data-player="P3" data-action="claim">Claim Country</div>
-            <div class="submenu-item" data-player="P3" data-action="alliance">Create Alliance</div>
-          </div>
+            <div class="submenu-item" data-action="setYear">Set Year</div>
+            <div class="menu-item player-menu" data-player="P1">Player 1 Actions</div>
+            <div id="player1Submenu" class="submenu">
+                <div class="submenu-item" data-player="P1" data-action="claim">Claim Country</div>
+                <div class="submenu-item" data-player="P1" data-action="alliance">Create Alliance</div>
+            </div>
 
-          <div class="menu-item player-menu" data-player="P4">Player 4 Actions</div>
-          <div id="player4Submenu" class="submenu">
-            <div class="submenu-item" data-player="P4" data-action="claim">Claim Country</div>
-            <div class="submenu-item" data-player="P4" data-action="alliance">Create Alliance</div>
-          </div>
+            <div class="menu-item player-menu" data-player="P2">Player 2 Actions</div>
+            <div id="player2Submenu" class="submenu">
+                <div class="submenu-item" data-player="P2" data-action="claim">Claim Country</div>
+                <div class="submenu-item" data-player="P2" data-action="alliance">Create Alliance</div>
+            </div>
 
-          <div class="menu-item player-menu" data-player="P5">Player 5 Actions</div>
-          <div id="player5Submenu" class="submenu">
-            <div class="submenu-item" data-player="P5" data-action="claim">Claim Country</div>
-            <div class="submenu-item" data-player="P5" data-action="alliance">Create Alliance</div>
-          </div>
-            
+            <div class="menu-item player-menu" data-player="P3">Player 3 Actions</div>
+            <div id="player3Submenu" class="submenu">
+                <div class="submenu-item" data-player="P3" data-action="claim">Claim Country</div>
+                <div class="submenu-item" data-player="P3" data-action="alliance">Create Alliance</div>
+            </div>
+
+            <div class="menu-item player-menu" data-player="P4">Player 4 Actions</div>
+            <div id="player4Submenu" class="submenu">
+                <div class="submenu-item" data-player="P4" data-action="claim">Claim Country</div>
+                <div class="submenu-item" data-player="P4" data-action="alliance">Create Alliance</div>
+            </div>
+
+            <div class="menu-item player-menu" data-player="P5">Player 5 Actions</div>
+            <div id="player5Submenu" class="submenu">
+                <div class="submenu-item" data-player="P5" data-action="claim">Claim Country</div>
+                <div class="submenu-item" data-player="P5" data-action="alliance">Create Alliance</div>
+            </div>
+
         </div>
 
-  </div>
+    </div>
 
-  <script>
-    // --- Sidebar toggle + player selection ---
-    const actionsMenu    = document.getElementById('actionsMenu');
-    const actionsSubmenu = document.getElementById('actionsSubmenu');
-    const hitCanvas = document.createElement('canvas');
-    const hitCtx = hitCanvas.getContext('2d');
-    let currentPlayer = null;
-    let currentAction = 'claim'; // default action
-    const colorMap = {
-      P1: [  49,   112, 213],  // blue
-      P2: [213,   49,   49],  // red
-      P3: [  61, 213,   49],  // green
-      P4: [  213, 203,   49],  // green
-      P5: [  121, 49,   213],  // green
-    };
+    <script>
+        // countriesColors.js
+        // Exporting country names mapped exactly to their provided hex codes
 
-    actionsMenu.addEventListener('click', () => {
-      actionsSubmenu.classList.toggle('active');
-    });
+        const countryColorMap = {
+            "Antarctica": "#7ab1e6",
+            "United Arab Emirates": "#7f5c4b",
+            "Afghanistan": "#50472d",
+            "Albania": "#df0000",
+            "Armenia": "#99493b",
+            "Angola": "#6d0d16",
+            "Argentina": "#a0c4e4",
+            "Austria": "#da5f73",
+            "Australia": "#343774",
+            "Azerbaijan": "#6a8573",
+            "Bosnia and Herzegovina": "#4a5574",
+            "Bangladesh": "#335c4b",
+            "Belgium": "#a45921",
+            "Burkina Faso": "#796032",
+            "Bulgaria": "#9c937f",
+            "Bahrain": "#e56e65",
+            "Burundi": "#ac9974",
+            "Benin": "#917934",
+            "Brunei": "#cab245",
+            "Bolivia": "#917628",
+            "Brazil": "#309939",
+            "Bahamas": "#366e58",
+            "Bhutan": "#fba62f",
+            "Botswana": "#6693b2",
+            "Belarus": "#944030",
+            "Belize": "#57307f",
+            "Canada": "#ff5c5c",
+            "Democratic Republic of the Congo": "#4974b3",
+            "Central African Republic": "#978d5f",
+            "Congo": "#9c8440",
+            "Switzerland": "#ff3232",
+            "Ivory Coast": "#a7b374",
+            "Chile": "#c37681",
+            "Cameroon": "#997633",
+            "China": "#ee2124",
+            "Colombia": "#b1762d",
+            "Costa Rica": "#9b6d90",
+            "Cuba": "#786799",
+            "Cyprus": "#f8f0e5",
+            "Czechia": "#b47888",
+            "Germany": "#9e4400",
+            "Djibouti": "#74c2a7",
+            "Denmark": "#d4475e",
+            "Dominica": "#3f6d3f",
+            "Dominican Republic": "#926079",
+            "Algeria": "#87a994",
+            "Ecuador": "#bc8731",
+            "Estonia": "#547b99",
+            "Egypt": "#98585c",
+            "Western Sahara": "#5d6150",
+            "Eritrea": "#945b57",
+            "Spain": "#dc6212",
+            "Ethiopia": "#857032",
+            "Finland": "#9aacc4",
+            "Fiji": "#7a9cc1",
+            "France": "#A46D99",
+            "Gabon": "#67a168",
+            "United Kingdom": "#a26484",
+            "Georgia": "#ffa2a2",
+            "French Guiana": "#83af1c",
+            "Ghana": "#926928",
+            "Gambia": "#764f54",
+            "Guinea": "#987c34",
+            "Equatorial Guinea": "#998861",
+            "Greece": "#75A3D1",
+            "Guatemala": "#81b6da",
+            "Guinea-Bissau": "#957f2b",
+            "Guyana": "#7c8451",
+            "Honduras": "#52d1ec",
+            "Croatia": "#ae5983",
+            "Haiti": "#6c1f6c",
+            "Hungary": "#b18782",
+            "Indonesia": "#ff7f7f",
+            "Ireland": "#b1b589",
+            "Israel": "#a4b7e5",
+            "India": "#a0906e",
+            "Iraq": "#92575c",
+            "Iran": "#af9073",
+            "Iceland": "#536499",
+            "Italy": "#99937e",
+            "Jamaica": "#566621",
+            "Jordan": "#65584c",
+            "Japan": "#f2ced7",
+            "Kenya": "#53391b",
+            "Kyrgyzstan": "#ff1300",
+            "Cambodia": "#6f2b73",
+            "North Korea": "#a04466",
+            "South Korea": "#d6d0d7",
+            "Kosovo": "#39569d",
+            "Kuwait": "#7b685c",
+            "Kazakhstan": "#16b0b5",
+            "Laos": "#7c2e53",
+            "Lebanon": "#e48684",
+            "Sri Lanka": "#b6702d",
+            "Liberia": "#c6728b",
+            "Lesotho": "#5d919a",
+            "Lithuania": "#946d2c",
+            "Luxembourg": "#a497b1",
+            "Latvia": "#b04e5d",
+            "Libya": "#462a19",
+            "Morocco": "#bb282d",
+            "Monaco": "#e68792",
+            "Moldova": "#8e564d",
+            "Montenegro": "#e22e18",
+            "Madagascar": "#a99378",
+            "North Macedonia": "#e26128",
+            "Mali": "#9f8727",
+            "Myanmar": "#c39638",
+            "Mongolia": "#944258",
+            "Mauritania": "#61733e",
+            "Malta": "#e58793",
+            "Mauritius": "#80703d",
+            "Maldives": "#903638",
+            "Malawi": "#613b20",
+            "Mexico": "#937670",
+            "Malaysia": "#ad6374",
+            "Mozambique": "#7b6f32",
+            "Namibia": "#565d5d",
+            "Niger": "#a2a157",
+            "Nigeria": "#55ae8a",
+            "Nicaragua": "#5398d6",
+            "Netherlands": "#997590",
+            "Norway": "#9f3b5c",
+            "Nepal": "#d08ea9",
+            "New Zealand": "#2D3370",
+            "Oman": "#b5655b",
+            "Panama": "#b38595",
+            "Peru": "#e55f6b",
+            "Papua New Guinea": "#6e1716",
+            "Philippines": "#87517f",
+            "Pakistan": "#507b62",
+            "Poland": "#ed899d",
+            "Puerto Rico": "#b35d88",
+            "Palestine": "#657157",
+            "Portugal": "#a13406",
+            "Palau": "#2daad1",
+            "Paraguay": "#997394",
+            "Qatar": "#af5f77",
+            "Romania": "#98593e",
+            "Serbia": "#aa8491",
+            "Russian Federation": "#9c7696",
+            "Rwanda": "#4a9e7c",
+            "Saudi Arabia": "#0c5c39",
+            "Solomon Islands": "#2e666e",
+            "Seychelles": "#9a765f",
+            "Sudan": "#7b5453",
+            "Sweden": "#4c8775",
+            "Singapore": "#f699a1",
+            "Slovenia": "#a852a8",
+            "Slovakia": "#b67690",
+            "Sierra Leone": "#5EB7AA",
+            "Senegal": "#9A8236",
+            "Somalia": "#498EDE",
+            "Suriname": "#926E5D",
+            "South Sudan": "#4F6150",
+            "Sao Tome and Principe": "#6D9726",
+            "El Salvador": "#5181C2",
+            "Syrian Arab Republic": "#92565B",
+            "Eswatini": "#9F706C",
+            "Chad": "#965431",
+            "Togo": "#827C33",
+            "Thailand": "#97677B",
+            "Tajikistan": "#A78968",
+            "Turkmenistan": "#237E3E",
+            "Tunisia": "#E91728",
+            "Turkey": "#E41824",
+            "Trinidad and Tobago": "#B12B3E",
+            "Tanzania": "#277D53",
+            "Uganda": "#A1540B",
+            "Ukraine": "#7F985D",
+            "Uruguay": "#9EAED2",
+            "United States of America": "#B97C8D",
+            "Uzbekistan": "#66BDA0",
+            "Venezuela": "#9D5939",
+            "Viet Nam": "#DC331B",
+            "Vanuatu": "#5C4A27",
+            "Samoa": "#9D193D",
+            "Yemen": "#995A61",
+            "South Africa": "#5C5E5E",
+            "Zambia": "#3A7501",
+            "Zimbabwe": "#927222"
+        };
 
-    document.querySelectorAll('.player-menu').forEach(menu => {
-      menu.addEventListener('click', () => {
-        const player = menu.dataset.player;
-        const submenu = document.getElementById('player' + player.charAt(1) + 'Submenu');
-        submenu.classList.toggle('active');
-      });
-    });
+        const colorToCountryMap = Object.fromEntries(
+            Object.entries(countryColorMap).map(([country, color]) => [color.toLowerCase(), country])
+        );
 
-document.querySelectorAll('.submenu-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const clickedPlayer = item.dataset.player;
-    const clickedAction = item.dataset.action;
+        // --- Sidebar toggle + player selection ---
+        const actionsMenu = document.getElementById('actionsMenu');
+        const actionsSubmenu = document.getElementById('actionsSubmenu');
+        const hitCanvas = document.createElement('canvas');
+        const hitCtx = hitCanvas.getContext('2d');
+        const yearPopup = document.getElementById('yearPopup');
+        const yearInput = document.getElementById('yearInput');
+        const setYearBtn = document.getElementById('setYearBtn');
+        const cancelYearBtn = document.getElementById('cancelYearBtn');
+        let currentPlayer = null;
+        let currentAction = 'claim'; // default action
+        let year = 2024;
 
-    if (currentPlayer === clickedPlayer && currentAction === clickedAction) {
-      currentPlayer = null;
-      currentAction = null;
-      document.querySelectorAll('.submenu-item').forEach(i => {
-        i.textContent = i.textContent.replace(' ✓', '');
-      });
-      return;
-    }
-
-    currentPlayer = clickedPlayer;
-    currentAction = clickedAction;
-
-    document.querySelectorAll('.submenu-item').forEach(i => {
-      i.textContent = i.textContent.replace(' ✓', '');
-    });
-    item.textContent = item.textContent + ' ✓';
-  });
-});
-
-  const toggleBtn = document.getElementById('consoleToggle');
-  const consolePanel = document.getElementById('consolePanel');
-  
-  toggleBtn.addEventListener('click', () => {
-    consolePanel.classList.toggle('active');
-    if (consolePanel.classList.contains('active')) {
-      toggleBtn.innerHTML = '&#9660;'; // down arrow
-      document.getElementById('consoleInput').focus();
-    } else {
-      toggleBtn.innerHTML = '&#9650;'; // up arrow
-    }
-  });
+        let startingDirections = "Hey ChatGPT, imagine a turn based game kind of like Civilization but modern borders and countries. I will input a player's turn and you tell me things based off that. Each turn, tell me three events happening in this (fictional) timeline. Also, tell me the results of a player's actions each turn. For example, if a player picks the country Germany to play as, and I say: Germany decides to attack France, then tell me what would happen next in this fictional timeline, like whether Germany gains France as a territory or loses the battle. In this fictional timeline, imagine there are no alliances yet, so no NATO, UN, EU, or anything like that.  I don't want any like stats like +1 anything or anything whatever. I just want you to tell me what is happening.";
+        let currentTurn = `The year is ${year}<br>`;
 
 
-    // --- Canvas setup & layers ---
-    const canvas = document.getElementById('canvas');
-    const ctx    = canvas.getContext('2d');
-    const layerSources = ['countrymapland.png', 'countrymapcolor.png','countrymapborder.png','countrymapwater.png'];
-    const layers = layerSources.map(src => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = 'https://cosmizy.com/' + src;
-      return img;
-    });
+        const colorMap = {
+            P1: [49, 112, 213],  // blue
+            P2: [213, 49, 49],  // red
+            P3: [61, 213, 49],  // green
+            P4: [213, 203, 49],  // green
+            P5: [121, 49, 213],  // green
+        };
 
-    let loadedCount = 0;
-    let landImageData;
-
-    function drawAll() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw recolored land first
-      if (landImageData) {
-        ctx.putImageData(landImageData, 0, 0);
-      } else {
-        ctx.drawImage(layers[0], 0, 0);
-      }
-      
-      // Draw water and borders on top (layers[3] = water, layers[2] = border)
-      ctx.drawImage(layers[3], 0, 0);
-      ctx.drawImage(layers[2], 0, 0);
-    }
-
-    function checkAll() {
-      loadedCount++;
-      if (loadedCount === layers.length) {
-        // Set canvas size to images
-        canvas.width  = hitCanvas.width  = layers[0].width;
-        canvas.height = hitCanvas.height = layers[0].height;
-
-        // Draw colormap to hitCanvas for pixel lookup only (no recolor here)
-        hitCtx.drawImage(layers[1], 0, 0);
-
-        // Initialize landImageData from land image (to recolor)
-        ctx.drawImage(layers[0], 0, 0);
-        landImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-        drawAll();
-      }
-    }
-
-    layers.forEach(img => img.onload = checkAll);
-
-    // --- Click‑to‑claim logic ---
-    canvas.addEventListener('click', e => {
-      if (!currentPlayer) return;
-    
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-      const y = Math.floor((e.clientY - rect.top)  * (canvas.height / rect.height));
-    
-      // Read country color from colormap (hitCtx)
-      const hitData = hitCtx.getImageData(0, 0, canvas.width, canvas.height).data;
-      const idx = (y * canvas.width + x) * 4;
-      const tR = hitData[idx], tG = hitData[idx + 1], tB = hitData[idx + 2];
-    
-      if(tR === 0 && tG === 0 && tB === 0) return; // no country clicked
-    
-      const [pR, pG, pB] = colorMap[currentPlayer];
-      const data = landImageData.data;
-    
-      if (currentAction === 'claim') {
-        // Solid recolor (as before)
-        for (let i = 0; i < data.length; i += 4) {
-          if (hitData[i] === tR && hitData[i+1] === tG && hitData[i+2] === tB) {
-            data[i]   = pR;
-            data[i+1] = pG;
-            data[i+2] = pB;
-            data[i+3] = 255;
-          }
+        function logToConsole(message) {
+            const consoleInput = document.getElementById('consoleInput');
+            consoleInput.value += message + '\n';
+            consoleInput.scrollTop = consoleInput.scrollHeight; // Auto-scroll to bottom
         }
-      } else if (currentAction === 'alliance') {
-        // Diagonal stripe pattern overlay of player's color
-    
-        for (let i = 0; i < data.length; i += 4) {
-          if (hitData[i] === tR && hitData[i+1] === tG && hitData[i+2] === tB) {
-            // Get pixel coordinates:
-            const pixelIndex = i / 4;
-            const px = pixelIndex % canvas.width;
-            const py = Math.floor(pixelIndex / canvas.width);
-    
-            // Check diagonal stripe pattern:
-            if ((px + py) % 6 < 3) {
-              // Blend the player color with existing land color (simple overwrite or mix)
-              data[i]   = pR;
-              data[i+1] = pG;
-              data[i+2] = pB;
-              data[i+3] = 255;
+
+        logToConsole(startingDirections);
+
+        document.querySelector('[data-action="setYear"]').addEventListener('click', () => {
+            yearInput.value = year;
+            yearPopup.classList.remove('hidden');
+            yearInput.focus();
+        });
+
+        setYearBtn.addEventListener('click', () => {
+            const inputVal = parseInt(yearInput.value);
+            if (!isNaN(inputVal)) {
+                year = inputVal;
+                currentTurn = `The year is ${year}<br>`;
+                logToConsole(currentTurn.replace('<br>', ''));
             }
-            // else keep original land pixel color (no change)
-          }
-        }
-      }
-    
-      drawAll();
-    });
+            yearPopup.classList.add('hidden');
+        });
 
-  </script>
+        // Cancel button
+        cancelYearBtn.addEventListener('click', () => {
+            yearPopup.classList.add('hidden');
+        });
+        
+        actionsMenu.addEventListener('click', () => {
+            actionsSubmenu.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.player-menu').forEach(menu => {
+            menu.addEventListener('click', () => {
+                const player = menu.dataset.player;
+                const submenu = document.getElementById('player' + player.charAt(1) + 'Submenu');
+                submenu.classList.toggle('active');
+            });
+        });
+
+        document.querySelectorAll('.submenu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const clickedPlayer = item.dataset.player;
+                const clickedAction = item.dataset.action;
+
+                if (currentPlayer === clickedPlayer && currentAction === clickedAction) {
+                    currentPlayer = null;
+                    currentAction = null;
+                    document.querySelectorAll('.submenu-item').forEach(i => {
+                        i.textContent = i.textContent.replace(' ✓', '');
+                    });
+                    return;
+                }
+
+                currentPlayer = clickedPlayer;
+                currentAction = clickedAction;
+
+                document.querySelectorAll('.submenu-item').forEach(i => {
+                    i.textContent = i.textContent.replace(' ✓', '');
+                });
+                item.textContent = item.textContent + ' ✓';
+            });
+        });
+
+        const toggleBtn = document.getElementById('consoleToggle');
+        const consolePanel = document.getElementById('consolePanel');
+
+        toggleBtn.addEventListener('click', () => {
+            consolePanel.classList.toggle('active');
+            if (consolePanel.classList.contains('active')) {
+                toggleBtn.innerHTML = '&#9660;'; // down arrow
+                document.getElementById('consoleInput').focus();
+            } else {
+                toggleBtn.innerHTML = '&#9650;'; // up arrow
+            }
+        });
+
+
+        // --- Canvas setup & layers ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const layerSources = ['countrymapland.png', 'countrymapcolor.png', 'countrymapborder.png', 'countrymapwater.png'];
+        const layers = layerSources.map(src => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = 'https://cosmizy.com/' + src;
+            return img;
+        });
+
+        let loadedCount = 0;
+        let landImageData;
+
+        function drawAll() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw recolored land first
+            if (landImageData) {
+                ctx.putImageData(landImageData, 0, 0);
+            } else {
+                ctx.drawImage(layers[0], 0, 0);
+            }
+
+            // Draw water and borders on top (layers[3] = water, layers[2] = border)
+            ctx.drawImage(layers[3], 0, 0);
+            ctx.drawImage(layers[2], 0, 0);
+        }
+
+        function checkAll() {
+            loadedCount++;
+            if (loadedCount === layers.length) {
+                // Set canvas size to images
+                canvas.width = hitCanvas.width = layers[0].width;
+                canvas.height = hitCanvas.height = layers[0].height;
+
+                // Draw colormap to hitCanvas for pixel lookup only (no recolor here)
+                hitCtx.drawImage(layers[1], 0, 0);
+
+                // Initialize landImageData from land image (to recolor)
+                ctx.drawImage(layers[0], 0, 0);
+                landImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                drawAll();
+            }
+        }
+
+        layers.forEach(img => img.onload = checkAll);
+
+        // --- Click‑to‑claim logic ---
+        canvas.addEventListener('click', e => {
+            if (!currentPlayer) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+            const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+
+            // Read country color from colormap (hitCtx)
+            const hitData = hitCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const idx = (y * canvas.width + x) * 4;
+            const tR = hitData[idx], tG = hitData[idx + 1], tB = hitData[idx + 2];
+
+            if (tR === 0 && tG === 0 && tB === 0) return; // no country clicked
+
+            const [pR, pG, pB] = colorMap[currentPlayer];
+            const data = landImageData.data;
+
+            if (currentAction === 'claim') {
+                // Solid recolor (as before)
+                for (let i = 0; i < data.length; i += 4) {
+                    if (hitData[i] === tR && hitData[i + 1] === tG && hitData[i + 2] === tB) {
+                        data[i] = pR;
+                        data[i + 1] = pG;
+                        data[i + 2] = pB;
+                        data[i + 3] = 255;
+                    }
+                }
+
+                logToConsole(`${currentPlayer} has claimed country ${getCountryByColor([tR, tG, tB])}`);
+            } else if (currentAction === 'alliance') {
+                // Diagonal stripe pattern overlay of player's color
+
+                for (let i = 0; i < data.length; i += 4) {
+                    if (hitData[i] === tR && hitData[i + 1] === tG && hitData[i + 2] === tB) {
+                        // Get pixel coordinates:
+                        const pixelIndex = i / 4;
+                        const px = pixelIndex % canvas.width;
+                        const py = Math.floor(pixelIndex / canvas.width);
+
+                        // Check diagonal stripe pattern:
+                        if ((px + py) % 6 < 3) {
+                            // Blend the player color with existing land color (simple overwrite or mix)
+                            data[i] = pR;
+                            data[i + 1] = pG;
+                            data[i + 2] = pB;
+                            data[i + 3] = 255;
+                        }
+                        // else keep original land pixel color (no change)
+                    }
+                }
+            }
+
+            drawAll();
+        });
+
+        function getCountryByColor([r, g, b]) {
+            const hex = rgbToHex(r, g, b).toLowerCase();
+            return colorToCountryMap[hex] || "Unknown";
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+    </script>
 </body>
 </html>
