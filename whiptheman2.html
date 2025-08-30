@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>whiptheman.io</title> <!-- Add the title element here -->
-  <link rel="icon" href="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/favicon.png?" type="image/png">
+  <title>whiptheman2.io</title> <!-- Add the title element here -->
+  <link rel="icon" href="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/whiptheman2favicon.png?" type="image/png">
   <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      overflow: hidden;
-    }
+      body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          overflow: hidden;
+          
+      }
         
       
         
@@ -60,16 +61,16 @@
     }
 
     #movableFigure {
-      left: 50%;
+      left: 55%;
       transform: translateX(-50%);
     }
 
     #movableFigure2 {
-      left: 40%;
+      left: 45%;
       transform: translateX(-50%);
     }
 
-    .head, .body, .left-arm, .right-arm, .left-leg, .right-leg {
+    .head, .torso, .left-arm, .right-arm, .left-leg, .right-leg {
       position: absolute;
       background-color: black;
     }
@@ -83,7 +84,7 @@
       transform: translateX(-50%);
     }
 
-    .body {
+    .torso {
       width: 20px;
       height: 120px;
       top: 40px;
@@ -139,7 +140,7 @@
       left: 25%;
       transform-origin: 0% 10%;
       transform: rotate(-110deg);
-      background-color: white; /* background-color: black; */
+      background-color: black; /* background-color: black; */
       border: 0px solid #000000;
     }
 
@@ -208,38 +209,56 @@
       border-bottom: 20px solid black;
     }
 
-    .title-text {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: black;
-      font-size: 55px;
-    }
+      .title-text {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          font-size: 55px;
+          -webkit-text-stroke: 4px black; /* width and color */
 
-    .highscore-text {
-      position: absolute;
-      top: 10px;
-      left: 1100px;
-      color: black;
-      font-size: 33px;
-      display: block;
-    }
-      
-    .coin-text {
-      position: absolute;
-      top: 80px;
-      left: 10px;
-      color: black;
-      font-size: 36px;
-    }
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+          
+          color: white;
+      }
 
-    .whip-text {
-      position: absolute;
-      top: 80px;
-      left: 175px;
-      color: black;
-      font-size: 36px;
-    }
+      .highscore-text {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          
+          font-size: 33px;
+          display: block;
+          -webkit-text-stroke: 3px black; /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: white;
+      }
+
+      .coin-text {
+          position: absolute;
+          top: 80px;
+          left: 10px;
+          font-size: 36px;
+          -webkit-text-stroke: 3px black; /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: white;
+      }
+
+      .whip-text {
+          position: absolute;
+          top: 80px;
+          left: 175px;
+          
+          font-size: 36px;
+          -webkit-text-stroke: 3px black; /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: white;
+      }
 
     /*.ground-text {
       position: absolute;
@@ -273,6 +292,15 @@
       z-index: 3;
     }
 
+      .sky {
+          position: absolute;
+          bottom: 10%;
+          left: 0;
+          width: 100%;
+          height: 120%;
+          z-index: -1;
+      }
+
     .shop-frame {
       position: absolute;
       top: 50%;
@@ -287,29 +315,48 @@
       outline: 2px solid #000000;
     }
 
-    .gift-frame {
-      position: absolute;
-      top: 50%;
-      transform: translateX(-50%); /* Center the text horizontally */
-      transform: translateY(-50%); /* Center the text horizontally */
-      width: 200px;
-      height: 75px;
-      background-color: #FFFFFF;
-      border-radius: 16px;
-      z-index: 6;
-      display: none;
-      outline: 2px solid #000000;
-    }
+      .gift-frame {
+          position: absolute;
+          top: 50%;
+          transform: translateX(-50%); /* Center the text horizontally */
+          transform: translateY(-50%); /* Center the text horizontally */
+          width: 200px;
+          height: 75px;
+          background-color: rgb(255 255 255 / 40%);
+          border-radius: 16px;
+          z-index: 6;
+          display: none;
+          outline: 0px solid #000000;
+          font-family: 'Times New Roman', Times, serif;
+          -webkit-text-stroke: 3px rgb(0 0 0 / 50%); /* width and color */
 
-    #gift-textbox {
-        width: calc(100%); /* Subtracting padding from the width */
-        height: calc(100%); /* Subtracting padding from the height */
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
-        padding: 5px; /* Example padding */
-        border-radius: 16px; /* Optional: Add rounded corners */
-        border: none; /* Remove button border */
-        font-size: 48px; /* Set font size */
-    }
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: rgb(255 255 255 / 100%);
+      }
+
+      #gift-textbox {
+          width: calc(100%); /* Subtracting padding from the width */
+          height: calc(100%); /* Subtracting padding from the height */
+          box-sizing: border-box; /* Include padding and border in the element's total width and height */
+          padding: 5px; /* Example padding */
+          background-color: rgb(255 255 255 / 0%);
+          border-radius: 16px; /* Optional: Add rounded corners */
+          border: none; /* Remove button border */
+          outline: 0px solid #000000;
+          font-size: 48px; /* Set font size */
+          font-family: 'Times New Roman', Times, serif;
+          -webkit-text-stroke: 3px rgb(0 0 0 / 50%); /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: rgb(255 255 255 / 100%);
+      }
+
+      ::placeholder {
+          color: rgb(255 255 255 / 100%);
+          opacity: 1; /* Firefox */
+      }
 
     .claim-gift-button {
       position: absolute;
@@ -322,62 +369,80 @@
       border: none; /* Remove button border */
       cursor: pointer;
       border-radius: 16px; /* Optional: Add rounded corners */
-    }
-
-    .large-button {
-      position: absolute;
-      top: 40%; /* Adjust the top distance as needed */
-      transform: translateX(-50%);
-      transform: translateY(-50%);
-      padding: 10px 20px; /* Adjust padding to control button size */
-      font-size: 32px; /* Set font size */
-      background-color: #FFFFFF /* Set button background color */
-      color: black; /* Set button text color */
-      border: none; /* Remove button border */
-      cursor: pointer;
-      border-radius: 16px; /* Optional: Add rounded corners */
-      z-index: 5;
-    }
-
-    .large-button:hover {
-      background-color: #D3D3D3; /* Change background color on hover */
-    }
-
-    .shop-button {
-      position: absolute;
-      top: 25px; /* Adjust the top distance as needed */
-      left: 400px; /* Adjust the left distance or use other positioning properties */
-      padding: 10px 20px; /* Adjust padding to control button size */
-      font-size: 32px; /* Set font size */
-      background-color: #FFFFFF /* Set button background color */
-      color: black; /* Set button text color */
-      border: none; /* Remove button border */
-      cursor: pointer;
-      border-radius: 16px; /* Optional: Add rounded corners */
-      z-index: 5;
-    }
-
-    .shop-button:hover {
-      background-color: #D3D3D3; /* Change background color on hover */
-    }
       
-    .gift-button {
-      position: absolute;
-      top: 25px; /* Adjust the top distance as needed */
-      left: 525px; /* Adjust the left distance or use other positioning properties */
-      padding: 10px 20px; /* Adjust padding to control button size */
-      font-size: 32px; /* Set font size */
-      background-color: #FFFFFF /* Set button background color */
-      color: black; /* Set button text color */
-      border: none; /* Remove button border */
-      cursor: pointer;
-      border-radius: 16px; /* Optional: Add rounded corners */
-      z-index: 5;
     }
 
-    .gift-button:hover {
-      background-color: #D3D3D3; /* Change background color on hover */
-    }
+      .large-button {
+          position: absolute;
+          top: 40%; /* Adjust the top distance as needed */
+          transform: translateX(-50%);
+          transform: translateY(-50%);
+          padding: 10px 20px; /* Adjust padding to control button size */
+          font-size: 32px; /* Set font size */
+          background-color: rgb(255 255 255 / 40%);
+          border: none; /* Remove button border */
+          cursor: pointer;
+          border-radius: 16px; /* Optional: Add rounded corners */
+          z-index: 5;
+          font-family: 'Times New Roman', Times, serif;
+          -webkit-text-stroke: 3px rgb(0 0 0 / 50%); /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: rgb(255 255 255 / 100%);
+      }
+
+          .large-button:hover {
+              
+              background-color: rgb(255 255 255 / 50%);
+          }
+
+      .shop-button {
+          position: absolute;
+          top: 25px; /* Adjust the top distance as needed */
+          left: 400px; /* Adjust the left distance or use other positioning properties */
+          padding: 10px 20px; /* Adjust padding to control button size */
+          font-size: 32px; /* Set font size */
+          background-color: rgb(255 255 255 / 40%);
+          border: none; /* Remove button border */
+          cursor: pointer;
+          border-radius: 16px; /* Optional: Add rounded corners */
+          z-index: 5;
+          font-family: 'Times New Roman', Times, serif;
+          -webkit-text-stroke: 3px rgb(0 0 0 / 50%); /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: rgb(255 255 255 / 100%);
+      }
+
+          .shop-button:hover {
+              background-color: rgb(255 255 255 / 50%);
+          }
+
+      .gift-button {
+          position: absolute;
+          top: 25px; /* Adjust the top distance as needed */
+          left: 525px; /* Adjust the left distance or use other positioning properties */
+          padding: 10px 20px; /* Adjust padding to control button size */
+          font-size: 32px; /* Set font size */
+          background-color: rgb(255 255 255 / 40%);
+          border: none; /* Remove button border */
+          cursor: pointer;
+          border-radius: 16px; /* Optional: Add rounded corners */
+          z-index: 5;
+          font-family: 'Times New Roman', Times, serif;
+          -webkit-text-stroke: 3px rgb(0 0 0 / 50%); /* width and color */
+
+          paint-order: stroke; /* <-- add this for ticker text stroke  */
+
+          color: rgb(255 255 255 / 100%);
+          visibility: hidden;
+      }
+
+          .gift-button:hover {
+              background-color: rgb(255 255 255 / 50%);
+          }
 
     .buy-man {
       cursor: pointer;
@@ -486,486 +551,488 @@
 </head>
 <body>
 
-<div id="blood-container"></div>
-<div id="coin-container"></div>
-    
-<button class="large-button" id="large-button" title="Click to Whip">Wave</button>
-<button class="shop-button" onclick="shopClick();">Shop</button>
-<button class="gift-button" onclick="giftClick();">Gift</button>
+    <div id="blood-container"></div>
+    <div id="coin-container"></div>
 
-  <div class="shop-frame" id="shop-frame">
-      <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
-      <div class="upgrade-booster" id="upgrade-booster" onclick="upgradeBooster()">Boost Whip - 120sec<br>200 Coins</div>
-      <div class="upgrade-double" id="upgrade-double" onclick="upgradeDouble()">Double Whips - 60sec<br>100 Coins</div>
-      <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip - inf<br>25 Coins</div>
-      <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip - inf<br>25 Coins</div>
-      <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip - inf<br>100 Coins</div>
-      <div class="buy-poster" id="buy-poster" onclick="buyPoster()">Space Academy™ Poster - 60sec<br>10 Coins</div>
-  </div>
+    <button class="large-button" id="large-button" title="Click to Whip">Whip</button>
+    <button class="shop-button" onclick="shopClick();">Shop</button>
+    <button class="gift-button" onclick="giftClick();">Gift</button>
 
-  <div class="gift-frame" id="gift-frame">
-      <input type="text" id="gift-textbox" placeholder="Code">
-      <div class="claim-gift-button" id="claim-gift-button" onclick="claimGift()">Claim</div>
-  </div>
-
-  <div class="title-text">wavetotheman.io</div>
-<div class="highscore-text" id="highscore-text">highscore: 0</div>
-  <div class="coin-text" id="coin-text">coins: 0</div>
-  <div class="whip-text" id="whip-text">waves: 0</div>
-
-  <img src="https://github.com/Cosmizy/whiptheman/blob/main/whipthemanGround.png?raw=true" class="ground" id="ground">
-    
-  <div class="ground" id="ground">
-    
-  </div>
-
-  <div class="figure" id="movableFigure">
-    <div class="head"></div>
-    <div class="body"></div>
-    <div class="left-arm"></div>
-    <div class="right-arm"></div>
-    <div class="left-leg"></div>
-    <div class="right-leg"></div>
-  </div>
-
-  <div class="figure" id="movableFigure2">
-    <div class="head">
-     <div class="crown">
-      <div class="black-square"></div>
-      <div class="triangle"></div>
-      <div class="triangle2"></div>
-      <div class="triangle3"></div>
-     </div>
+    <div class="shop-frame" id="shop-frame">
+        <div class="buy-man" id="buy-man" onclick="buyMan()">New Man<br>5 Coins</div>
+        <div class="upgrade-booster" id="upgrade-booster" onclick="upgradeBooster()">Boost Whip - 120sec<br>200 Coins</div>
+        <div class="upgrade-double" id="upgrade-double" onclick="upgradeDouble()">Double Whips - 60sec<br>100 Coins</div>
+        <div class="upgrade-thick" id="upgrade-thick" onclick="upgradeThick()">Thick Whip - inf<br>25 Coins</div>
+        <div class="upgrade-long" id="upgrade-long" onclick="upgradeLong()">Long Whip - inf<br>25 Coins</div>
+        <div class="upgrade-power" id="upgrade-power" onclick="upgradePower()">Powerful Whip - inf<br>100 Coins</div>
+        <div class="buy-poster" id="buy-poster" onclick="buyPoster()">Space Academy™ Poster - 60sec<br>10 Coins</div>
     </div>
-    <div class="body"></div>
-    <div class="left-arm"></div>
-   <div class="right-arm">
-       <div class="tool"></div>
-       <div class="tool2"></div>
+
+    <div class="gift-frame" id="gift-frame">
+        <input type="text" id="gift-textbox" placeholder="Code">
+        <div class="claim-gift-button" id="claim-gift-button" onclick="claimGift()">Claim</div>
     </div>
-    <div class="left-leg"></div>
-    <div class="right-leg"></div>
-  </div>
+
+    <div class="title-text">whiptheman2.io</div>
+    <div class="highscore-text" id="highscore-text">highscore: 0</div>
+    <div class="coin-text" id="coin-text">coins: 0</div>
+    <div class="whip-text" id="whip-text">whips: 0</div>
+
+    <img src="https://github.com/Cosmizy/whiptheman/blob/main/whipthemanGround.png?raw=true" class="ground" id="ground">
+    <img src="https://github.com/Cosmizy/whiptheman/blob/main/WTM2SKYBACKGROUND.png?raw=true" class="sky" id="sky">
+
+    <div class="ground" id="ground">
+
+    </div>
+
+    <div class="figure" id="movableFigure">
+        <div class="head"></div>
+        <div class="torso"></div>
+        <div class="left-arm"></div>
+        <div class="right-arm"></div>
+        <div class="left-leg"></div>
+        <div class="right-leg"></div>
+    </div>
+
+    <div class="figure" id="movableFigure2">
+        <div class="head">
+            <div class="crown">
+                <div class="black-square"></div>
+                <div class="triangle"></div>
+                <div class="triangle2"></div>
+                <div class="triangle3"></div>
+            </div>
+        </div>
+        <div class="torso"></div>
+        <div class="left-arm"></div>
+        <div class="right-arm">
+            <div class="tool"></div>
+            <div class="tool2"></div>
+        </div>
+        <div class="left-leg"></div>
+        <div class="right-leg"></div>
+    </div>
 
     <img src="https://raw.githubusercontent.com/Cosmizy/whiptheman/main/poster.png" alt="Space Academy™" class="poster">
-    
-  <script>
 
- const firebaseConfig = {
-    apiKey: "AIzaSyC1g8oscztqxou85TW3eeKGYHJfMTfnqzw",
-    authDomain: "whiptheman.firebaseapp.com",
-    projectId: "whiptheman",
-    storageBucket: "whiptheman.appspot.com",
-    messagingSenderId: "429725313939",
-    appId: "1:429725313939:web:4883345cac6b7b14821666",
-    measurementId: "G-Y8QPDDXX8E"
-  };
+    <script>
 
-    let banned = 0;
-    let timeoutId;
-      
-    document.getElementById("large-button").addEventListener("click", buttonClick);
-      
-document.addEventListener("keydown", function(event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-    }
-});
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1g8oscztqxou85TW3eeKGYHJfMTfnqzw",
+            authDomain: "whiptheman.firebaseapp.com",
+            projectId: "whiptheman",
+            storageBucket: "whiptheman.appspot.com",
+            messagingSenderId: "429725313939",
+            appId: "1:429725313939:web:4883345cac6b7b14821666",
+            measurementId: "G-Y8QPDDXX8E"
+        };
 
-document.addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-        // Clear the timeout when Enter key is released
-        clearTimeout(timeoutId);
-        timeoutId = null; // Reset timeoutId
-    }
-});
+        let banned = 0;
+        let timeoutId;
 
-    let isManAlive = true;
-      
-    function buttonClick() {
-        if (isManAlive) {
-            //alert(hex);
-            rotateStick();
-            rotateStick2();
-            moveUp();
-            //updateBloodParticleColor();
-            
-            const movableFigure = document.getElementById('movableFigure');
-            const targetElement = movableFigure.querySelector('.body');
-            const rect = targetElement.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-    
-            createBlood(0, 150);
-    
-            const randomNumber = Math.random();
-             const randomNumber2 = Math.random();
+        document.getElementById("large-button").addEventListener("click", buttonClick);
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+            }
+        });
+
+        document.addEventListener("keyup", function (event) {
+            if (event.key === "Enter") {
+                // Clear the timeout when Enter key is released
+                clearTimeout(timeoutId);
+                timeoutId = null; // Reset timeoutId
+            }
+        });
+
+        let isManAlive = true;
+
+        function buttonClick() {
+            if (isManAlive) {
+                //alert(hex);
+                rotateStick();
+                rotateStick2();
+                moveUp();
+                //updateBloodParticleColor();
+
+                const movableFigure = document.getElementById('movableFigure');
+                const targetElement = movableFigure.querySelector('.torso');
+                const parentRect = movableFigure.getBoundingClientRect();
+                const targetRect = targetElement.getBoundingClientRect();
+                const centerX = (targetRect.left - parentRect.left) + targetRect.width / 2;
+                const centerY = (targetRect.top - targetRect.top) + parentRect.height / 2;
+                createBlood(centerX, 200);
+
+
+                const randomNumber = Math.random();
+                const randomNumber2 = Math.random();
                 let gotCoin;
 
                 const tool2 = document.querySelector('.tool2');
                 const tool2Display = window.getComputedStyle(tool2).getPropertyValue('display');
-            // Check if the random number falls within the 20% probability
+                // Check if the random number falls within the 20% probability
 
-            if (tool2Display === 'block') {
-                moveUp();
-            }
-            
-            if (randomNumber <= coinChance) {
-              createCoin(0,150);
-              gotCoin = true; // or set it based on your logic
-              moveUp(gotCoin);
+                if (tool2Display === 'block') {
+                    moveUp();
+                }
+
+                if (randomNumber <= coinChance) {
+                    createCoin(0, 150);
+                    gotCoin = true; // or set it based on your logic
+                    moveUp(gotCoin);
+                } else {
+                    gotCoin = false; // or set it based on your logic
+                }
+
+                if (randomNumber2 <= deathChance) {
+                    killMan();
+                }
             } else {
-                gotCoin = false; // or set it based on your logic
+
             }
-    
-            if (randomNumber2 <= deathChance) {
-              killMan();
+        }
+
+        function shopClick() {
+            const shopFrame = document.getElementById('shop-frame');
+
+            if (shopFrame.style.display === 'block') {
+                shopFrame.style.display = 'none';
+            } else {
+                shopFrame.style.display = 'block';
             }
-        } else {
-            
         }
-    }
 
-    function shopClick() {
-        const shopFrame = document.getElementById('shop-frame');
+        function giftClick() {
+            const giftFrame = document.getElementById('gift-frame');
 
-        if (shopFrame.style.display === 'block') {
-            shopFrame.style.display = 'none';
-        } else {
-            shopFrame.style.display = 'block';
+            if (giftFrame.style.display === 'block') {
+                giftFrame.style.display = 'none';
+            } else {
+                giftFrame.style.display = 'block';
+            }
         }
-    }
 
-    function giftClick() {
-        const giftFrame = document.getElementById('gift-frame');
+        let posterCost = 10;
 
-        if (giftFrame.style.display === 'block') {
-            giftFrame.style.display = 'none';
-        } else {
-            giftFrame.style.display = 'block';
+        function buyPoster() {
+            if (coinCount >= posterCost) {
+                coinChance *= 1.25;
+                deathChance = 0;
+                coinCount -= posterCost;
+                const poster = document.querySelector('.poster');
+                poster.style.display = 'block';
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
+
+                const posterButton = document.getElementById('buy-poster');
+                posterButton.style.display = 'none';
+
+                setTimeout(() => {
+                    coinChance /= 1.25;
+                    posterButton.style.display = 'block';
+                    poster.style.display = 'none';
+                }, 60000);
+            }
         }
-    }
 
-    let posterCost = 10;
+        let boosterCost = 200;
 
-    function buyPoster() {
-        if (coinCount >= posterCost) {
-            coinChance *= 1.25;
-            deathChance = 0;
-            coinCount -= posterCost;
-            const poster = document.querySelector('.poster');
-            poster.style.display = 'block';
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
+        function upgradeBooster() {
+            if (coinCount >= boosterCost) {
+                const originalBorderStyle = toolElement.style.border;
+                const originalBorderStyle2 = toolElement2.style.border;
+                toolElement.style.border = '2px solid #0000FF';
+                toolElement2.style.border = '2px solid #0000FF';
+                booster = true;
+                coinChance *= 3;
+                deathChance = 0;
+                coinCount -= boosterCost;
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
 
-            const posterButton = document.getElementById('buy-poster');
-            posterButton.style.display = 'none';
+                const boosterButton = document.getElementById('upgrade-booster');
+                boosterButton.style.display = 'none';
 
-            setTimeout(() => {
-                coinChance /= 1.25;
-                posterButton.style.display = 'block';
-                poster.style.display = 'none';
-            }, 60000);
+                setTimeout(() => {
+                    booster = false;
+                    coinChance /= 3;
+                    toolElement.style.border = originalBorderStyle;
+                    toolElement2.style.border = originalBorderStyle2;
+                    boosterButton.style.display = 'block';
+                }, 120000);
+            }
         }
-    }
-      
-    let boosterCost = 200;
 
-    function upgradeBooster() {
-        if (coinCount >= boosterCost) {
-            const originalBorderStyle = toolElement.style.border;
-            const originalBorderStyle2 = toolElement2.style.border;
-            toolElement.style.border = '2px solid #0000FF';
-            toolElement2.style.border = '2px solid #0000FF';
-            booster = true;
-            coinChance *= 3;
-            deathChance = 0;
-            coinCount -= boosterCost;
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
+        let doubleCost = 100;
 
-            const boosterButton = document.getElementById('upgrade-booster');
-            boosterButton.style.display = 'none';
+        function upgradeDouble() {
+            if (coinCount >= doubleCost) {
+                toolElement2.style.display = 'block';
+                coinChance *= 1.5;
+                coinCount -= doubleCost;
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
 
-            setTimeout(() => {
-                booster = false;
-                coinChance /= 3;
-                toolElement.style.border = originalBorderStyle;
-                toolElement2.style.border = originalBorderStyle2;
-                boosterButton.style.display = 'block';
-            }, 120000);
+                const doubleButton = document.getElementById('upgrade-double');
+                doubleButton.style.display = 'none';
+
+                setTimeout(() => {
+                    coinChance /= 1.5;
+                    toolElement2.style.display = 'none';
+                    doubleButton.style.display = 'block';
+                }, 60000);
+            }
         }
-    }
 
-    let doubleCost = 100;
+        let thickCost = 25;
 
-    function upgradeDouble() {
-        if (coinCount >= doubleCost) {
-            toolElement2.style.display = 'block';
-            coinChance *= 1.5;
-            coinCount -= doubleCost;
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
+        function upgradeThick() {
+            if (coinCount >= thickCost) {
+                toolElement.style.width = '20px';
+                toolElement2.style.width = '20px';
+                coinChance += 0.05;
+                deathChance += 0.001;
+                coinCount -= thickCost;
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
 
-            const doubleButton = document.getElementById('upgrade-double');
-            doubleButton.style.display = 'none';
-
-            setTimeout(() => {
-                coinChance /= 1.5;
-                toolElement2.style.display = 'none';
-                doubleButton.style.display = 'block';
-            }, 60000);
+                const thickButton = document.getElementById('upgrade-thick');
+                thickButton.style.display = 'none';
+            }
         }
-    }
-      
-    let thickCost = 25;
 
-    function upgradeThick() {
-        if (coinCount >= thickCost) {
-            toolElement.style.width = '20px';
-            toolElement2.style.width = '20px';
-            coinChance += 0.05;
-            deathChance += 0.001;
-            coinCount -= thickCost;
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
+        let longCost = 25;
 
-            const thickButton = document.getElementById('upgrade-thick');
-            thickButton.style.display = 'none';
+        function upgradeLong() {
+            if (coinCount >= longCost) {
+                toolElement.style.height = '175px';
+                toolElement2.style.height = '175px';
+                coinChance += 0.05;
+                deathChance += 0.001;
+                coinCount -= longCost;
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
+
+                const longButton = document.getElementById('upgrade-long');
+                longButton.style.display = 'none';
+            }
         }
-    }
 
-    let longCost = 25;
+        let powerCost = 100;
 
-    function upgradeLong() {
-        if (coinCount >= longCost) {
-            toolElement.style.height = '175px';
-            toolElement2.style.height = '175px';
-            coinChance += 0.05;
-            deathChance += 0.001;
-            coinCount -= longCost;
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
+        function upgradePower() {
+            if (coinCount >= powerCost) {
+                toolElement.style.border = '2px solid #FF0000';
+                toolElement2.style.border = '2px solid #FF0000';
+                coinChance += 0.2;
+                deathChance += 0.0025;
+                coinCount -= powerCost;
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
 
-            const longButton = document.getElementById('upgrade-long');
-            longButton.style.display = 'none';
+                const powerButton = document.getElementById('upgrade-power');
+                powerButton.style.display = 'none';
+            }
         }
-    }
 
-    let powerCost = 100;
+        //function bloodOn() {
+        //    const groundText = document.querySelector('.ground-text');
 
-    function upgradePower() {
-        if (coinCount >= powerCost) {
-            toolElement.style.border = '2px solid #FF0000';
-            toolElement2.style.border = '2px solid #FF0000';
-            coinChance += 0.2;
-            deathChance += 0.0025;
-            coinCount -= powerCost;
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
+        //    if (groundText.style.color === 'red') {
+        // If text is currently red, change it to white
+        //        groundText.style.color = 'white';
+        //        changeHex('#ffffff');
+        //    } else {
+        // If text is not red, change it to red
+        //        groundText.style.color = 'red';
+        //        changeHex('#ff0000');
+        //    }
+        //}
 
-            const powerButton = document.getElementById('upgrade-power');
-            powerButton.style.display = 'none';
-        }
-    }
-
-    //function bloodOn() {
-    //    const groundText = document.querySelector('.ground-text');
-       
-    //    if (groundText.style.color === 'red') {
-            // If text is currently red, change it to white
-    //        groundText.style.color = 'white';
-    //        changeHex('#ffffff');
-    //    } else {
-            // If text is not red, change it to red
-    //        groundText.style.color = 'red';
-    //        changeHex('#ff0000');
-    //    }
-    //}
-
-    function killMan() {
-        const whipButton = document.getElementById('large-button');
-        const movableFigure = document.getElementById('movableFigure');
-        const manButton = document.getElementById('buy-man');
-        manButton.style.display = 'block';
-        isManAlive = false;
-
-        movableFigure.style.display = 'none';
-        
-        whipButton.disabled = true;
-        whipButton.style.opacity = 0.5;
-        whipButton.style.cursor = 'not-allowed';
-        whipButton.title = 'Man is dead. Buy a new man in Shop.';
-    }
-
-    let manCost = 5;
-
-    function buyMan() {
-        if (coinCount >= manCost) {
+        function killMan() {
             const whipButton = document.getElementById('large-button');
-            whipButton.disabled = false;
-            whipButton.style.opacity = 1;
-            whipButton.style.cursor = 'pointer';
-            whipButton.title = 'Click to Whip';
-
-            isManAlive = true;
-    
-            movableFigure.style.display = 'block';
-            
-            coinChance += 0.025;
-            deathChance -= 0.0005;
-            coinCount -= manCost;
-            const coinsText = document.getElementById('coin-text');
-            coinsText.textContent = `coins: ${coinCount}`;
-
+            const movableFigure = document.getElementById('movableFigure');
             const manButton = document.getElementById('buy-man');
-            manButton.style.display = 'none';
+            manButton.style.display = 'block';
+            isManAlive = false;
+
+            movableFigure.style.display = 'none';
+
+            whipButton.disabled = true;
+            whipButton.style.opacity = 0.5;
+            whipButton.style.cursor = 'not-allowed';
+            whipButton.title = 'Man is dead. Buy a new man in Shop.';
         }
-    }
 
-    function makeFigureFall() {
-      const movableFigure = document.getElementById('movableFigure');
-      const windowHeight = window.innerHeight;
+        let manCost = 5;
 
-      // Set the initial top position
-      movableFigure.style.top = '0';
+        function buyMan() {
+            if (coinCount >= manCost) {
+                const whipButton = document.getElementById('large-button');
+                whipButton.disabled = false;
+                whipButton.style.opacity = 1;
+                whipButton.style.cursor = 'pointer';
+                whipButton.title = 'Click to Whip';
 
-      // Simulate the falling motion
-      setTimeout(() => {
-        movableFigure.style.top = `${windowHeight - movableFigure.clientHeight - 40}px`;
-      }, 100);
-    }
+                isManAlive = true;
 
-    function makeFigure2Fall() {
-      const movableFigure2 = document.getElementById('movableFigure2');
-      const windowHeight = window.innerHeight;
+                movableFigure.style.display = 'block';
 
-      // Set the initial top position
-      movableFigure2.style.top = '0';
+                coinChance += 0.025;
+                deathChance -= 0.0005;
+                coinCount -= manCost;
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
 
-      // Simulate the falling motion
-      setTimeout(() => {
-        movableFigure2.style.top = `${windowHeight - movableFigure2.clientHeight - 40}px`;
-      }, 100);
-    }
+                const manButton = document.getElementById('buy-man');
+                manButton.style.display = 'none';
+            }
+        }
 
-    // Call the function when the page is loaded
-    window.onload = function() {
-        loadScores();
-        if (banned === 1) {
-            alert('Your score has been reset for abusing glitches');
-            makeFigureFall();
-            makeFigure2Fall(); // Call the function for movableFigure2
-            
-            banned = 0;
+        function makeFigureFall() {
+            const movableFigure = document.getElementById('movableFigure');
+            const windowHeight = window.innerHeight;
+
+            // Set the initial top position
+            movableFigure.style.top = '0';
+
+            // Simulate the falling motion
+            setTimeout(() => {
+                movableFigure.style.top = `${windowHeight - movableFigure.clientHeight - 40}px`;
+            }, 100);
+        }
+
+        function makeFigure2Fall() {
+            const movableFigure2 = document.getElementById('movableFigure2');
+            const windowHeight = window.innerHeight;
+
+            // Set the initial top position
+            movableFigure2.style.top = '0';
+
+            // Simulate the falling motion
+            setTimeout(() => {
+                movableFigure2.style.top = `${windowHeight - movableFigure2.clientHeight - 40}px`;
+            }, 100);
+        }
+
+        // Call the function when the page is loaded
+        window.onload = function () {
+            loadScores();
+            if (banned === 1) {
+                alert('Your score has been reset for abusing glitches');
+                makeFigureFall();
+                makeFigure2Fall(); // Call the function for movableFigure2
+
+                banned = 0;
+                saveScores();
+
+
+                // Remove all elements from the body
+                //document.body.innerHTML = "";
+                //alert('You have been permanently banned from whiptheman.io for abusing glitches');
+            } else {
+                makeFigureFall();
+                makeFigure2Fall(); // Call the function for movableFigure2
+            }
+        };
+
+        const toolElement = document.querySelector('.tool');
+
+        function rotateStick() {
+            let rotate = true;
+            let invert = false;
+            let rotation = -110;
+
+            // Update the rotation angle every frame
+            function updateRotation() {
+                if (rotate && !invert) {
+                    rotation += 5;
+                } else if (rotate && invert) {
+                    rotation -= 5;
+                }
+
+                if (rotation >= -40) {
+                    invert = true;
+                }
+
+                if (rotation < -110) {
+                    rotate = false;
+                    invert = false;
+                }
+
+                toolElement.style.transform = `rotate(${rotation}deg)`;
+
+                // Request the next animation frame
+                requestAnimationFrame(updateRotation);
+            }
+
+            // Start the animation
+            updateRotation();
+        }
+
+        const toolElement2 = document.querySelector('.tool2');
+
+        function rotateStick2() {
+            let rotate = true;
+            let invert = false;
+            let rotation = -110;
+
+            // Update the rotation angle every frame
+            function updateRotation() {
+                if (rotate && !invert) {
+                    rotation += 5;
+                } else if (rotate && invert) {
+                    rotation -= 5;
+                }
+
+                if (rotation >= -40) {
+                    invert = true;
+                }
+
+                if (rotation < -110) {
+                    rotate = false;
+                    invert = false;
+                }
+
+                toolElement2.style.transform = `rotate(${rotation}deg)`;
+
+                // Request the next animation frame
+                requestAnimationFrame(updateRotation);
+            }
+
+            // Start the animation
+            updateRotation();
+        }
+
+
+        let clickCount = 0;
+        let coinCount = 0;
+        let highScore = 20000;
+        let coinChance = 0.2;
+        let deathChance = 0;
+        let booster = false;
+
+        function moveUp(gotCoin) {
+            clickCount += 1;
+            const clicksText = document.getElementById('whip-text');
+            clicksText.textContent = `whips: ${clickCount}`;
+            if (gotCoin) {
+                coinCount += 1;
+
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
+            }
+
+            if (clickCount > highScore) {
+                highScore = clickCount;
+                updateHighScore();
+            }
+
             saveScores();
-            
-            
-            // Remove all elements from the body
-            //document.body.innerHTML = "";
-            //alert('You have been permanently banned from whiptheman.io for abusing glitches');
-        } else {  
-            makeFigureFall();
-            makeFigure2Fall(); // Call the function for movableFigure2
-        }
-    };
-
-const toolElement = document.querySelector('.tool');
-      
-function rotateStick() {
-    let rotate = true;
-    let invert = false;
-    let rotation = -110;
-
-    // Update the rotation angle every frame
-    function updateRotation() {
-        if (rotate && !invert) {
-            rotation += 5;
-        } else if (rotate && invert) {
-            rotation -= 5;
         }
 
-        if (rotation >= -40) {
-            invert = true;
-        }
 
-        if (rotation < -110) {
-            rotate = false;
-            invert = false;
-        }
-
-        toolElement.style.transform = `rotate(${rotation}deg)`;
-
-        // Request the next animation frame
-        requestAnimationFrame(updateRotation);
-    }
-
-    // Start the animation
-    updateRotation();
-}
-
-const toolElement2 = document.querySelector('.tool2');
-      
-function rotateStick2() {
-    let rotate = true;
-    let invert = false;
-    let rotation = -110;
-
-    // Update the rotation angle every frame
-    function updateRotation() {
-        if (rotate && !invert) {
-            rotation += 5;
-        } else if (rotate && invert) {
-            rotation -= 5;
-        }
-
-        if (rotation >= -40) {
-            invert = true;
-        }
-
-        if (rotation < -110) {
-            rotate = false;
-            invert = false;
-        }
-
-        toolElement2.style.transform = `rotate(${rotation}deg)`;
-
-        // Request the next animation frame
-        requestAnimationFrame(updateRotation);
-    }
-
-    // Start the animation
-    updateRotation();
-}
-
-      
-    let clickCount = 0;
-    let coinCount = 0;
-    let highScore = 20000;
-    let coinChance = 0.2;
-    let deathChance = 0;
-    let booster = false;
-
-    function moveUp(gotCoin) {
-      clickCount += 1;
-      const clicksText = document.getElementById('whip-text');
-      clicksText.textContent = `waves: ${clickCount}`;
-        if (gotCoin) {
-            coinCount += 1;
-
-          const coinsText = document.getElementById('coin-text');
-          coinsText.textContent = `coins: ${coinCount}`;
-        }
-
-        if (clickCount > highScore) {
-            highScore = clickCount;
-            updateHighScore();
-        }
-        
-        saveScores();
-    }
-
-      
 
         let hex = '#ffffff';
 
@@ -1003,7 +1070,7 @@ function rotateStick2() {
                 coinCount: banned ? 0 : coinCount,   // Reset coin count to 0 if banned
                 banned: banned,
             };
-        
+
             // Convert scores object to JSON and save to local storage
             localStorage.setItem('whipthemanScores', JSON.stringify(scores));
         }
@@ -1011,24 +1078,24 @@ function rotateStick2() {
         function loadScores() {
             // Retrieve scores from local storage
             const storedScores = localStorage.getItem('whipthemanScores');
-            
+
             if (storedScores) {
                 const scores = JSON.parse(storedScores);
-        
+
                 clickCount = scores.clickCount || 0;
                 coinCount = scores.coinCount || 0;
                 banned = scores.banned || 0;
-        
+
                 const clicksText = document.getElementById('whip-text');
-                clicksText.textContent = `waves: ${clickCount}`;
-        
+                clicksText.textContent = `whips: ${clickCount}`;
+
                 const coinsText = document.getElementById('coin-text');
                 coinsText.textContent = `coins: ${coinCount}`;
-        
+
                 updateHighScore(); // Call to update high score display
             }
         }
-      
+
         function createCoin(x, y) {
             const coinContainer = document.getElementById('coin-container');
 
@@ -1050,119 +1117,121 @@ function rotateStick2() {
             }
         }
 
-function updateBloodParticleColor() {
-    bloodParticle.style.backgroundColor = hex;
-}
-
-function changeHex(newHex) {
-    hex = newHex;
-    updateBloodParticleColor();
-}
-
-function animateBloodParticle(bloodParticle) {
-    let x = parseFloat(bloodParticle.style.left);
-    let y = parseFloat(bloodParticle.style.top);
-    let speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
-    let speedY = (Math.random() - 0.5) * 10; // Random vertical speed
-    const gravity = 0.2;
-
-    function move() {
-        speedY += gravity;
-        x += speedX;
-        y += speedY;
-        bloodParticle.style.left = x + 'px';
-        bloodParticle.style.top = y + 'px';
-
-        // Stop the particle when it reaches the bottom (optional)
-        if (y > window.innerHeight) {
-            bloodParticle.remove();
+        function updateBloodParticleColor() {
+            bloodParticle.style.backgroundColor = hex;
         }
-    }
 
-    function remove() {
-        bloodParticle.remove();
-    }
-
-    const animation = bloodParticle.animate([
-        { transform: 'translate(0, 0)' },
-        { transform: `translate(${speedX}px, ${speedY}px)` }
-    ], {
-        duration: 2000,
-        easing: 'ease-out',
-        fill: 'forwards'
-    });
-
-    animation.onfinish = remove;
-
-    setInterval(move, 16);
-}
-//coin
-function animateCoinParticle(coinParticle) {
-    let x = parseFloat(coinParticle.style.left);
-    let y = parseFloat(coinParticle.style.top);
-    let speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
-    let speedY = (Math.random() - 0.5) * 10; // Random vertical speed
-    const coinGravity = 0.15;
-
-    function move() {
-        speedY += coinGravity;
-        x += speedX;
-        y += speedY;
-        coinParticle.style.left = x + 'px';
-        coinParticle.style.top = y + 'px';
-
-        // Stop the particle when it reaches the bottom (optional)
-        if (y > window.innerHeight) {
-            coinParticle.remove();
+        function changeHex(newHex) {
+            hex = newHex;
+            updateBloodParticleColor();
         }
-    }
 
-    function remove() {
-        coinParticle.remove();
-    }
+        function animateBloodParticle(bloodParticle) {
+            let x = parseFloat(bloodParticle.style.left);
+            let y = parseFloat(bloodParticle.style.top);
+            let speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
+            let speedY = (Math.random() - 0.5) * 10; // Random vertical speed
+            const gravity = 0.2;
 
-    const animation = coinParticle.animate([
-        { transform: 'translate(0, 0)' },
-        { transform: `translate(${speedX}px, ${speedY}px)` }
-    ], {
-        duration: 2000,
-        easing: 'ease-out',
-        fill: 'forwards'
-    });
+            function move() {
+                speedY += gravity;
+                x += speedX;
+                y += speedY;
+                bloodParticle.style.left = x + 'px';
+                bloodParticle.style.top = y + 'px';
 
-    animation.onfinish = remove;
+                // Stop the particle when it reaches the bottom (optional)
+                if (y > window.innerHeight) {
+                    bloodParticle.remove();
+                }
+            }
 
-    setInterval(move, 16);
-}
+            function remove() {
+                bloodParticle.remove();
+            }
 
-function claimGift() {
-    var giftText = document.getElementById('gift-textbox').value;
+            const animation = bloodParticle.animate([
+                { transform: 'translate(0, 0)' },
+                { transform: `translate(${speedX}px, ${speedY}px)` }
+            ], {
+                duration: 2000,
+                easing: 'ease-out',
+                fill: 'forwards'
+            });
 
-    // Define the target text to compare against
-    var targetText = "carters";
+            animation.onfinish = remove;
 
-    // Check if the input text matches the target text
-    if (giftText === targetText) {
-        alert("Gift Claimed!");
+            setInterval(move, 16);
+        }
+        //coin
+        function animateCoinParticle(coinParticle) {
+            let x = parseFloat(coinParticle.style.left);
+            let y = parseFloat(coinParticle.style.top);
+            let speedX = (Math.random() - 0.5) * 10; // Random horizontal speed
+            let speedY = (Math.random() - 0.5) * 10; // Random vertical speed
+            const coinGravity = 0.15;
 
-        const clicksText = document.getElementById('whip-text');
-        clicksText.textContent = `waves: ${clickCount}`;
-        
-        const coinsText = document.getElementById('coin-text');
-        coinsText.textContent = `coins: ${coinCount}`;
-        
-        coinCount = 2000;
-        clickCount = 20500;
-        saveScores();
-    } else {
-        alert("Code not found");
-    }
-}
+            function move() {
+                speedY += coinGravity;
+                x += speedX;
+                y += speedY;
+                coinParticle.style.left = x + 'px';
+                coinParticle.style.top = y + 'px';
+
+                // Stop the particle when it reaches the bottom (optional)
+                if (y > window.innerHeight) {
+                    coinParticle.remove();
+                }
+            }
+
+            function remove() {
+                coinParticle.remove();
+            }
+
+            const animation = coinParticle.animate([
+                { transform: 'translate(0, 0)' },
+                { transform: `translate(${speedX}px, ${speedY}px)` }
+            ], {
+                duration: 2000,
+                easing: 'ease-out',
+                fill: 'forwards'
+            });
+
+            animation.onfinish = remove;
+
+            setInterval(move, 16);
+        }
+
+        function claimGift() {
+            var giftText = document.getElementById('gift-textbox').value;
+
+            // Define the target text to compare against
+            var targetText = "carters";
+
+            // Check if the input text matches the target text
+            if (giftText === targetText) {
+                alert("What are you doing with your life?");
+                /*alert("Gift Claimed!");
+
+                const clicksText = document.getElementById('whip-text');
+                clicksText.textContent = `whips: ${clickCount}`;
+
+                const coinsText = document.getElementById('coin-text');
+                coinsText.textContent = `coins: ${coinCount}`;
+
+                coinCount = 2000;
+                clickCount = 20500;
+                saveScores();
+                */
+            } else {
+                alert("Code not found");
+            }
+        }
 
 
-    
-      
-  </script>
-    
+
+
+    </script>
+
 </body>
 </html>
