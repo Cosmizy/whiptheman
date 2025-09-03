@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Black Ice</title>
+  <style>
+    /* Reset and layout */
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #e9f5ff; /* icy tint */
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: #0b0b0b;
+    }
+    #gameCanvas {
+      display: block;
+      width: 100vw;  /* scale to page */
+      height: 100vh; /* scale to page */
+      image-rendering: pixelated;
+      background: radial-gradient(1200px 800px at center, #f7fbff 0%, #e9f5ff 55%, #dff0ff 100%);
+      cursor: none; /* clean look */
+    }
+    .hud {
+      position: fixed;
+      inset: 0 0 auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      padding: 10px;
+      mix-blend-mode: multiply;
+      text-align: center;
+    }
+    .pill {
+      background: rgba(255,255,255,0.8);
+      border-radius: 999px;
+      padding: 8px 14px;
+      margin: 6px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <div class="hud" id="hud"></div>
+
+  <script>
+  (() => {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const hud = document.getElementById('hud');
+
+    // Game world will adapt to screen size (1:1 with pixels) and regenerate hazards on resize.
+    let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+    let p2AI = false; // NEW: is player 2 AI-controlled?
+
+    // Arena configuration
+    const WALL_THICK = 28;           // black border thickness
+    const SPIKE_DEPTH = 42;          // how far spikes go inward DEFAULT 42
+    const SPIKE_GAP = 16;            // spacing between spike bases DEFAULT 16
+    let CENTER_SPINNER_ARMS = 4;   // cross
+    const CENTER_SPINNER_INNER = 30; // inner radius where blade starts
+    const CENTER_SPINNER_OUTER = 150;// outer radius of blade
+    const CENTER_BLADE_HALF = 12;    // half thickness of a blade
+    const SPIN_SPEED = 1.7;          // radians/second
+    const SPINNER_SPIKE_LENGTH = 42;  // how far spikes extend outward
+    const SPINNER_SPIKE_WIDTH  = 28;  // width of the spike base along the arm
+
+    // Ice physics
+    const ACCEL = 500;               // acceleration per second^2
+    const MAX_SPEED = 10000;           // max speed
+    const FRICTION = 0.985;          // per-frame multiplier
+
+    // Players
+    const SIZE = 28;                 // square side length
+    const KNOCKBACK = 400;           // impulse speed from attack
+    const ATTACK_RANGE = 54;         // reach from center
+    const ATTACK_ARC = Math.PI/2.2;  // hit arc angle in facing dir
+    const ATTACK_COOLDOWN = 0.45;    // seconds
+
+    // State
+    let last = 0;
+    let running = true;
+    let spin = 0; // spinner angle
+
+    const keys = new Set();
+
+    const spikes = []; // triangles along walls (array of {a:{x,y}, b:{x,y}, c:{x,y}})
+
+    function resize() {
+      W = Math.floor(window.innerWidth);
+      H = Math.floor(window.innerHeight);
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      regenSpikes();
+      centerSpinner.cx = W/2; centerSpinner.cy = H/2;
+      // keep players inside after resize
+      players.forEach(keepInside);
+    }
+
+    function regenSpikes() {
+      spikes.length = 0;
+      // Top and bottom walls spikes
+      const usableTop = W - 2*WALL_THICK;
+      let x = WALL_THICK;
+      while (x + SPIKE_GAP <= W - WALL_THICK) {
+        // top triangle pointing down
+        spikes.push(tri(x, WALL_THICK, x + SPIKE_GAP/2, WALL_THICK + SPIKE_DEPTH, x + SPIKE_GAP, WALL_THICK));
+        // bottom triangle pointing up
+        spikes.push(tri(x, H - WALL_THICK, x + SPIKE_GAP/2, H - WALL_THICK - SPIKE_DEPTH, x + SPIKE_GAP, H - WALL_THICK));
+        x += SPIKE_GAP;
+      }
+      // Left and right walls spikes
+      let y = WALL_THICK;
+      while (y + SPIKE_GAP <= H - WALL_THICK) {
+        // left triangle pointing right
+        spikes.push(tri(WALL_THICK, y, WALL_THICK + SPIKE_DEPTH, y + SPIKE_GAP/2, WALL_THICK, y + SPIKE_GAP));
+        // right triangle pointing left
+        spikes.push(tri(W - WALL_THICK, y, W - WALL_THICK - SPIKE_DEPTH, y + SPIKE_GAP/2, W - WALL_THICK, y + SPIKE_GAP));
+        y += SPIKE_GAP;
+      }
+    }
+
+    function tri(x1,y1,x2,y2,x3,y3){return {a:{x:x1,y:y1},b:{x:x2,y:y2},c:{x:x3,y:y3}}}
+
+    // Spinner
+    const centerSpinner = { cx: 0, cy: 0 };
+
+    // Players setup
+    function makePlayer(id, x, y, keymap) {
+      return {
+        id,
+        x, y,
+        vx: 0, vy: 0,
+        ax: 0, ay: 0,
+        size: SIZE,
+        facing: 0, // radians
+        score: 0,
+        attackTimer: 0, // cooldown
+        attackActiveTimer: 0, // active window
+        keymap,
+        alive: true,
+        respawnTimer: 0,
+        color: '#0b0b0b'
+      };
+    }
+
+    const p1Keys = { up:'KeyW', down:'KeyS', left:'KeyA', right:'KeyD', attack:'Space' };
+    const p2Keys = { up:'ArrowUp', down:'ArrowDown', left:'ArrowLeft', right:'ArrowRight', attack:'Enter' };
+
+    const players = [
+      makePlayer(1,  W*0.25, H*0.5, p1Keys),
+      makePlayer(2,  W*0.75, H*0.5, p2Keys)
+    ];
+
+    function resetRound(winnerId = null) {
+      // soft reset positions/velocities
+      players[0].x = W*0.25; players[0].y = H*0.5; players[0].vx = players[0].vy = 0; players[0].alive = true; players[0].respawnTimer = 0;
+      players[1].x = W*0.75; players[1].y = H*0.5; players[1].vx = players[1].vy = 0; players[1].alive = true; players[1].respawnTimer = 0;
+      players.forEach(p=>{p.attackActiveTimer=0; p.attackTimer=0;});
+      
+    }
+
+    // Input
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'KeyP') { running = !running; return; }
+      if (e.code === 'KeyR') { resetRound(); return; }
+      if (e.code === 'Digit0') { p2AI = !p2AI; return; }
+      if (e.code === 'Digit9') { CENTER_SPINNER_ARMS = (CENTER_SPINNER_ARMS % 12) + 1; return; }
+
+      keys.add(e.code);
+      // prevent page from scrolling on arrows/space
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) {
+        e.preventDefault();
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      keys.delete(e.code);
+    });
+
+    function handleControls(p, dt) {
+      p.ax = 0; p.ay = 0;
+      let moved = false;
+      if (keys.has(p.keymap.left))  { p.ax -= ACCEL; moved = true; }
+      if (keys.has(p.keymap.right)) { p.ax += ACCEL; moved = true; }
+      if (keys.has(p.keymap.up))    { p.ay -= ACCEL; moved = true; }
+      if (keys.has(p.keymap.down))  { p.ay += ACCEL; moved = true; }
+
+      // update facing direction based on input vector (if any)
+      if (moved) {
+        const ang = Math.atan2(p.ay, p.ax);
+        // face movement direction
+        p.facing = ang;
+      }
+
+      // Attack
+      if (keys.has(p.keymap.attack) && p.attackTimer <= 0) {
+        p.attackTimer = ATTACK_COOLDOWN;
+        p.attackActiveTimer = 0.14; // small active window
+      }
+
+      // Integrate acceleration -> velocity (ice), clamp max speed
+      p.vx += p.ax * dt;
+      p.vy += p.ay * dt;
+
+      const speed = Math.hypot(p.vx, p.vy);
+      const max = MAX_SPEED;
+      if (speed > max) {
+        const s = max / speed; p.vx *= s; p.vy *= s;
+      }
+
+      // Friction (very slippery)
+      p.vx *= FRICTION;
+      p.vy *= FRICTION;
+
+      // Position update
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+
+      // Cooldowns
+      p.attackTimer = Math.max(0, p.attackTimer - dt);
+      p.attackActiveTimer = Math.max(0, p.attackActiveTimer - dt);
+    }
+
+    // --- Smarter AI for P2 ---
+    function aiControls(p, target, dt) {
+      p.ax = 0; p.ay = 0;
+    
+      // Vector toward opponent
+      let dx = target.x - p.x;
+      let dy = target.y - p.y;
+      let dist = Math.hypot(dx, dy);
+    
+      // Normalize direction to opponent
+      let tx = dx / (dist || 1);
+      let ty = dy / (dist || 1);
+    
+      // --- Hazard avoidance ---
+      // 1. Avoid spinner
+      const sdx = p.x - centerSpinner.cx;
+      const sdy = p.y - centerSpinner.cy;
+      const spinnerDist = Math.hypot(sdx, sdy);
+      const safeSpinnerRadius = CENTER_SPINNER_OUTER + 100; // safety buffer
+      if (spinnerDist < safeSpinnerRadius) {
+        // Move away from spinner
+        tx += sdx / spinnerDist * 2;
+        ty += sdy / spinnerDist * 2;
+      }
+    
+      // 2. Avoid spikes (stay away from walls)
+      const margin = WALL_THICK * 3 + p.size * 2;
+      if (p.x < margin) { tx += 2; }
+      if (p.x > W - margin) { tx -= 2; }
+      if (p.y < margin) { ty += 2; }
+      if (p.y > H - margin) { ty -= 2; }
+    
+      // --- Movement decision ---
+      const moveDist = Math.hypot(tx, ty);
+      if (moveDist > 0.001) {
+        tx /= moveDist;
+        ty /= moveDist;
+        p.ax = tx * ACCEL;
+        p.ay = ty * ACCEL;
+        p.facing = Math.atan2(ty, tx);
+      }
+    
+      // --- Attack if close ---
+      if (dist < ATTACK_RANGE * 1.5 && p.attackTimer <= 0) {
+        p.attackTimer = ATTACK_COOLDOWN;
+        p.attackActiveTimer = 0.14;
+      }
+    
+      // --- Physics integration (same as handleControls) ---
+      p.vx += p.ax * dt;
+      p.vy += p.ay * dt;
+    
+      const speed = Math.hypot(p.vx, p.vy);
+      if (speed > MAX_SPEED) {
+        const s = MAX_SPEED / speed;
+        p.vx *= s; p.vy *= s;
+      }
+    
+      p.vx *= FRICTION;
+      p.vy *= FRICTION;
+    
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+    
+      p.attackTimer = Math.max(0, p.attackTimer - dt);
+      p.attackActiveTimer = Math.max(0, p.attackActiveTimer - dt);
+    }
+
+
+    function keepInside(p) {
+      const half = p.size/2;
+      const minX = WALL_THICK + half;
+      const maxX = W - WALL_THICK - half;
+      const minY = WALL_THICK + half;
+      const maxY = H - WALL_THICK - half;
+      if (p.x < minX) { p.x = minX; p.vx = Math.abs(p.vx); }
+      if (p.x > maxX) { p.x = maxX; p.vx = -Math.abs(p.vx); }
+      if (p.y < minY) { p.y = minY; p.vy = Math.abs(p.vy); }
+      if (p.y > maxY) { p.y = maxY; p.vy = -Math.abs(p.vy); }
+    }
+
+    function rect(x,y,w,h, color) {
+      ctx.fillStyle = color; ctx.fillRect(x,y,w,h);
+    }
+
+    function drawSpikes() {
+      ctx.fillStyle = '#0b0b0b';
+      for (const t of spikes) {
+        ctx.beginPath();
+        ctx.moveTo(t.a.x, t.a.y);
+        ctx.lineTo(t.b.x, t.b.y);
+        ctx.lineTo(t.c.x, t.c.y);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function drawWalls() {
+      ctx.fillStyle = '#0b0b0b';
+      // top, bottom, left, right walls
+      rect(0, 0, W, WALL_THICK, '#0b0b0b');
+      rect(0, H - WALL_THICK, W, WALL_THICK, '#0b0b0b');
+      rect(0, 0, WALL_THICK, H, '#0b0b0b');
+      rect(W - WALL_THICK, 0, WALL_THICK, H, '#0b0b0b');
+    }
+    
+    function drawSpinner() {
+      const {cx, cy} = centerSpinner;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(spin);
+    
+      ctx.fillStyle = '#0b0b0b';
+      for (let i=0;i<CENTER_SPINNER_ARMS;i++){
+        ctx.rotate(Math.PI*2/CENTER_SPINNER_ARMS);
+    
+        // arm rectangle (not lethal)
+        ctx.beginPath();
+        ctx.moveTo(CENTER_SPINNER_INNER, -CENTER_BLADE_HALF);
+        ctx.lineTo(CENTER_SPINNER_OUTER, -CENTER_BLADE_HALF);
+        ctx.lineTo(CENTER_SPINNER_OUTER, CENTER_BLADE_HALF);
+        ctx.lineTo(CENTER_SPINNER_INNER, CENTER_BLADE_HALF);
+        ctx.closePath();
+        ctx.fill();
+    
+        // spike triangle (lethal)
+        const baseStart = CENTER_SPINNER_OUTER - SPINNER_SPIKE_WIDTH;
+        const baseEnd   = CENTER_SPINNER_OUTER;
+        ctx.beginPath();
+        ctx.moveTo(baseStart, CENTER_BLADE_HALF); // left corner of base
+        ctx.lineTo(baseEnd,   CENTER_BLADE_HALF); // right corner of base
+        ctx.lineTo((baseStart+baseEnd)/2, CENTER_BLADE_HALF + SPINNER_SPIKE_LENGTH); // tip
+        ctx.closePath();
+        ctx.fill();
+      }
+    
+      // center hub
+      ctx.beginPath();
+      ctx.arc(0,0, 10, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawPlayer(p) {
+      ctx.save();
+      // shadow
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(p.x - p.size/2 + 3, p.y - p.size/2 + 5, p.size, p.size);
+      ctx.globalAlpha = 1;
+      // body
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+      // facing indicator (thin notch)
+      const notch = 8;
+      const nx = Math.cos(p.facing), ny = Math.sin(p.facing);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(p.x + nx*(p.size/2) - 2, p.y + ny*(p.size/2) - 2, 4, 4);
+
+      // attack arc visual
+      if (p.attackActiveTimer > 0) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.facing);
+        ctx.globalAlpha = 0.20;
+        ctx.fillStyle = '#0b0b0b';
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.arc(0,0, ATTACK_RANGE, -ATTACK_ARC/2, ATTACK_ARC/2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    function playerKill(p, killerId = null) {
+      if (!p.alive) return;
+      p.alive = false;
+      p.respawnTimer = 1.6; // delay then reset round
+      
+      if (killerId) {
+          
+      }
+    }
+
+    function drawScores() {
+      const pad = 12, w = 70, h = 32;
+      ctx.globalAlpha = 0.9;
+      // P1 left top
+      roundedRect(ctx, WALL_THICK + pad, WALL_THICK + pad, w, h, 10, 'rgba(255,255,255,0.85)');
+      ctx.fillStyle = '#0b0b0b';
+      ctx.font = '700 16px system-ui, Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`P1 ${players[0].score}`, WALL_THICK + pad + w/2, WALL_THICK + pad + h/2);
+      // P2 right top
+      roundedRect(ctx, W - WALL_THICK - pad - w, WALL_THICK + pad, w, h, 10, 'rgba(255,255,255,0.85)');
+      ctx.fillStyle = '#0b0b0b';
+      ctx.fillText(`P2 ${players[1].score}`, W - WALL_THICK - pad - w/2, WALL_THICK + pad + h/2);
+      ctx.globalAlpha = 1;
+    }
+
+    function roundedRect(ctx, x, y, w, h, r, fillStyle){
+      ctx.fillStyle = fillStyle;
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y, x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x, y+h, r);
+      ctx.arcTo(x, y+h, x, y, r);
+      ctx.arcTo(x, y, x+w, y, r);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Geometry helpers
+    function pointInTri(px, py, t){
+      const {a,b,c} = t;
+      const v0x = c.x - a.x, v0y = c.y - a.y;
+      const v1x = b.x - a.x, v1y = b.y - a.y;
+      const v2x = px - a.x, v2y = py - a.y;
+      const dot00 = v0x*v0x + v0y*v0y;
+      const dot01 = v0x*v1x + v0y*v1y;
+      const dot02 = v0x*v2x + v0y*v2y;
+      const dot11 = v1x*v1x + v1y*v1y;
+      const dot12 = v1x*v2x + v1y*v2y;
+      const invDen = 1 / (dot00 * dot11 - dot01 * dot01 + 1e-9);
+      const u = (dot11 * dot02 - dot01 * dot12) * invDen;
+      const v = (dot00 * dot12 - dot01 * dot02) * invDen;
+      return (u >= 0) && (v >= 0) && (u + v < 1);
+    }
+    
+    function spinnerKills(p){
+      // Vector from spinner center to player (world space)
+      const dx = p.x - centerSpinner.cx;
+      const dy = p.y - centerSpinner.cy;
+    
+      // Find the nearest arm index relative to current spin
+      const worldAngle = Math.atan2(dy, dx);
+      const seg = (2 * Math.PI) / CENTER_SPINNER_ARMS;
+      const armIndex = Math.round((worldAngle - spin) / seg);
+    
+      // World-space angle of that arm's axis (this *includes* spin)
+      const armAngleWorld = spin + armIndex * seg;
+    
+      // Rotate player into that arm's local space
+      const ca = Math.cos(-armAngleWorld);
+      const sa = Math.sin(-armAngleWorld);
+      const localX = dx * ca - dy * sa;
+      const localY = dx * sa + dy * ca;
+    
+      // Spike geometry (uses your configurable vars)
+      const baseStart = CENTER_SPINNER_OUTER - SPINNER_SPIKE_WIDTH;
+      const baseEnd   = CENTER_SPINNER_OUTER;
+      const tipX      = (baseStart + baseEnd) / 2;
+      const tipY      = CENTER_BLADE_HALF + SPINNER_SPIKE_LENGTH;
+    
+      // Slightly inflate the triangle by the player's "radius" so it's fair at speed
+      const r = p.size * 0.45;
+      const tri = {
+        a: { x: baseStart - r, y: CENTER_BLADE_HALF - r },
+        b: { x: baseEnd   + r, y: CENTER_BLADE_HALF - r },
+        c: { x: tipX,          y: tipY + r }
+      };
+    
+      return pointInTri(localX, localY, tri);
+    }
+      
+    function spikesKill(p){
+      // Approximate by checking player center inside triangle. Good enough since triangles are thin and lethal.
+      const cx = p.x, cy = p.y;
+      for (const t of spikes){
+        if (pointInTri(cx, cy, t)) return true;
+      }
+      return false;
+    }
+
+    function resolveAttacks(dt){
+      const [a,b] = players;
+      // Only live players participate
+      if (!a.alive || !b.alive) return;
+
+      function attemptHit(attacker, defender){
+        if (attacker.attackActiveTimer <= 0) return;
+        const dx = defender.x - attacker.x;
+        const dy = defender.y - attacker.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > ATTACK_RANGE + defender.size*0.6) return;
+        const ang = Math.atan2(dy, dx);
+        let delta = ang - attacker.facing;
+        // wrap to [-PI, PI]
+        while (delta > Math.PI) delta -= 2*Math.PI;
+        while (delta < -Math.PI) delta += 2*Math.PI;
+        if (Math.abs(delta) <= ATTACK_ARC/2) {
+          // apply knockback impulse
+          const nx = Math.cos(attacker.facing), ny = Math.sin(attacker.facing);
+          defender.vx += nx * KNOCKBACK;
+          defender.vy += ny * KNOCKBACK;
+          // brief i-frames to avoid multi-hit in same active window
+          attacker.attackActiveTimer = 0; // one hit per swing
+        }
+      }
+
+      attemptHit(a,b);
+      attemptHit(b,a);
+    }
+
+    function resolvePlayerCollision(p1, p2) {
+      if (!p1.alive || !p2.alive) return;
+    
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const dist = Math.hypot(dx, dy);
+      const minDist = (p1.size/2 + p2.size/2);
+    
+      if (dist < minDist && dist > 0) {
+        // Normalized collision vector
+        const nx = dx / dist;
+        const ny = dy / dist;
+    
+        // Push players apart so they don’t overlap
+        const overlap = (minDist - dist) / 2;
+        p1.x -= nx * overlap;
+        p1.y -= ny * overlap;
+        p2.x += nx * overlap;
+        p2.y += ny * overlap;
+    
+        // Relative velocity along normal
+        const rvx = p2.vx - p1.vx;
+        const rvy = p2.vy - p1.vy;
+        const velAlongNormal = rvx * nx + rvy * ny;
+    
+        if (velAlongNormal < 0) {
+          // Elastic bounce (tweak restitution <1 for less bouncy)
+          const restitution = 0.9;
+          const impulse = -(1 + restitution) * velAlongNormal / 2;
+    
+          const ix = impulse * nx;
+          const iy = impulse * ny;
+    
+          p1.vx -= ix;
+          p1.vy -= iy;
+          p2.vx += ix;
+          p2.vy += iy;
+        }
+      }
+    }
+
+    function spinnerArmCollision(p) {
+      const dx = p.x - centerSpinner.cx;
+      const dy = p.y - centerSpinner.cy;
+    
+      // angle step per arm
+      const seg = (2 * Math.PI) / CENTER_SPINNER_ARMS;
+    
+      for (let i=0; i<CENTER_SPINNER_ARMS; i++) {
+        const armAngle = spin + i * seg;
+    
+        // rotate player into arm’s local space
+        const ca = Math.cos(-armAngle);
+        const sa = Math.sin(-armAngle);
+        const localX = dx * ca - dy * sa;
+        const localY = dx * sa + dy * ca;
+    
+        // arm rectangle in local space
+        const minX = CENTER_SPINNER_INNER;
+        const maxX = CENTER_SPINNER_OUTER;
+        const minY = -CENTER_BLADE_HALF;
+        const maxY = CENTER_BLADE_HALF;
+    
+        const r = p.size/2; // padding for player box
+        if (localX > minX - r && localX < maxX + r &&
+            localY > minY - r && localY < maxY + r) {
+          // Collision → push player outward along Y axis (simpler bounce)
+          if (Math.abs(localY - minY) < Math.abs(localY - maxY)) {
+            // push up
+            const push = (minY - r) - localY;
+            const wx = localX * Math.cos(armAngle) - localY * Math.sin(armAngle);
+            const wy = localX * Math.sin(armAngle) + localY * Math.cos(armAngle);
+          } else {
+            // push down
+          }
+          return { collided:true, armAngle, localX, localY };
+        }
+      }
+      return { collided:false };
+    }
+      
+    function update(dt){
+      if (!running) return;
+      spin += SPIN_SPEED * dt;
+      for (const p of players){
+        if (!p.alive){
+          p.respawnTimer -= dt;
+          if (p.respawnTimer <= 0){ resetRound(); }
+          continue;
+        }
+      if (p.id === 2 && p2AI) {
+        aiControls(p, players[0], dt); // NEW: AI controls
+      } else {
+        handleControls(p, dt);
+      }
+        keepInside(p);
+      }
+
+      resolvePlayerCollision(players[0], players[1]);
+        
+      resolveAttacks(dt);
+
+      // Hazards
+      for (const p of players){
+        if (!p.alive) continue;
+        if (spinnerKills(p)) {
+          const killer = players.find(k=>k.id!==p.id)?.id;
+          playerKill(p, killer);
+        } else if (spikesKill(p)) {
+          const killer = players.find(k=>k.id!==p.id)?.id;
+          playerKill(p, killer);
+        }
+      }
+    }
+
+    function render(){
+      // clear (background handled by CSS gradient)
+      ctx.clearRect(0,0,W,H);
+
+      // draw ice sheen
+      drawIceSheen();
+
+      // hazards
+      drawWalls();
+      drawSpikes();
+      drawSpinner();
+
+      // players
+      players.forEach(drawPlayer);
+
+      // center dot
+      ctx.fillStyle = 'rgba(0,0,0,0.08)';
+      ctx.beginPath();
+      ctx.arc(W/2, H/2, 2, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    function drawIceSheen(){
+      // subtle moving highlights to imply slipperiness
+      const t = performance.now() * 0.001;
+      const bands = 3;
+      for (let i=0;i<bands;i++){
+        const y = (H/bands) * i + ((t*40 + i*80) % (H/bands));
+        const grad = ctx.createLinearGradient(0, y, W, y+80);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.5, 'rgba(255,255,255,0.08)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, y, W, 80);
+      }
+    }
+
+    function loop(ts){
+      if (!last) last = ts;
+      const dt = Math.min(0.033, (ts - last)/1000); // clamp dt for stability
+      last = ts;
+      update(dt);
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>
