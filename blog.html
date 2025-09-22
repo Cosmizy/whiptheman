@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Firebase Auth Test</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    // 🔑 Replace with your config from Firebase Console → Project settings → Web app
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+    };
+
+    // Init
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Sign in with Google
+    async function login() {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        document.getElementById("status").innerText =
+          `Signed in as ${user.displayName}, UID: ${user.uid}`;
+        console.log("Your UID:", user.uid); // 👈 Copy this for your Firestore rules
+      } catch (err) {
+        console.error("Login error", err);
+      }
+    }
+
+    // Sign out
+    async function logout() {
+      await signOut(auth);
+      document.getElementById("status").innerText = "Signed out";
+    }
+
+    // Expose to buttons
+    window.login = login;
+    window.logout = logout;
+  </script>
+</head>
+<body>
+  <h1>Auth Test</h1>
+  <button onclick="login()">Sign in with Google</button>
+  <button onclick="logout()">Sign out</button>
+  <p id="status">Not signed in</p>
+</body>
+</html>
