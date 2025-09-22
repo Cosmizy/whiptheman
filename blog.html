@@ -2,54 +2,161 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Firebase Auth Test</title>
+  <title>Personal Blog</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      query, 
+      orderBy 
+    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    // 🔑 Replace with your config from Firebase Console → Project settings → Web app
-    const firebaseConfig = {
-      apiKey: "AIzaSyAcxPEUHPHwB--ALd8zbGdQnnBdnqG5rmA",
-      authDomain: "blog-83384.firebaseapp.com",
-      projectId: "blog-83384",
-      storageBucket: "blog-83384.firebasestorage.app",
-      messagingSenderId: "1078208638111",
-      appId: "1:1078208638111:web:bd54b7ea82c6738171c6aa"
-    };
+    // 🔑 Replace with your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAcxPEUHPHwB--ALd8zbGdQnnBdnqG5rmA",
+    authDomain: "blog-83384.firebaseapp.com",
+    projectId: "blog-83384",
+    storageBucket: "blog-83384.firebasestorage.app",
+    messagingSenderId: "1078208638111",
+    appId: "1:1078208638111:web:bd54b7ea82c6738171c6aa"
+  };
 
-    // Init
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
+    const postsCol = collection(db, "posts");
 
-    // Sign in with Google
-    async function login() {
+    // Admin email
+    const ADMIN_EMAIL = "cosmizy@gmail.com"; // <-- change to your email
+
+    // Monitor auth state
+    onAuthStateChanged(auth, (user) => {
+      const status = document.getElementById("status");
+      const newPostForm = document.getElementById("newPostForm");
+      if(user) {
+        status.innerText = `Signed in as ${user.email}`;
+        if(user.email === ADMIN_EMAIL){
+          newPostForm.style.display = "block";
+        } else {
+          newPostForm.style.display = "none";
+        }
+      } else {
+        status.innerText = "Not signed in";
+        newPostForm.style.display = "none";
+      }
+    });
+
+    // Register new user (only run once, for yourself)
+    async function register() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
       try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        document.getElementById("status").innerText =
-          `Signed in as ${user.displayName}, UID: ${user.uid}`;
-        console.log("Your UID:", user.uid); // 👈 Copy this for your Firestore rules
-      } catch (err) {
-        console.error("Login error", err);
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("User created! Now log in.");
+      } catch(err) {
+        alert(err.message);
       }
     }
 
-    // Sign out
-    async function logout() {
-      await signOut(auth);
-      document.getElementById("status").innerText = "Signed out";
+    // Login
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch(err) {
+        alert(err.message);
+      }
     }
 
-    // Expose to buttons
+    // Logout
+    async function logout() {
+      await signOut(auth);
+    }
+
+    // Add new post (admin only)
+    async function addPost() {
+      const user = auth.currentUser;
+      if(user && user.email === ADMIN_EMAIL) {
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("content").value;
+        if(!title || !content){
+          alert("Title and content cannot be empty!");
+          return;
+        }
+        await addDoc(postsCol, {
+          title,
+          content,
+          authorEmail: user.email,
+          timestamp: Date.now()
+        });
+        document.getElementById("title").value = "";
+        document.getElementById("content").value = "";
+        loadPosts();
+      } else {
+        alert("You are not allowed to post!");
+      }
+    }
+
+    // Load all posts
+    async function loadPosts() {
+      const snapshot = await getDocs(query(postsCol, orderBy("timestamp", "desc")));
+      const container = document.getElementById("posts");
+      container.innerHTML = "";
+      snapshot.forEach(doc => {
+        const post = doc.data();
+        container.innerHTML += `
+          <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+            <h2>${post.title}</h2>
+            <p>${post.content}</p>
+            <small>by ${post.authorEmail}</small>
+          </div>
+        `;
+      });
+    }
+
+    // Load posts on page load
+    window.onload = loadPosts;
+
+    // Expose functions to buttons
     window.login = login;
+    window.register = register;
     window.logout = logout;
+    window.addPost = addPost;
   </script>
 </head>
 <body>
-  <h1>Auth Test</h1>
-  <button onclick="login()">Sign in with Google</button>
-  <button onclick="logout()">Sign out</button>
-  <p id="status">Not signed in</p>
+  <h1>My Personal Blog</h1>
+
+  <div id="authForm">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="register()">Register (Only once)</button>
+    <button onclick="login()">Login</button>
+    <button onclick="logout()">Logout</button>
+    <p id="status">Not signed in</p>
+  </div>
+
+  <div id="newPostForm" style="display:none; margin-top:20px;">
+    <h3>New Post (Admin Only)</h3>
+    <input id="title" placeholder="Post Title" style="width:100%; margin-bottom:5px;">
+    <textarea id="content" placeholder="Post Content" style="width:100%; height:100px;"></textarea><br>
+    <button onclick="addPost()">Add Post</button>
+  </div>
+
+  <hr>
+  <h2>All Posts</h2>
+  <div id="posts"></div>
 </body>
 </html>
