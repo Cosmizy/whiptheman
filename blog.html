@@ -38,15 +38,14 @@
     const postsCol = collection(db, "posts");
 
     // Admin email
-    const ADMIN_EMAIL = "cosmizy@gmail.com"; // <-- change to your email
-
-    // Monitor auth state
+    const ADMIN_EMAILS = ["cosmizy@gmail.com", "contact.catheartt@gmail.com"];
+    
     onAuthStateChanged(auth, (user) => {
       const status = document.getElementById("status");
       const newPostForm = document.getElementById("newPostForm");
       if(user) {
         status.innerText = `Signed in as ${user.email}`;
-        if(user.email === ADMIN_EMAIL){
+        if(ADMIN_EMAILS.includes(user.email)){
           newPostForm.style.display = "block";
         } else {
           newPostForm.style.display = "none";
@@ -56,6 +55,7 @@
         newPostForm.style.display = "none";
       }
     });
+
 
     // Register new user (only run once, for yourself)
     async function register() {
@@ -88,7 +88,7 @@
     // Add new post (admin only)
     async function addPost() {
       const user = auth.currentUser;
-      if(user && user.email === ADMIN_EMAIL) {
+      if(user && ADMIN_EMAILS.includes(user.email)) {
         const title = document.getElementById("title").value;
         const content = document.getElementById("content").value;
         if(!title || !content){
