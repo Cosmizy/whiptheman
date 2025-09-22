@@ -114,18 +114,24 @@
       const urlRegex = /(https?:\/\/[^\s]+)/g;
     
       return content.replace(urlRegex, (url) => {
+        // Strip query params for extension check
+        const cleanUrl = url.split('?')[0];
+    
         // If URL ends with image extension, embed it
-        if(url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+        if(cleanUrl.match(/\.(jpeg|jpg|gif|png)$/i)) {
           return `<img src="${url}" style="max-width:100%; display:block; margin:10px 0;">`;
         }
+    
         // For Imgur links without extension, append .jpg
-        if(url.includes("imgur.com") && !url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+        if(url.includes("imgur.com") && !cleanUrl.match(/\.(jpeg|jpg|gif|png)$/i)) {
           return `<img src="${url}.jpg" style="max-width:100%; display:block; margin:10px 0;">`;
         }
+    
         // Otherwise, leave it as a clickable link
         return `<a href="${url}" target="_blank">${url}</a>`;
       });
     }
+
 
     // Load all posts
     async function loadPosts() {
