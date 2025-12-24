@@ -159,6 +159,17 @@ let flip = document.getElementById("flip");
 let stream = null;
 let facingMode = "environment";
 
+const resizeBtn = document.getElementById("resize");
+const viewfinder = document.getElementById("viewfinder");
+
+let isSmall = false;
+
+resizeBtn.addEventListener("click", () => {
+    isSmall = !isSmall;
+    viewfinder.classList.toggle("small", isSmall);
+});
+
+
 async function startCamera() {
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -204,6 +215,7 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
 
 
