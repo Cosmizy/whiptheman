@@ -1,0 +1,22 @@
+{
+  "name": "Cosmizy Camera",
+  "short_name": "Camera",
+  "start_url": "/camera/",
+  "scope": "/camera/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/camera/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/camera/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

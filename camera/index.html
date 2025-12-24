@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+<title>Cosmizy Camera</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/camera/manifest.json">
+<meta name="theme-color" content="#000000">
+
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Camera">
+<link rel="apple-touch-icon" href="/camera/icon-192.png">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html, body {
+    height: 100%;
+    background: black;
+    overflow: hidden;
+}
+
+.camera-app {
+    position: fixed;
+    inset: 0;
+    background: black;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.top-bar {
+    position: absolute;
+    top: env(safe-area-inset-top);
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 10;
+    font-weight: 500;
+}
+
+.bottom-bar {
+    position: absolute;
+    bottom: env(safe-area-inset-bottom);
+    width: 100%;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    z-index: 10;
+}
+
+.shutter {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: white;
+    border: 5px solid rgba(255,255,255,0.9);
+}
+
+.shutter:active {
+    transform: scale(0.95);
+}
+
+.flip {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    font-size: 18px;
+}
+
+canvas {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="camera-app">
+    <video id="video" autoplay playsinline></video>
+
+    <div class="top-bar">PHOTO</div>
+
+    <div class="bottom-bar">
+        <button class="flip" id="flip">↺</button>
+        <div class="shutter" id="shutter"></div>
+        <div style="width:44px"></div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+let video = document.getElementById("video");
+let canvas = document.getElementById("canvas");
+let shutter = document.getElementById("shutter");
+let flip = document.getElementById("flip");
+
+let stream = null;
+let facingMode = "environment";
+
+async function startCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode },
+        audio: false
+    });
+
+    video.srcObject = stream;
+}
+
+shutter.addEventListener("click", () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+
+    const img = canvas.toDataURL("image/png");
+
+    const a = document.createElement("a");
+    a.href = img;
+    a.download = "photo.png";
+    a.click();
+});
+
+flip.addEventListener("click", () => {
+    facingMode = facingMode === "environment" ? "user" : "environment";
+    startCamera();
+});
+
+startCamera();
+
+// Register Service Worker
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/camera/sw.js", {
+        scope: "/camera/"
+    });
+}
+</script>
+
+</body>
+</html>
