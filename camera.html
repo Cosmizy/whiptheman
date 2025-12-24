@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmizy's Camera</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+        background: black;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .camera-app {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        background: black;
+    }
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Top bar */
+    .top-bar {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        z-index: 10;
+    }
+
+    /* Bottom bar */
+    .bottom-bar {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+        z-index: 10;
+    }
+
+    /* Shutter button */
+    .shutter {
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        border: 5px solid white;
+        background: white;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    }
+
+    .shutter:active {
+        transform: scale(0.95);
+    }
+
+    /* Flip camera button */
+    .flip {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid white;
+        background: transparent;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    canvas {
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="camera-app">
+    <video id="video" autoplay playsinline></video>
+
+    <div class="top-bar">
+        <span>PHOTO</span>
+    </div>
+
+    <div class="bottom-bar">
+        <button class="flip" id="flip">↺</button>
+        <div class="shutter" id="shutter"></div>
+        <div style="width:45px"></div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+let video = document.getElementById("video");
+let canvas = document.getElementById("canvas");
+let shutter = document.getElementById("shutter");
+let flip = document.getElementById("flip");
+
+let currentFacingMode = "environment";
+let stream = null;
+
+async function startCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode },
+        audio: false
+    });
+
+    video.srcObject = stream;
+}
+
+shutter.addEventListener("click", () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+
+    const imageData = canvas.toDataURL("image/png");
+
+    // Download photo (like saving to camera roll)
+    const link = document.createElement("a");
+    link.href = imageData;
+    link.download = "photo.png";
+    link.click();
+});
+
+flip.addEventListener("click", () => {
+    currentFacingMode =
+        currentFacingMode === "environment" ? "user" : "environment";
+    startCamera();
+});
+
+// Start camera on load
+startCamera();
+</script>
+
+</body>
+</html>
