@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a.html</title>
+</head>
+<body>
+
+<table border="1" id="linkTable">
+  <tr><td><a href="https://www.google.com/search?q=skibidi+toilet+67+brainrot"></a></td></tr>
+  <tr><td><a href="https://en.wikipedia.org/wiki/67"></a></td></tr>
+  <tr><td><a href="https://en.wikipedia.org/wiki/6-7_meme"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=how+to+tell+if+you+are+gay"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=how+to+tell+if+you+are+trans"></a></td></tr>
+  <tr><td><a href="https://en.wikipedia.org/wiki/Skibidi_Toilet"></a></td></tr>
+  <tr><td><a href="https://en.wikipedia.org/wiki/Gyatt"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=skibidi+toilet+67+gyatt"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=skibidi+toilet+gyatt+brainrot"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=skibidi+toilet+gyatt"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=67+kid+edit"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=is+skibidi+toilet+good+for+your+brain"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=is+skibidi+toilet+appropriate+for+10+year+olds"></a></td></tr>
+  <tr><td><a href="https://www.google.com/search?q=is+skibidi+toilet+good+for+67+year+olds"></a></td></tr>
+  <tr><td><a href="https://example.com"></a></td></tr>
+</table>
+
+<script>
+  function openAllLinks() {
+    const links = document.querySelectorAll("#linkTable a");
+
+    links.forEach(link => {
+      window.open(link.href, "_blank");
+    });
+  }
+
+  const delay = 5000; // 5 seconds
+
+  // Run immediately on page load
+  window.onload = function () {
+    openAllLinks();
+    setInterval(openAllLinks, delay);
+  };
+</script>
+
+</body>
+</html>
