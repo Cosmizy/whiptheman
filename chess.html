@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Simple Chess</title>
+
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #222;
+    font-family: Arial, sans-serif;
+  }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 70px);
+    grid-template-rows: repeat(8, 70px);
+    border: 4px solid white;
+  }
+
+  .square {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 42px;
+    cursor: pointer;
+    user-select: none;
+    transition: 0.15s;
+  }
+
+  .light {
+    background: #f0d9b5;
+  }
+
+  .dark {
+    background: #b58863;
+  }
+
+  .selected {
+    outline: 4px solid yellow;
+  }
+
+  .move {
+    background: #7cff7c !important;
+  }
+
+.piece {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+}
+
+.white-piece {
+    filter: invert(1)
+          drop-shadow(1px 0 0 rgba(0,0,0,0.7))
+          drop-shadow(-1px 0 0 rgba(0,0,0,0.7))
+          drop-shadow(0 1px 0 rgba(0,0,0,0.7))
+          drop-shadow(0 -1px 0 rgba(0,0,0,0.7));
+}
+
+.black-piece {
+    filter:
+      drop-shadow(1px 0 0 rgba(255,255,255,0.7))
+      drop-shadow(-1px 0 0 rgba(255,255,255,0.7))
+      drop-shadow(0 1px 0 rgba(255,255,255,0.7))
+      drop-shadow(0 -1px 0 rgba(255,255,255,0.7));
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="board"></div>
+
+<script>
+const board = document.getElementById("board");
+
+const svgMap = {
+  "♔": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KING.svg",
+  "♕": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_QUEEN.svg",
+  "♖": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_ROOK.svg",
+  "♗": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_BISHOP.svg",
+  "♘": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KNIGHT.svg",
+  "♙": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_PAWN.svg",
+"w💣︎": "https://raw.githubusercontent.com/Cosmizy/whiptheman/06b01f6b89cef3aafc3b62196a598e36246b48af/chess_pieces/CHESS_EXPLOSION.svg",
+
+  "♚": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KING.svg",
+  "♛": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_QUEEN.svg",
+  "♜": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_ROOK.svg",
+  "♝": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_BISHOP.svg",
+  "♞": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KNIGHT.svg",
+  "♟": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_PAWN.svg",
+"b💣︎": "https://raw.githubusercontent.com/Cosmizy/whiptheman/06b01f6b89cef3aafc3b62196a598e36246b48af/chess_pieces/CHESS_EXPLOSION.svg",
+};
+    
+const pieces = [
+  "♜","♞","♝","♛","♚","♝","♞","♜",
+  "♟","♟","♟","♟","♟","♟","♟","♟",
+  "b💣︎","","","","","","","b💣︎",
+  "","","","","","","","",
+  "","","","","","","","",
+  "w💣︎","","","","","","","w💣︎",
+  "♙","♙","♙","♙","♙","♙","♙","♙",
+  "♖","♘","♗","♕","♔","♗","♘","♖"
+];
+    
+let selected = null;
+let possibleMoves = [];
+let bombTimers = new Array(64).fill(null);
+
+for (let i = 0; i < pieces.length; i++) {
+  if (pieces[i] === "w💣︎" || pieces[i] === "b💣︎") {
+    bombTimers[i] = Math.floor(Math.random() * 6) + 5; // 5–10
+  }
+}
+    
+function isWhite(piece) {
+  return piece !== "" && "♔♕♖♗♘♙w💣︎".includes(piece);
+}
+
+function isBlack(piece) {
+  return piece !== "" && "♚♛♜♝♞♟b💣︎".includes(piece);
+}
+
+function getRow(i) {
+  return Math.floor(i / 8);
+}
+
+function getCol(i) {
+  return i % 8;
+}
+
+function addMove(moves, from, to) {
+  if (to < 0 || to >= 64) return;
+
+  const fromPiece = pieces[from];
+  const targetPiece = pieces[to];
+
+  if (
+    targetPiece === "" ||
+    (isWhite(fromPiece) && isBlack(targetPiece)) ||
+    (isBlack(fromPiece) && isWhite(targetPiece))
+  ) {
+    moves.push(to);
+  }
+}
+
+function getMoves(index) {
+  const piece = pieces[index];
+  const moves = [];
+
+  const row = getRow(index);
+  const col = getCol(index);
+
+    // BOMB
+    if (piece === "w💣︎" || piece === "b💣︎") {
+      const kingMoves = [-9,-8,-7,-1,1,7,8,9];
+    
+      for (let move of kingMoves) {
+        const target = index + move;
+    
+        if (target < 0 || target >= 64) continue;
+        if (Math.abs(getCol(target) - getCol(index)) > 1) continue;
+    
+        addMove(moves, index, target);
+      }
+    
+      return moves; // IMPORTANT: bombs don't use other rules
+    }
+    
+    // PAWN
+    if (piece === "♙") {
+      // move 1 forward
+      if (pieces[index - 8] === "") {
+        moves.push(index - 8);
+    
+        // move 2 forward on first move
+        if (row === 6 && pieces[index - 16] === "") {
+          moves.push(index - 16);
+        }
+      }
+    
+      // capture diagonally only if enemy exists
+      if (col > 0 && isBlack(pieces[index - 9])) {
+        moves.push(index - 9);
+      }
+    
+      if (col < 7 && isBlack(pieces[index - 7])) {
+        moves.push(index - 7);
+      }
+    }
+    
+    if (piece === "♟") {
+      // move 1 forward
+      if (pieces[index + 8] === "") {
+        moves.push(index + 8);
+    
+        // move 2 forward on first move
+        if (row === 1 && pieces[index + 16] === "") {
+          moves.push(index + 16);
+        }
+      }
+    
+      // capture diagonally only if enemy exists
+      if (col > 0 && isWhite(pieces[index + 7])) {
+        moves.push(index + 7);
+      }
+    
+      if (col < 7 && isWhite(pieces[index + 9])) {
+        moves.push(index + 9);
+      }
+    }
+
+  // ROOK
+  if (piece === "♖" || piece === "♜") {
+    const dirs = [-8, 8, -1, 1];
+
+    for (let dir of dirs) {
+      let pos = index;
+
+      while (true) {
+        let next = pos + dir;
+
+        if (next < 0 || next >= 64) break;
+
+        // stop wrapping
+        if ((dir === -1 || dir === 1) &&
+            getRow(next) !== getRow(pos)) break;
+
+        if (pieces[next] === "") {
+          moves.push(next);
+        } else {
+          if (
+            (isWhite(piece) && isBlack(pieces[next])) ||
+            (isBlack(piece) && isWhite(pieces[next]))
+          ) {
+            moves.push(next);
+          }
+          break;
+        }
+
+        pos = next;
+      }
+    }
+  }
+
+  // KNIGHT
+  if (piece === "♘" || piece === "♞") {
+    const knightMoves = [
+      [-2,-1],[-2,1],
+      [-1,-2],[-1,2],
+      [1,-2],[1,2],
+      [2,-1],[2,1]
+    ];
+
+    for (let [r,c] of knightMoves) {
+      const nr = row + r;
+      const nc = col + c;
+
+      if (nr >=0 && nr <8 && nc >=0 && nc <8) {
+        const target = nr * 8 + nc;
+        addMove(moves, index, target);
+      }
+    }
+  }
+
+  // BISHOP
+  if (piece === "♗" || piece === "♝") {
+    const dirs = [-9,-7,7,9];
+
+    for (let dir of dirs) {
+      let pos = index;
+
+      while (true) {
+        let next = pos + dir;
+
+        if (next < 0 || next >= 64) break;
+
+        if (Math.abs(getCol(next) - getCol(pos)) !== 1) break;
+
+        if (pieces[next] === "") {
+          moves.push(next);
+        } else {
+          if (
+            (isWhite(piece) && isBlack(pieces[next])) ||
+            (isBlack(piece) && isWhite(pieces[next]))
+          ) {
+            moves.push(next);
+          }
+          break;
+        }
+
+        pos = next;
+      }
+    }
+  }
+
+  // QUEEN
+  if (piece === "♕" || piece === "♛") {
+    const dirs = [-8,8,-1,1,-9,-7,7,9];
+
+    for (let dir of dirs) {
+      let pos = index;
+
+      while (true) {
+        let next = pos + dir;
+
+        if (next < 0 || next >= 64) break;
+
+        if ((dir === -1 || dir === 1) &&
+            getRow(next) !== getRow(pos)) break;
+
+        if ((dir === -9 || dir === 7) &&
+            getCol(next) !== getCol(pos) - 1) break;
+
+        if ((dir === -7 || dir === 9) &&
+            getCol(next) !== getCol(pos) + 1) break;
+
+        if (pieces[next] === "") {
+          moves.push(next);
+        } else {
+          if (
+            (isWhite(piece) && isBlack(pieces[next])) ||
+            (isBlack(piece) && isWhite(pieces[next]))
+          ) {
+            moves.push(next);
+          }
+          break;
+        }
+
+        pos = next;
+      }
+    }
+  }
+
+  // KING
+  if (piece === "♔" || piece === "♚") {
+    const kingMoves = [-9,-8,-7,-1,1,7,8,9];
+
+    for (let move of kingMoves) {
+      const target = index + move;
+
+      if (target < 0 || target >= 64) continue;
+
+      if (Math.abs(getCol(target) - col) > 1) continue;
+
+      addMove(moves, index, target);
+    }
+  }
+
+  return moves;
+}
+
+function explode(center) {
+  const row = getRow(center);
+  const col = getCol(center);
+
+  for (let r = -1; r <= 1; r++) {
+    for (let c = -1; c <= 1; c++) {
+      const nr = row + r;
+      const nc = col + c;
+
+      if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) continue;
+
+      const idx = nr * 8 + nc;
+
+      pieces[idx] = "";
+      bombTimers[idx] = null;
+    }
+  }
+}
+
+function drawBoard() {
+  board.innerHTML = "";
+
+  for (let i = 0; i < 64; i++) {
+    const square = document.createElement("div");
+
+    const row = Math.floor(i / 8);
+    const col = i % 8;
+
+    square.classList.add("square");
+    square.classList.add((row + col) % 2 === 0 ? "light" : "dark");
+
+    if (selected === i) {
+      square.classList.add("selected");
+    }
+
+    if (possibleMoves.includes(i)) {
+      square.classList.add("move");
+    }
+
+    const piece = pieces[i];
+
+    if (piece !== "") {
+      const img = document.createElement("img");
+      img.src = svgMap[piece];
+      img.classList.add("piece");
+
+      // mark pieces
+      if ("♔♕♖♗♘♙w💣︎".includes(piece)) {
+        img.classList.add("white-piece");
+      } else {
+        img.classList.add("black-piece");
+      }
+        
+      square.appendChild(img);
+    }
+
+    square.addEventListener("click", () => handleClick(i));
+
+    board.appendChild(square);
+  }
+}
+
+function handleClick(index) {
+
+  // move piece ONLY if square is valid
+    if (selected !== null && possibleMoves.includes(index)) {
+      const movingPiece = pieces[selected];
+    
+      // move piece
+      pieces[index] = movingPiece;
+      pieces[selected] = "";
+    
+      // move bomb timer if it exists
+      bombTimers[index] = bombTimers[selected];
+      bombTimers[selected] = null;
+    
+      selected = null;
+      possibleMoves = [];
+    
+      // if it's a bomb, decrement timer
+      if (movingPiece === "w💣︎" || movingPiece === "b💣︎") {
+        bombTimers[index]--;
+    
+        if (bombTimers[index] <= 0) {
+          explode(index);
+        }
+      }
+    
+      drawBoard();
+      return;
+    }
+
+  // select a new piece
+  if (pieces[index] !== "") {
+    selected = index;
+    possibleMoves = getMoves(index);
+  } else {
+    // clicked empty square
+    selected = null;
+    possibleMoves = [];
+  }
+
+  drawBoard();
+}
+
+drawBoard();
+</script>
+
+</body>
+</html>
