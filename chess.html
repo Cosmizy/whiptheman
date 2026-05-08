@@ -126,6 +126,7 @@
   <button onclick="loadBoard('default')">default</button>
   <button onclick="loadBoard('bomb')">bomb</button>
   <button onclick="loadBoard('pawn')">pawn</button>
+  <button onclick="loadBoard('mason')">mason</button>
 </div>
     
 <script>
@@ -146,6 +147,7 @@ const svgMap = {
   "♘": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KNIGHT.svg",
   "♙": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_PAWN.svg",
 "w💣︎": "https://raw.githubusercontent.com/Cosmizy/whiptheman/06b01f6b89cef3aafc3b62196a598e36246b48af/chess_pieces/CHESS_EXPLOSION.svg",
+"w☮": "https://raw.githubusercontent.com/Cosmizy/whiptheman/04f4b656043dfafb7705817cb59fda8ad7cc67db/chess_pieces/CHESS_PEACE.svg",
 
   "♚": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KING.svg",
   "♛": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_QUEEN.svg",
@@ -154,6 +156,7 @@ const svgMap = {
   "♞": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KNIGHT.svg",
   "♟": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_PAWN.svg",
 "b💣︎": "https://raw.githubusercontent.com/Cosmizy/whiptheman/06b01f6b89cef3aafc3b62196a598e36246b48af/chess_pieces/CHESS_EXPLOSION.svg",
+"b☮": "https://raw.githubusercontent.com/Cosmizy/whiptheman/04f4b656043dfafb7705817cb59fda8ad7cc67db/chess_pieces/CHESS_PEACE.svg",
 };
 
 const boards = {
@@ -190,6 +193,17 @@ const boards = {
       "♙","♙","♙","♕","♔","♙","♙","♙"
     ],
 
+     mason: [
+      "♜","♞","♝","♛","♚","♝","♞","♜",
+      "w💣︎","♟","w💣︎","♟","w💣︎","♟","w💣︎","♟",
+      "♟","♙","♟","♙","♟","♙","♟","♙",
+      "b☮","b☮","b☮","b☮","b☮","b☮","b☮","b☮",
+      "w☮","w☮","w☮","w☮","w☮","w☮","w☮","w☮",
+      "♟","♙","♟","♙","♟","♙","♟","♙",
+      "♙","b💣︎","♙","b💣︎","♙","b💣︎","♙","b💣︎",
+      "♖","♘","♗","♕","♔","♗","♘","♖"
+    ],
+
 };
     
 
@@ -205,11 +219,11 @@ for (let i = 0; i < pieces.length; i++) {
 }
     
 function isWhite(piece) {
-  return piece !== "" && "♔♕♖♗♘♙w💣︎".includes(piece);
+  return piece !== "" && "♔♕♖♗♘♙w💣︎w☮".includes(piece);
 }
 
 function isBlack(piece) {
-  return piece !== "" && "♚♛♜♝♞♟b💣︎".includes(piece);
+  return piece !== "" && "♚♛♜♝♞♟b💣︎b☮".includes(piece);
 }
 
 function getRow(i) {
@@ -227,7 +241,7 @@ function addMove(moves, from, to) {
   const targetPiece = pieces[to];
 
  // pieces that cannot capture
- if (fromPiece === "w💣︎" || fromPiece === "b💣︎") {
+ if (fromPiece === "w💣︎" || fromPiece === "b💣︎" || fromPiece === "w☮" || fromPiece === "b☮") {
     if (targetPiece === "") {
       moves.push(to);
     }
@@ -251,6 +265,21 @@ function getMoves(index) {
   const row = getRow(index);
   const col = getCol(index);
 
+    // PEACE
+    if (piece === "w☮" || piece === "b☮") {
+        const kingMoves = [-9,-8,-7,-1,1,7,8,9];
+    
+        for (let move of kingMoves) {
+          const target = index + move;
+    
+          if (target < 0 || target >= 64) continue;
+    
+          if (Math.abs(getCol(target) - col) > 1) continue;
+    
+          addMove(moves, index, target);
+        }
+    }
+    
     // BOMB
     if (piece === "w💣︎" || piece === "b💣︎") {
       const kingMoves = [-9,-8,-7,-1,1,7,8,9];
@@ -497,7 +526,7 @@ function drawBoard() {
       img.classList.add("piece");
 
       // mark pieces
-      if ("♔♕♖♗♘♙w💣︎".includes(piece)) {
+      if ("♔♕♖♗♘♙w💣︎w☮".includes(piece)) {
         img.classList.add("white-piece");
       } else {
         img.classList.add("black-piece");
