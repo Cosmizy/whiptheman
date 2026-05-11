@@ -73,6 +73,7 @@
     cursor: pointer;
     user-select: none;
     transition: 0.15s;
+    position: relative;
   }
 
   .light {
@@ -88,8 +89,28 @@
   }
 
   .move {
-    background: #7cff7c !important;
+    /*background: #7cff7c !important;*/
   }
+
+.move-indicator {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+  pointer-events: none;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10; /* ABOVE pieces */
+
+    filter:  brightness(0) saturate(100%) invert(80%) sepia(30%) saturate(2000%) hue-rotate(70deg);/*
+      drop-shadow(1px 0 0 rgba(255,255,255,1))
+      drop-shadow(-1px 0 0 rgba(255,255,255,1))
+      drop-shadow(0 1px 0 rgba(255,255,255,1))
+      drop-shadow(0 -1px 0 rgba(255,255,255,1));*/
+    
+}
 
 .piece {
   width: 85%;
@@ -127,6 +148,9 @@
   <button onclick="loadBoard('bomb')">bomb</button>
   <button onclick="loadBoard('pawn')">pawn</button>
   <button onclick="loadBoard('mason')">mason</button>
+  <button onclick="loadBoard('equihopper')">equihopper</button>
+  <button onclick="loadBoard('siege')">siege</button>
+  <button onclick="loadBoard('caeser')">caeser</button>
 </div>
     
 <script>
@@ -140,6 +164,8 @@ menuToggle.addEventListener("click", () => {
 });
     
 const svgMap = {
+  "move": "https://raw.githubusercontent.com/Cosmizy/whiptheman/cbf657c0dd6fb4d959163e64885c6ce37ca5a330/chess_pieces/CHESS_MOVE5.svg",
+    
   "♔": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KING.svg",
   "♕": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_QUEEN.svg",
   "♖": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_ROOK.svg",
@@ -148,6 +174,7 @@ const svgMap = {
   "♙": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_PAWN.svg",
 "w💣︎": "https://raw.githubusercontent.com/Cosmizy/whiptheman/06b01f6b89cef3aafc3b62196a598e36246b48af/chess_pieces/CHESS_EXPLOSION.svg",
 "w☮": "https://raw.githubusercontent.com/Cosmizy/whiptheman/04f4b656043dfafb7705817cb59fda8ad7cc67db/chess_pieces/CHESS_PEACE.svg",
+"w🩉": "https://raw.githubusercontent.com/Cosmizy/whiptheman/4e645a318c962a529c33288f768cec9d82c9a43b/chess_pieces/CHESS_EQUIHOPPER.svg",
 
   "♚": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_KING.svg",
   "♛": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_QUEEN.svg",
@@ -157,6 +184,7 @@ const svgMap = {
   "♟": "https://raw.githubusercontent.com/Cosmizy/whiptheman/ccad29646cdcf7990d7a7dea1efdf2d22f5c1412/chess_pieces/BLACK_CHESS_PAWN.svg",
 "b💣︎": "https://raw.githubusercontent.com/Cosmizy/whiptheman/06b01f6b89cef3aafc3b62196a598e36246b48af/chess_pieces/CHESS_EXPLOSION.svg",
 "b☮": "https://raw.githubusercontent.com/Cosmizy/whiptheman/04f4b656043dfafb7705817cb59fda8ad7cc67db/chess_pieces/CHESS_PEACE.svg",
+"b🩉": "https://raw.githubusercontent.com/Cosmizy/whiptheman/4e645a318c962a529c33288f768cec9d82c9a43b/chess_pieces/CHESS_EQUIHOPPER.svg",
 };
 
 const boards = {
@@ -204,6 +232,39 @@ const boards = {
       "♖","♘","♗","♕","♔","♗","♘","♖"
     ],
 
+    equihopper: [
+      "♜","♞","♝","♛","♚","♝","♞","♜",
+      "♟","♟","♟","♟","♟","♟","♟","♟",
+      "b🩉","","","","","","","b🩉",
+      "","","","","","","","",
+      "","","","","","","","",
+      "w🩉","","","","","","","w🩉",
+      "♙","♙","♙","♙","♙","♙","♙","♙",
+      "♖","♘","♗","♕","♔","♗","♘","♖"
+    ],
+
+     siege: [
+      "♜","♞","♝","♛","♚","♝","♞","♜",
+      "b🩉","♜","♜","♞","♞","♜","♜","b🩉",
+      "♟","b🩉","b💣︎","♜","♜","b💣︎","b🩉","♟",
+      "♟","b☮","♟","♟","♟","♟","b☮","♟",
+      "♙","w☮","♙","♙","♙","♙","w☮","♙",
+      "♙","w🩉","w💣︎","♖","♖","w💣︎","w🩉","♙",
+      "w🩉","♖","♖","♘","♘","♖","♖","w🩉",
+      "♖","♘","♗","♕","♔","♗","♘","♖"
+    ],
+    
+     caeser: [
+      "♝","♟","♜","♚","♚","♜","♟","♞",
+      "♞","b☮","b🩉","♛","♛","b🩉","♞","♞",
+      "b☮","b☮","♜","♞","♞","♜","♜","♜",
+      "","","b💣︎","b☮","♟","b💣︎","","",
+      "","","w💣︎","w☮","w☮","w💣︎","","",
+      "w🩉","w🩉","♖","♖","♖","♖","♘","♘",
+      "♙","♙","♖","♕","♕","♖","♘","♘",
+      "♗","♙","♖","♔","♔","♖","♘","♘"
+    ],
+
 };
     
 
@@ -214,16 +275,16 @@ let bombTimers = new Array(64).fill(null);
 
 for (let i = 0; i < pieces.length; i++) {
   if (pieces[i] === "w💣︎" || pieces[i] === "b💣︎") {
-    bombTimers[i] = Math.floor(Math.random() * 6) + 5; // 5–10
+    bombTimers[i] = Math.floor(Math.random() * 3) + 3; // 3–5
   }
 }
     
 function isWhite(piece) {
-  return piece !== "" && "♔♕♖♗♘♙w💣︎w☮".includes(piece);
+  return piece !== "" && "♔♕♖♗♘♙w💣︎w☮w🩉".includes(piece);
 }
 
 function isBlack(piece) {
-  return piece !== "" && "♚♛♜♝♞♟b💣︎b☮".includes(piece);
+  return piece !== "" && "♚♛♜♝♞♟b💣︎b☮b🩉".includes(piece);
 }
 
 function getRow(i) {
@@ -265,6 +326,49 @@ function getMoves(index) {
   const row = getRow(index);
   const col = getCol(index);
 
+    // EQUIHOPPER
+    if (piece === "w🩉") {
+      // move 1 forward
+      if (pieces[index - 8] === "") {
+        moves.push(index - 8);
+      }
+
+      // capture directly in front
+      if (isBlack(pieces[index - 8])) {
+        moves.push(index - 8);
+      }
+    
+      // capture diagonally only if enemy exists
+      if (col > 0 && isBlack(pieces[index - 9])) {
+        moves.push(index - 9);
+      }
+    
+      if (col < 7 && isBlack(pieces[index - 7])) {
+        moves.push(index - 7);
+      }
+    }
+    
+    if (piece === "b🩉") {
+      // move 1 forward
+      if (pieces[index + 8] === "") {
+        moves.push(index + 8);
+      }
+
+      // capture directly in front
+      if (isWhite(pieces[index + 8])) {
+        moves.push(index + 8);
+      }
+        
+      // capture diagonally only if enemy exists
+      if (col > 0 && isWhite(pieces[index + 7])) {
+        moves.push(index + 7);
+      }
+    
+      if (col < 7 && isWhite(pieces[index + 9])) {
+        moves.push(index + 9);
+      }
+    }
+    
     // PEACE
     if (piece === "w☮" || piece === "b☮") {
         const kingMoves = [-9,-8,-7,-1,1,7,8,9];
@@ -513,10 +617,16 @@ function drawBoard() {
     if (selected === i) {
       square.classList.add("selected");
     }
-
+    
     if (possibleMoves.includes(i)) {
       square.classList.add("move");
+
+      const img = document.createElement("img");
+      img.src = svgMap["move"];
+      img.classList.add("move-indicator");
+      square.appendChild(img);
     }
+    
 
     const piece = pieces[i];
 
@@ -526,7 +636,7 @@ function drawBoard() {
       img.classList.add("piece");
 
       // mark pieces
-      if ("♔♕♖♗♘♙w💣︎w☮".includes(piece)) {
+      if ("♔♕♖♗♘♙w💣︎w☮w🩉".includes(piece)) {
         img.classList.add("white-piece");
       } else {
         img.classList.add("black-piece");
@@ -546,7 +656,8 @@ function handleClick(index) {
   // move piece ONLY if square is valid
     if (selected !== null && possibleMoves.includes(index)) {
       const movingPiece = pieces[selected];
-    
+      const capturedPiece = pieces[index];
+        
       // move piece
       pieces[index] = movingPiece;
       pieces[selected] = "";
@@ -557,7 +668,10 @@ function handleClick(index) {
     
       selected = null;
       possibleMoves = [];
-    
+
+      // switch turns
+      currentTurn = currentTurn === "white" ? "black" : "white";
+        
       // if it's a bomb, decrement timer
       if (movingPiece === "w💣︎" || movingPiece === "b💣︎") {
         bombTimers[index]--;
@@ -566,17 +680,36 @@ function handleClick(index) {
           explode(index);
         }
       }
+
+      // if it's an equihopper, explode
+      if (
+        (movingPiece === "w🩉" || movingPiece === "b🩉") &&
+        capturedPiece !== ""
+      ) {
+        explode(index);
+      }
     
       drawBoard();
       return;
     }
 
-  // select a new piece
-  if (pieces[index] !== "") {
+ // SELECT PIECE
+  const piece = pieces[index];
+
+  if (piece !== "") {
+
+    // STOP selecting wrong color
+    if (
+      (currentTurn === "white" && !isWhite(piece)) ||
+      (currentTurn === "black" && !isBlack(piece))
+    ) {
+      return;
+    }
+
     selected = index;
     possibleMoves = getMoves(index);
+
   } else {
-    // clicked empty square
     selected = null;
     possibleMoves = [];
   }
@@ -589,6 +722,8 @@ function handleClick(index) {
 function loadBoard(name) {
   pieces = [...boards[name]];
 
+  currentTurn = "white";
+    
   selected = null;
   possibleMoves = [];
   bombTimers = new Array(64).fill(null);
@@ -596,7 +731,7 @@ function loadBoard(name) {
   // reset bombs if needed
   for (let i = 0; i < pieces.length; i++) {
     if (pieces[i] === "w💣︎" || pieces[i] === "b💣︎") {
-      bombTimers[i] = Math.floor(Math.random() * 6) + 5;
+      bombTimers[i] = Math.floor(Math.random() * 3) + 3; // 3–5
     }
   }
 
