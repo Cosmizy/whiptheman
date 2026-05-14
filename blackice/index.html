@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Black Ice Multiplayer</title>
+
+<style>
+html, body {
+  margin:0;
+  overflow:hidden;
+  background:#e9f5ff;
+  font-family:sans-serif;
+}
+
+canvas {
+  display:block;
+  width:100vw;
+  height:100vh;
+}
+
+#menu {
+  position:fixed;
+  top:20px;
+  left:20px;
+  z-index:10;
+}
+
+button {
+  padding:10px 18px;
+  margin-right:10px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+#status {
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:white;
+  padding:10px;
+  border-radius:10px;
+}
+</style>
+</head>
+<body>
+
+<div id="menu">
+  <button onclick="joinRoom('room1')">Room 1</button>
+  <button onclick="joinRoom('room2')">Room 2</button>
+  <button onclick="joinRoom('room3')">Room 3</button>
+</div>
+
+<div id="status">Disconnected</div>
+
+<canvas id="game"></canvas>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+const SERVER_URL = "https://YOUR-RENDER-URL.onrender.com";
+
+const socket = io(SERVER_URL);
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const statusEl = document.getElementById("status");
+
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+canvas.width = W;
+canvas.height = H;
+
+window.addEventListener("resize", () => {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
+});
+
+let myId = null;
+let players = {};
+let currentRoom = null;
+let spinnerAngle = 0;
+
+const keys = {};
+
+window.addEventListener("keydown", e => {
+  keys[e.code] = true;
+});
+
+window.addEventListener("keyup", e => {
+  keys[e.code] = false;
+});
+
+function joinRoom(room) {
+  currentRoom = room;
+  socket.emit("joinRoom", room);
+}
+
+socket.on("connect", () => {
+  myId = socket.id;
+  statusEl.innerText = "Connected";
+});
+
+socket.on("disconnect", () => {
+  statusEl.innerText = "Disconnected";
+});
+
+socket.on("roomFull", () => {
+  alert("Room full");
+});
+
+socket.on("state", state => {
+  players = state.players;
+  spinnerAngle = state.spinnerAngle;
+});
+
+function update() {
+  if (!currentRoom) return;
+
+  const input = {
+    up: keys["KeyW"] || keys["ArrowUp"],
+    down: keys["KeyS"] || keys["ArrowDown"],
+    left: keys["KeyA"] || keys["ArrowLeft"],
+    right: keys["KeyD"] || keys["ArrowRight"]
+  };
+
+  socket.emit("input", input);
+}
+
+function drawSpinner() {
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  ctx.rotate(spinnerAngle);
+
+  ctx.fillStyle = "black";
+
+  for (let i = 0; i < 4; i++) {
+    ctx.rotate(Math.PI / 2);
+    ctx.fillRect(40, -10, 150, 20);
+  }
+
+  ctx.restore();
+}
+
+function drawPlayers() {
+  for (const id in players) {
+    const p = players[id];
+
+    ctx.fillStyle = p.color;
+
+    ctx.fillRect(
+      p.x - 15,
+      p.y - 15,
+      30,
+      30
+    );
+
+    if (id === myId) {
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(
+        p.x - 18,
+        p.y - 18,
+        36,
+        36
+      );
+    }
+  }
+}
+
+function render() {
+  ctx.clearRect(0,0,W,H);
+
+  drawSpinner();
+  drawPlayers();
+
+  requestAnimationFrame(render);
+}
+
+setInterval(update, 1000 / 60);
+render();
+</script>
+</body>
+</html>
