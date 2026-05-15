@@ -95,6 +95,18 @@ canvas.height = H;
 });
 
 let roomConfig = null;
+
+let roomConfig = null;
+
+const DEFAULT_CONFIG = {
+  CENTER_SPINNER_ARMS: 4,
+  CENTER_SPINNER_INNER: 30,
+  CENTER_SPINNER_OUTER: 150,
+  SPINNER_SPIKE_LENGTH: 42,
+  SPINNER_SPIKE_WIDTH: 28,
+  ATTACK_RANGE: 54,
+  ATTACK_ARC: Math.PI / 2.2
+};
   
 const WORLD_WIDTH = 1920;
 const WORLD_HEIGHT = 1080;
@@ -125,6 +137,16 @@ let players = {};
 const keys = {};
 
 const spikes = [];
+
+function cfg() {
+  return roomConfig || DEFAULT_CONFIG;
+}
+
+const arms = cfg().CENTER_SPINNER_ARMS;
+const inner = cfg().CENTER_SPINNER_INNER;
+const outer = cfg().CENTER_SPINNER_OUTER;
+const spikeLen = cfg().SPINNER_SPIKE_LENGTH;
+const spikeWidth = cfg().SPINNER_SPIKE_WIDTH;
 
 regenSpikes();
 
@@ -175,15 +197,12 @@ alert("Room full");
 });
 
 socket.on("state", state => {
-
-players = state.players;
-
-spinnerAngle = state.spinnerAngle;
+  players = state.players;
+  spinnerAngle = state.spinnerAngle;
 
   if (state.config) {
     roomConfig = state.config;
   }
-
 });
 
 function updateInput(){
@@ -322,37 +341,26 @@ ctx.rotate(spinnerAngle);
 
 ctx.fillStyle = "#0b0b0b";
 
-for(let i=0;i<CENTER_SPINNER_ARMS;i++){
+for (let i = 0; i < arms; i++) {
+  ctx.rotate((Math.PI * 2) / arms);
 
-ctx.rotate((Math.PI*2)/CENTER_SPINNER_ARMS);
+  ctx.beginPath();
+  ctx.moveTo(inner, -12);
+  ctx.lineTo(outer, -12);
+  ctx.lineTo(outer, 12);
+  ctx.lineTo(inner, 12);
+  ctx.closePath();
+  ctx.fill();
 
-ctx.beginPath();
+  const baseStart = outer - spikeWidth;
+  const baseEnd = outer;
 
-ctx.moveTo(CENTER_SPINNER_INNER,-CENTER_BLADE_HALF);
-ctx.lineTo(CENTER_SPINNER_OUTER,-CENTER_BLADE_HALF);
-ctx.lineTo(CENTER_SPINNER_OUTER,CENTER_BLADE_HALF);
-ctx.lineTo(CENTER_SPINNER_INNER,CENTER_BLADE_HALF);
-
-ctx.closePath();
-
-ctx.fill();
-
-const baseStart = CENTER_SPINNER_OUTER - SPINNER_SPIKE_WIDTH;
-const baseEnd = CENTER_SPINNER_OUTER;
-
-ctx.beginPath();
-
-ctx.moveTo(baseStart,CENTER_BLADE_HALF);
-ctx.lineTo(baseEnd,CENTER_BLADE_HALF);
-
-ctx.lineTo(
-(baseStart+baseEnd)/2,
-CENTER_BLADE_HALF + SPINNER_SPIKE_LENGTH
-);
-
-ctx.closePath();
-
-ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(baseStart, 12);
+  ctx.lineTo(baseEnd, 12);
+  ctx.lineTo((baseStart + baseEnd) / 2, 12 + spikeLen);
+  ctx.closePath();
+  ctx.fill();
 }
 
 ctx.beginPath();
