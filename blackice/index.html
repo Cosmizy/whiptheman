@@ -312,14 +312,12 @@ ctx.fill();
 
 function drawSpinner(){
 
-const center = worldToScreen(
-WORLD_WIDTH/2,
-WORLD_HEIGHT/2
-);
-
 ctx.save();
 
-ctx.translate(center.x,center.y);
+ctx.translate(
+WORLD_WIDTH / 2,
+WORLD_HEIGHT / 2
+);
 
 ctx.rotate(spinnerAngle);
 
@@ -329,42 +327,28 @@ for(let i=0;i<CENTER_SPINNER_ARMS;i++){
 
 ctx.rotate((Math.PI*2)/CENTER_SPINNER_ARMS);
 
-const inner =
-(CENTER_SPINNER_INNER / WORLD_WIDTH) * W;
-
-const outer =
-(CENTER_SPINNER_OUTER / WORLD_WIDTH) * W;
-
-const half =
-(CENTER_BLADE_HALF / WORLD_HEIGHT) * H;
-
 ctx.beginPath();
 
-ctx.moveTo(inner,-half);
-ctx.lineTo(outer,-half);
-ctx.lineTo(outer,half);
-ctx.lineTo(inner,half);
+ctx.moveTo(CENTER_SPINNER_INNER,-CENTER_BLADE_HALF);
+ctx.lineTo(CENTER_SPINNER_OUTER,-CENTER_BLADE_HALF);
+ctx.lineTo(CENTER_SPINNER_OUTER,CENTER_BLADE_HALF);
+ctx.lineTo(CENTER_SPINNER_INNER,CENTER_BLADE_HALF);
 
 ctx.closePath();
 
 ctx.fill();
 
-const spikeWidth =
-(SPINNER_SPIKE_WIDTH / WORLD_WIDTH) * W;
-
-const spikeLength =
-(SPINNER_SPIKE_LENGTH / WORLD_HEIGHT) * H;
-
-const baseStart = outer - spikeWidth;
-const baseEnd = outer;
+const baseStart = CENTER_SPINNER_OUTER - SPINNER_SPIKE_WIDTH;
+const baseEnd = CENTER_SPINNER_OUTER;
 
 ctx.beginPath();
 
-ctx.moveTo(baseStart,half);
-ctx.lineTo(baseEnd,half);
+ctx.moveTo(baseStart,CENTER_BLADE_HALF);
+ctx.lineTo(baseEnd,CENTER_BLADE_HALF);
+
 ctx.lineTo(
 (baseStart+baseEnd)/2,
-half + spikeLength
+CENTER_BLADE_HALF + SPINNER_SPIKE_LENGTH
 );
 
 ctx.closePath();
@@ -373,13 +357,10 @@ ctx.fill();
 }
 
 ctx.beginPath();
-
 ctx.arc(0,0,10,0,Math.PI*2);
-
 ctx.fill();
 
 ctx.restore();
-
 }
 
 function drawPlayers(){
