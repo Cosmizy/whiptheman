@@ -361,6 +361,7 @@ function drawPlayers(){
 for(const id in players){
 
 const p = players[id];
+if (!p) continue;
 
 if(!p.alive) continue;
 
