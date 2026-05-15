@@ -277,14 +277,11 @@ function drawWalls(){
 
 ctx.fillStyle = "#0b0b0b";
 
-const tX = (WALL_THICK / WORLD_WIDTH) * W;
-const tY = (WALL_THICK / WORLD_HEIGHT) * H;
+ctx.fillRect(0,0,WORLD_WIDTH,WALL_THICK);
+ctx.fillRect(0,WORLD_HEIGHT-WALL_THICK,WORLD_WIDTH,WALL_THICK);
 
-ctx.fillRect(0,0,W,tY);
-ctx.fillRect(0,H-tY,W,tY);
-
-ctx.fillRect(0,0,tX,H);
-ctx.fillRect(W-tX,0,tX,H);
+ctx.fillRect(0,0,WALL_THICK,WORLD_HEIGHT);
+ctx.fillRect(WORLD_WIDTH-WALL_THICK,0,WALL_THICK,WORLD_HEIGHT);
 
 }
 
@@ -294,15 +291,11 @@ ctx.fillStyle = "#0b0b0b";
 
 for(const t of spikes){
 
-const a = worldToScreen(t.a.x,t.a.y);
-const b = worldToScreen(t.b.x,t.b.y);
-const c = worldToScreen(t.c.x,t.c.y);
-
 ctx.beginPath();
 
-ctx.moveTo(a.x,a.y);
-ctx.lineTo(b.x,b.y);
-ctx.lineTo(c.x,c.y);
+ctx.moveTo(t.a.x,t.a.y);
+ctx.lineTo(t.b.x,t.b.y);
+ctx.lineTo(t.c.x,t.c.y);
 
 ctx.closePath();
 
@@ -476,9 +469,26 @@ ctx.fillRect(0,y,W,80);
 }
 }
 
-function render(){
+function render() {
 
 ctx.clearRect(0,0,W,H);
+
+const scale = Math.min(
+W / WORLD_WIDTH,
+H / WORLD_HEIGHT
+);
+
+const offsetX =
+(W - WORLD_WIDTH * scale) / 2;
+
+const offsetY =
+(H - WORLD_HEIGHT * scale) / 2;
+
+ctx.save();
+
+ctx.translate(offsetX,offsetY);
+
+ctx.scale(scale,scale);
 
 drawIceSheen();
 
@@ -489,6 +499,8 @@ drawSpikes();
 drawSpinner();
 
 drawPlayers();
+
+ctx.restore();
 
 requestAnimationFrame(render);
 
