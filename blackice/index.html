@@ -96,44 +96,21 @@ canvas.height = H;
 
 const WORLD_WIDTH = 1920;
 const WORLD_HEIGHT = 1080;
-    
-// ===== STATE =====
-let players = {};
-let spinnerAngle = 0;
-let currentRoom = null;
-let myId = null;
-let roomConfig = null;
 
-// ===== SAFE DEFAULT CONFIG =====
-const DEFAULT_CONFIG = {
-  CENTER_SPINNER_ARMS: 4,
-  CENTER_SPINNER_INNER: 30,
-  CENTER_SPINNER_OUTER: 150,
-  SPINNER_SPIKE_LENGTH: 42,
-  SPINNER_SPIKE_WIDTH: 28,
-  ATTACK_RANGE: 54,
-  ATTACK_ARC: Math.PI / 2.2
-};
-
-function cfg() {
-  return roomConfig || DEFAULT_CONFIG;
-}
-    
-/*
 const WALL_THICK = 28;
 
 const SPIKE_DEPTH = 42;
 const SPIKE_GAP = 16;
 
-const CENTER_SPINNER_ARMS = roomConfig.CENTER_SPINNER_ARMS;
-const CENTER_SPINNER_INNER = roomConfig.CENTER_SPINNER_INNER;
-const CENTER_SPINNER_OUTER = roomConfig.CENTER_SPINNER_OUTER;
+const CENTER_SPINNER_ARMS = 4;
+const CENTER_SPINNER_INNER = 30;
+const CENTER_SPINNER_OUTER = 150;
 const CENTER_BLADE_HALF = 12;
-const SPINNER_SPIKE_LENGTH = roomConfig.SPINNER_SPIKE_LENGTH;
-const SPINNER_SPIKE_WIDTH = roomConfig.SPINNER_SPIKE_WIDTH;
+const SPINNER_SPIKE_LENGTH = 42;
+const SPINNER_SPIKE_WIDTH = 28;
 
-const ATTACK_RANGE = roomConfig.ATTACK_RANGE;
-const ATTACK_ARC = Math.PI / 2.2; 
+const ATTACK_RANGE = 54;
+const ATTACK_ARC = Math.PI / 2.2;
 
 let myId = null;
 
@@ -141,79 +118,94 @@ let currentRoom = null;
 
 let spinnerAngle = 0;
 
-let players = {};*/
+let players = {};
 
 const keys = {};
 
 const spikes = [];
 
-const arms = cfg().CENTER_SPINNER_ARMS;
-const inner = cfg().CENTER_SPINNER_INNER;
-const outer = cfg().CENTER_SPINNER_OUTER;
-const spikeLen = cfg().SPINNER_SPIKE_LENGTH;
-const spikeWidth = cfg().SPINNER_SPIKE_WIDTH;
-
 regenSpikes();
 
 window.addEventListener("keydown", e => {
-  keys[e.code] = true;
 
-  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) {
-    e.preventDefault();
-  }
+keys[e.code] = true;
+
+if([
+"ArrowUp",
+"ArrowDown",
+"ArrowLeft",
+"ArrowRight",
+"Space"
+].includes(e.code)){
+e.preventDefault();
+}
+
 });
 
-
 window.addEventListener("keyup", e => {
-  keys[e.code] = false;
+keys[e.code] = false;
 });
 
 function joinRoom(room){
-  currentRoom = room;
-  socket.emit("joinRoom", room);
+
+currentRoom = room;
+
+socket.emit("joinRoom", room);
+
 }
 
 socket.on("connect", () => {
-  myId = socket.id;
-  statusEl.innerText = "Connected";
+
+myId = socket.id;
+
+statusEl.innerText = "Connected";
+
 });
 
 socket.on("disconnect", () => {
-  statusEl.innerText = "Disconnected";
+
+statusEl.innerText = "Disconnected";
+
 });
 
 socket.on("roomFull", () => {
-  alert("Room full");
+alert("Room full");
 });
 
 socket.on("state", state => {
-  players = state.players;
-  spinnerAngle = state.spinnerAngle;
 
-  if (state.config) {
-    roomConfig = state.config;
-  }
+players = state.players;
+
+spinnerAngle = state.spinnerAngle;
+
 });
 
-// ===== INPUT SEND =====
-setInterval(() => {
-  if (!currentRoom) return;
+function updateInput(){
 
-  socket.emit("input", {
-    up: keys["KeyW"] || keys["ArrowUp"],
-    down: keys["KeyS"] || keys["ArrowDown"],
-    left: keys["KeyA"] || keys["ArrowLeft"],
-    right: keys["KeyD"] || keys["ArrowRight"],
-    attack: keys["Space"]
-  });
+if(!currentRoom) return;
 
-}, 1000 / 60);
+socket.emit("input",{
+
+up: keys["KeyW"] || keys["ArrowUp"],
+down: keys["KeyS"] || keys["ArrowDown"],
+left: keys["KeyA"] || keys["ArrowLeft"],
+right: keys["KeyD"] || keys["ArrowRight"],
+
+attack: keys["Space"]
+
+});
+
+}
+
+setInterval(updateInput,1000/60);
 
 function worldToScreen(x,y){
-  return {
-    x: (x / WORLD_WIDTH) * W,
-    y: (y / WORLD_HEIGHT) * H
-  };
+
+const sx = (x / WORLD_WIDTH) * W;
+const sy = (y / WORLD_HEIGHT) * H;
+
+return {x:sx,y:sy};
+
 }
 
 function regenSpikes(){
@@ -311,117 +303,145 @@ ctx.fill();
 }
 }
 
-// ===== SPINNER =====
 function drawSpinner(){
-  const c = cfg();
 
-  const arms = c.CENTER_SPINNER_ARMS;
-  const inner = c.CENTER_SPINNER_INNER;
-  const outer = c.CENTER_SPINNER_OUTER;
-  const spikeLen = c.SPINNER_SPIKE_LENGTH;
-  const spikeWidth = c.SPINNER_SPIKE_WIDTH;
+ctx.save();
 
-  ctx.save();
+ctx.translate(
+WORLD_WIDTH / 2,
+WORLD_HEIGHT / 2
+);
 
-  ctx.translate(WORLD_WIDTH/2, WORLD_HEIGHT/2);
-  ctx.rotate(spinnerAngle);
+ctx.rotate(spinnerAngle);
 
-  ctx.fillStyle = "#0b0b0b";
+ctx.fillStyle = "#0b0b0b";
 
-  for (let i = 0; i < arms; i++) {
-    ctx.rotate((Math.PI * 2) / arms);
+for(let i=0;i<CENTER_SPINNER_ARMS;i++){
 
-    ctx.beginPath();
-    ctx.moveTo(inner, -12);
-    ctx.lineTo(outer, -12);
-    ctx.lineTo(outer, 12);
-    ctx.lineTo(inner, 12);
-    ctx.closePath();
-    ctx.fill();
+ctx.rotate((Math.PI*2)/CENTER_SPINNER_ARMS);
 
-    const baseStart = outer - spikeWidth;
-    const baseEnd = outer;
+ctx.beginPath();
 
-    ctx.beginPath();
-    ctx.moveTo(baseStart, 12);
-    ctx.lineTo(baseEnd, 12);
-    ctx.lineTo((baseStart + baseEnd)/2, 12 + spikeLen);
-    ctx.closePath();
-    ctx.fill();
-  }
+ctx.moveTo(CENTER_SPINNER_INNER,-CENTER_BLADE_HALF);
+ctx.lineTo(CENTER_SPINNER_OUTER,-CENTER_BLADE_HALF);
+ctx.lineTo(CENTER_SPINNER_OUTER,CENTER_BLADE_HALF);
+ctx.lineTo(CENTER_SPINNER_INNER,CENTER_BLADE_HALF);
 
-  ctx.beginPath();
-  ctx.arc(0,0,10,0,Math.PI*2);
-  ctx.fill();
+ctx.closePath();
 
-  ctx.restore();
+ctx.fill();
+
+const baseStart = CENTER_SPINNER_OUTER - SPINNER_SPIKE_WIDTH;
+const baseEnd = CENTER_SPINNER_OUTER;
+
+ctx.beginPath();
+
+ctx.moveTo(baseStart,CENTER_BLADE_HALF);
+ctx.lineTo(baseEnd,CENTER_BLADE_HALF);
+
+ctx.lineTo(
+(baseStart+baseEnd)/2,
+CENTER_BLADE_HALF + SPINNER_SPIKE_LENGTH
+);
+
+ctx.closePath();
+
+ctx.fill();
 }
 
-// ===== PLAYERS =====
+ctx.beginPath();
+ctx.arc(0,0,10,0,Math.PI*2);
+ctx.fill();
+
+ctx.restore();
+}
+
 function drawPlayers(){
-  for (const id in players) {
-    const p = players[id];
-    if (!p || !p.alive) continue;
 
-    const pos = worldToScreen(p.x,p.y);
+for(const id in players){
 
-    ctx.save();
+const p = players[id];
+if (!p) continue;
 
-    // shadow
-    ctx.globalAlpha = 0.12;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(pos.x - p.size/2 + 3, pos.y - p.size/2 + 5, p.size, p.size);
+if(!p.alive) continue;
 
-    // player
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = p.color;
-    ctx.fillRect(pos.x - p.size/2, pos.y - p.size/2, p.size, p.size);
+ctx.save();
 
-    // facing indicator
-    const nx = Math.cos(p.facing);
-    const ny = Math.sin(p.facing);
+ctx.globalAlpha = 0.12;
 
-    ctx.fillStyle = "white";
-    ctx.fillRect(
-      pos.x + nx*(p.size/2) - 2,
-      pos.y + ny*(p.size/2) - 2,
-      4,4
-    );
+ctx.fillStyle = "#000";
 
-    // attack arc
-    if (p.attackActiveTimer > 0) {
-      ctx.save();
-      ctx.translate(pos.x,pos.y);
-      ctx.rotate(p.facing);
+ctx.fillRect(
+p.x - p.size/2 + 3,
+p.y - p.size/2 + 5,
+p.size,
+p.size
+);
 
-      ctx.globalAlpha = 0.2;
-      ctx.beginPath();
-      ctx.moveTo(0,0);
-      ctx.arc(
-        0,0,
-        cfg().ATTACK_RANGE,
-        -cfg().ATTACK_ARC/2,
-        cfg().ATTACK_ARC/2
-      );
-      ctx.closePath();
-      ctx.fill();
+ctx.globalAlpha = 1;
 
-      ctx.restore();
-    }
+ctx.fillStyle = p.color;
 
-    if (id === myId) {
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(
-        pos.x - p.size/2 - 3,
-        pos.y - p.size/2 - 3,
-        p.size + 6,
-        p.size + 6
-      );
-    }
+ctx.fillRect(
+p.x - p.size/2,
+p.y - p.size/2,
+p.size,
+p.size
+);
 
-    ctx.restore();
-  }
+const nx = Math.cos(p.facing);
+const ny = Math.sin(p.facing);
+
+ctx.fillStyle = "white";
+
+ctx.fillRect(
+p.x + nx*(p.size/2) - 2,
+p.y + ny*(p.size/2) - 2,
+4,
+4
+);
+
+if(p.attackActiveTimer > 0){
+
+ctx.save();
+
+ctx.translate(p.x,p.y);
+
+ctx.rotate(p.facing);
+
+ctx.globalAlpha = 0.2;
+
+ctx.beginPath();
+
+ctx.moveTo(0,0);
+
+ctx.arc(
+0,
+0,
+ATTACK_RANGE,
+-ATTACK_ARC/2,
+ATTACK_ARC/2
+);
+
+ctx.closePath();
+
+ctx.fill();
+
+ctx.restore();
+}
+
+if(id === myId){
+
+ctx.strokeStyle = "white";
+
+ctx.lineWidth = 3;
+
+ctx.strokeRect(
+p.x - p.size/2 - 3,
+p.y - p.size/2 - 3,
+p.size + 6,
+p.size + 6
+);
 }
 
 ctx.restore();
@@ -450,35 +470,41 @@ ctx.fillRect(0,y,W,80);
 }
 }
 
-function drawBackground(){
-  ctx.fillStyle = "#e9f5ff";
-  ctx.fillRect(0,0,WORLD_WIDTH,WORLD_HEIGHT);
-}
-
-// ===== RENDER =====
 function render() {
-  ctx.clearRect(0,0,W,H);
 
-  if (!roomConfig) {
-    requestAnimationFrame(render);
-    return;
-  }
+ctx.clearRect(0,0,W,H);
 
-  const scale = Math.min(W / WORLD_WIDTH, H / WORLD_HEIGHT);
-  const offsetX = (W - WORLD_WIDTH * scale) / 2;
-  const offsetY = (H - WORLD_HEIGHT * scale) / 2;
+const scale = Math.min(
+W / WORLD_WIDTH,
+H / WORLD_HEIGHT
+);
 
-  ctx.save();
-  ctx.translate(offsetX, offsetY);
-  ctx.scale(scale, scale);
+const offsetX =
+(W - WORLD_WIDTH * scale) / 2;
 
-  drawBackground();
-  drawSpinner();
-  drawPlayers();
+const offsetY =
+(H - WORLD_HEIGHT * scale) / 2;
 
-  ctx.restore();
+ctx.save();
 
-  requestAnimationFrame(render);
+ctx.translate(offsetX,offsetY);
+
+ctx.scale(scale,scale);
+
+drawIceSheen();
+
+drawWalls();
+
+drawSpikes();
+
+drawSpinner();
+
+drawPlayers();
+
+ctx.restore();
+
+requestAnimationFrame(render);
+
 }
 
 render();
