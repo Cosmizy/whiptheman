@@ -94,6 +94,8 @@ canvas.height = H;
 
 });
 
+let roomConfig = null;
+  
 const WORLD_WIDTH = 1920;
 const WORLD_HEIGHT = 1080;
 
@@ -178,7 +180,9 @@ players = state.players;
 
 spinnerAngle = state.spinnerAngle;
 
-roomConfig = state.config; // config from server
+  if (state.config) {
+    roomConfig = state.config;
+  }
 
 });
 
