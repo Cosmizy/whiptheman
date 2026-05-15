@@ -322,10 +322,9 @@ ctx.fillStyle = "#0b0b0b";
 
 const step = (Math.PI * 2) / CENTER_SPINNER_ARMS;
   
-for (let i = 0; i < CENTER_SPINNER_ARMS; i++) {
+for (let i=0;i<CENTER_SPINNER_ARMS;i++){
 
-ctx.save();
-ctx.rotate(i * step);
+ctx.rotate((Math.PI*2)/CENTER_SPINNER_ARMS);
 
 ctx.beginPath();
 
