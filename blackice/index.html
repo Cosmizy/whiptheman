@@ -69,6 +69,13 @@ font-family:sans-serif;
 
 <script>
 
+let deviceId = localStorage.getItem("deviceId");
+
+if (!deviceId) {
+  deviceId = crypto.randomUUID();
+  localStorage.setItem("deviceId", deviceId);
+}
+  
 const SERVER_URL = "https://blackice-server.onrender.com";
 
 const socket = io(SERVER_URL);
@@ -159,6 +166,8 @@ socket.on("connect", () => {
 myId = socket.id;
 
 statusEl.innerText = "Connected";
+
+socket.emit("identify", deviceId);
 
 });
 
